@@ -205,9 +205,8 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 
 <main>
   <div class="ophint">
-    <span>カードを<b>タップ</b>＝縦向き⇄横向き</span>
-    <span><b>長押し</b>＝移動メニュー</span>
-    <span><b>ドラッグ</b>＝ゾーンへ移動</span>
+    <span>カードを<b>タップ</b>＝メニュー（移動・向き）</span>
+    <span><b>ドラッグ</b>＝ゾーンへ直接移動</span>
     <span><b>山札をタップ</b>＝引く・混ぜる</span>
   </div>
 
@@ -215,9 +214,9 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <h2>はじめかた</h2>
     <ol>
       <li>まず下の<b>「両者の準備をする」</b>を押します。山札を混ぜて、手札6枚・ハート5枚（裏向き）・エナ1枚（表向き）を両者に配ります。</li>
-      <li>カードを<b>長押し</b>すると、移動メニューが開きます。ここから任意のゾーンへ動かせます。</li>
-      <li>カードを<b>タップ</b>すると、縦向き⇄横向きが切り替わります。</li>
-      <li>カードを<b>上下にドラッグ</b>しても、ゾーンへ移動できます。</li>
+      <li>カードを<b>タップ</b>するとメニューが開きます。第1〜第5ラインやエナなど、任意のゾーンへ動かせます。</li>
+      <li>メニューの下の方で、<b>縦向き⇄横向き</b>と<b>表裏</b>も切り替えられます。</li>
+      <li>カードを<b>上下にドラッグ</b>すると、メニューを開かずにゾーンへ移動できます。</li>
       <li>間違えたら上部の<b>「戻す」</b>で1手ずつ取り消せます。</li>
     </ol>
     <button data-act="setupAll" data-pi="2" class="primary big">両者の準備をする（①③⑤⑥）</button>
@@ -226,7 +225,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 
   <details class="doc">
     <summary>このシミュレーターについて / 操作方法</summary>
-    <p><b>操作</b>：カードを<b>タップ</b>＝縦向き⇄横向き。<b>長押し</b>＝メニュー（移動・裏返す）。<b>上下にドラッグ</b>＝ゾーンへ移動。横スワイプは各段のスクロールです。PCではクリック／ドラッグ／長押しがそのまま使えます。</p>
+    <p><b>操作</b>：カードを<b>タップ</b>＝メニュー（移動・向き・表裏）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
     <p><b>「横向き」について</b>：卓上の「カードを横に倒す」という物理操作だけを持っています。エナでは「使用済み」、ホロビト・ハートでは「ダウン状態」と呼ばれますが（出典: 2026-08 公式ティザー）、この2つが同じ状態かは未確定のため、区別せず<b>向きだけ</b>を保持しています。</p>
     <p><b>典拠</b>：ゾーン名・50枚・準備手順・フェイズ名・向きの扱いは <code>docs/rules_confirmed.md</code>（出典: 2026-08 公式ティザー画像）に基づきます。</p>
     <p><b>実装していないもの</b>：バトルの勝敗、パワー比較、コストの支払い、エナドローの枚数、ハート破壊の条件、フェイズの強制。いずれも 2026-08 時点で未確定のため、推測で埋めていません。</p>
@@ -506,10 +505,10 @@ function openCardSheet(cid, pi){
   if (pi === undefined) pi = c.owner;
   sheetPi = pi;
   var h = '<h3>' + c.id + '（' + whereCard(c) + '）</h3>';
-  h += '<div class="sgrid c2">';
+  h += destHTML(cid, pi);
+  h += '<div class="sect">向き・表裏</div><div class="sgrid c2">';
   h += '<button data-tg="' + cid + '">' + (c.turned ? "縦向きに戻す" : "横向きにする") + '</button>';
   h += '<button data-fl="' + cid + '">' + (c.up ? "裏向きにする" : "表向きにする") + '</button></div>';
-  h += destHTML(cid, pi);
   h += '<div class="sgrid c2"><button data-close="1">閉じる</button></div>';
   openSheet(h);
 }
@@ -570,9 +569,9 @@ function clearOver(){ if (lastOver){ lastOver.classList.remove("over"); lastOver
 function dropTargetAt(x, y){ var el = document.elementFromPoint(x, y); return el ? el.closest("[data-drop]") : null; }
 function killGhost(){ if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost); ghost = null; }
 function endDrag(){
-  if (drag){
-    clearTimeout(drag.timer);
-    if (drag.el){ drag.el.classList.remove("ghosting"); drag.el.classList.remove("pressing"); }
+  if (drag && drag.el){
+    drag.el.classList.remove("ghosting");
+    drag.el.classList.remove("pressing");
   }
   killGhost(); clearOver(); drag = null;
 }
@@ -580,14 +579,10 @@ function endDrag(){
 document.addEventListener("pointerdown", function(e){
   if (e.pointerType === "mouse" && e.button !== 0) return;
   var pileEl = e.target.closest("[data-pile]");
-  if (pileEl){ drag = { pile:+pileEl.dataset.pile, moved:false, longFired:false }; return; }
+  if (pileEl){ drag = { pile:+pileEl.dataset.pile, moved:false }; return; }
   var cardEl = e.target.closest(".card"); if (!cardEl) return;
-  drag = { cid:cardEl.dataset.cid, el:cardEl, x0:e.clientX, y0:e.clientY, moved:false, longFired:false };
+  drag = { cid:cardEl.dataset.cid, el:cardEl, x0:e.clientX, y0:e.clientY, moved:false };
   cardEl.classList.add("pressing");
-  drag.timer = setTimeout(function(){
-    if (!drag || drag.moved) return;
-    drag.longFired = true; openCardSheet(drag.cid); endDrag();
-  }, 420);
 }, { passive:true });
 
 document.addEventListener("pointermove", function(e){
@@ -597,9 +592,8 @@ document.addEventListener("pointermove", function(e){
     if (Math.abs(dx) + Math.abs(dy) < 10) return;
     // 横方向が優勢なら段の横スクロールに委ねる（ドラッグを開始しない）
     if (Math.abs(dx) > Math.abs(dy) * 1.4 && !drag.el.closest(".lineslot")){
-      clearTimeout(drag.timer); drag.el.classList.remove("pressing"); drag = null; return;
+      drag.el.classList.remove("pressing"); drag = null; return;
     }
-    clearTimeout(drag.timer);
     drag.moved = true;
     ghost = drag.el.cloneNode(true); ghost.id = "ghost";
     document.body.appendChild(ghost);
@@ -623,11 +617,10 @@ document.addEventListener("pointerup", function(e){
       moveCard(drag.cid, +tgt.dataset.pi, tgt.dataset.drop, parseInt(tgt.dataset.idx || "0", 10), false);
       endDrag(); render(); return;
     }
-  } else if (!drag.longFired){
-    // タップ = 縦向き / 横向き の切り替え
-    snap();
-    var f = findCard(drag.cid); if (f) f.card.turned = !f.card.turned;
-    endDrag(); render(); return;
+  } else {
+    // タップ = メニューを開く（移動・向き・裏返し）
+    var cid = drag.cid;
+    endDrag(); openCardSheet(cid); return;
   }
   endDrag();
 });
