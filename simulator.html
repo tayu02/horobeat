@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ホロビート 盤面シミュレーター（ルール判定なし）</title>
+<style>
+:root{
+  --bg:#0b0a0a; --panel:#151212; --line:#3a2b2b; --red:#c0272d; --red2:#8e1c21;
+  --gold:#c9a44c; --txt:#efe9e3; --sub:#9a8f88;
+  --cw:56px; --ch:78px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  font-size:14px; line-height:1.5;
+  -webkit-text-size-adjust:100%;
+  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+  overscroll-behavior:none;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+header{
+  position:sticky; top:0; z-index:30;
+  background:linear-gradient(180deg,#1a1414,#120e0e);
+  border-bottom:1px solid var(--line);
+  padding:calc(env(safe-area-inset-top) + 6px) 8px 6px;
+}
+.hrow{display:flex;align-items:center;gap:6px}
+.hrow+.hrow{margin-top:5px}
+.badge{
+  background:var(--red); color:#fff; border-radius:6px;
+  padding:3px 8px; font-weight:700; font-size:13px; white-space:nowrap;
+}
+.badge.dark{background:#2a2020;color:var(--gold);border:1px solid var(--line)}
+.spacer{flex:1}
+button{
+  font:inherit; color:var(--txt); background:#241c1c;
+  border:1px solid var(--line); border-radius:8px;
+  padding:7px 10px; min-height:34px;
+  touch-action:manipulation; cursor:pointer;
+}
+button:active{background:#3a2a2a}
+button.primary{background:var(--red2);border-color:var(--red)}
+button:disabled{opacity:.35}
+.warn{
+  font-size:11px;color:#e8b3b3;background:#2a1414;border:1px solid #4a2020;
+  border-radius:6px;padding:4px 7px;line-height:1.4;
+}
+main{padding:8px 8px 20px}
+.zone{
+  background:var(--panel); border:1px solid var(--line);
+  border-radius:10px; padding:5px 6px 7px; margin-bottom:8px;
+}
+.zone.over{border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,164,76,.35) inset}
+.zlabel{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--gold);letter-spacing:.05em;margin-bottom:4px;
+}
+.zcount{color:var(--sub);font-size:10px}
+.strip{
+  display:flex; gap:5px; align-items:flex-start;
+  overflow-x:auto; -webkit-overflow-scrolling:touch;
+  min-height:calc(var(--ch) + 4px); padding-bottom:2px;
+}
+.strip.wrapy{flex-wrap:wrap;overflow-x:visible}
+.lines{display:flex;gap:5px;justify-content:space-between}
+.lineslot{
+  flex:1 1 0; min-width:0;
+  border:1px dashed #4a3636; border-radius:8px; padding:3px 2px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  min-height:calc(var(--ch) + 22px);
+}
+.lineslot.over{border-color:var(--gold);border-style:solid;background:#231a1a}
+.lineno{font-size:10px;color:var(--sub)}
+.linestack{display:flex;flex-direction:column;gap:2px;align-items:center;width:100%}
+.card{
+  width:var(--cw);height:var(--ch);
+  flex:0 0 auto; position:relative;
+  touch-action:pan-x;   /* 横=段のスクロール / 縦=カードのドラッグ */
+}
+.lineslot .card{touch-action:none}
+.ci{
+  width:var(--cw);height:var(--ch);border-radius:6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:1px solid #000; overflow:hidden;
+  transition:transform .12s ease;
+}
+.ci.up{background:linear-gradient(160deg,#f6f1e7,#ded4c4);color:#2a2020;border-color:#b9ac96}
+.ci.down{
+  background:
+    repeating-linear-gradient(45deg,#7d1a1f 0 6px,#8f2126 6px 12px);
+  color:#f0d6d6;border-color:#4d1013;
+}
+.ci .no{font-size:17px;font-weight:800;letter-spacing:.02em}
+.ci .id{font-size:8px;opacity:.7;margin-top:1px}
+.ci .mark{font-size:9px;opacity:.75;margin-top:2px}
+.card.ex .ci{transform:rotate(90deg) scale(.72);opacity:.72}
+.card.ex::after{
+  content:"使";position:absolute;right:-1px;top:-3px;
+  background:var(--gold);color:#1a1212;font-size:9px;font-weight:700;
+  border-radius:4px;padding:0 3px;
+}
+.card.sel .ci{outline:2px solid var(--gold);outline-offset:1px}
+.card.ghosting{opacity:.25}
+#ghost{
+  position:fixed;z-index:200;pointer-events:none;
+  transform:translate(-50%,-50%) scale(1.15);opacity:.92;
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,.6));
+}
+.pile{
+  width:var(--cw);height:var(--ch);border-radius:6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:1px solid #4d1013;
+  background:repeating-linear-gradient(45deg,#7d1a1f 0 6px,#8f2126 6px 12px);
+  color:#f0d6d6;font-size:11px;font-weight:700;
+  box-shadow:2px 2px 0 #2a0d0f,4px 4px 0 #1c0809;
+}
+.pile.empty{background:#1a1414;border:1px dashed #4a3636;color:var(--sub);box-shadow:none}
+.row2{display:flex;gap:8px}
+.row2>.zone{flex:1;margin-bottom:8px}
+details.doc{
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:6px 8px;margin-bottom:8px;font-size:12px;color:var(--sub);
+}
+details.doc summary{color:var(--gold);font-size:12px;cursor:pointer}
+details.doc p{margin:6px 0}
+details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
+.steps{display:flex;flex-direction:column;gap:5px}
+.step{display:flex;gap:6px;align-items:center}
+.step .n{color:var(--gold);font-size:12px;width:1.4em;flex:0 0 auto}
+.step button{flex:1;text-align:left;font-size:12px;padding:6px 8px;min-height:32px}
+.step .manual{
+  flex:1;font-size:12px;color:var(--sub);border:1px dashed var(--line);
+  border-radius:8px;padding:6px 8px;
+}
+#sheetwrap{position:fixed;inset:0;z-index:100;display:none}
+#sheetwrap.on{display:block}
+#sheetbg{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+#sheet{
+  position:absolute;left:0;right:0;bottom:0;
+  background:#1a1414;border-top:1px solid var(--line);
+  border-radius:14px 14px 0 0;padding:10px 10px calc(env(safe-area-inset-bottom) + 12px);
+  max-height:78vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+#sheet h3{margin:2px 0 8px;font-size:14px;color:var(--gold)}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.sgrid.c2{grid-template-columns:repeat(2,1fr)}
+.sgrid button{font-size:12px;padding:9px 4px;min-height:40px}
+.sect{font-size:11px;color:var(--sub);margin:8px 0 4px}
+.hint{font-size:11px;color:var(--sub);padding:0 2px 10px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <span class="badge dark" id="roundLbl">ラウンド 1</span>
+    <span class="badge" id="phaseLbl">準備</span>
+    <span class="spacer"></span>
+    <button id="btnPhase" class="primary">フェイズ送り ▶</button>
+    <button id="btnUndo" disabled>戻す</button>
+  </div>
+  <div class="hrow">
+    <div class="warn">ルール判定なし。フェイズ・コスト・バトル・勝敗は一切自動処理しません。全て手で動かしてください。</div>
+  </div>
+</header>
+
+<main>
+
+  <details class="doc">
+    <summary>このシミュレーターについて / 操作方法</summary>
+    <p><b>操作</b>：カードを<b>タップ</b>＝未使用⇄使用済み。<b>長押し</b>＝メニュー（移動・裏返す）。<b>上下にドラッグ</b>＝ゾーンへ移動。横スワイプは各段のスクロールです。</p>
+    <p><b>典拠</b>：ゾーン名・50枚・準備手順・フェイズ名は <code>docs/rules_confirmed.md</code>（出典: 2026-08 公式ティザー画像）に基づきます。</p>
+    <p><b>実装していないもの</b>：バトルの勝敗、パワー比較、コストの支払い、エナドローの枚数、ハート破壊の条件、フェイズの強制。いずれも 2026-08 時点で未確定のため、推測で埋めていません。1ラインあたりの枚数も制限していません。</p>
+    <p>カードは ID と通し番号のみのダミー50枚です。実カードのデータは含みません。</p>
+    <p>※ 元情報は「開発中の画像」であり、製品版と異なる場合があります。</p>
+  </details>
+
+  <div class="zone" data-drop="heart" id="zone-heart">
+    <div class="zlabel">ハートゾーン <span class="zcount" id="c-heart"></span></div>
+    <div class="strip wrapy" id="z-heart"></div>
+  </div>
+
+  <div class="zone" id="zone-line">
+    <div class="zlabel">バトルライン <span class="zcount" id="c-line"></span></div>
+    <div class="lines" id="z-line"></div>
+  </div>
+
+  <div class="zone" data-drop="waza" id="zone-waza">
+    <div class="zlabel">ワザゾーン <span class="zcount" id="c-waza"></span></div>
+    <div class="strip" id="z-waza"></div>
+  </div>
+
+  <div class="zone" data-drop="ena" id="zone-ena">
+    <div class="zlabel">エナゾーン <span class="zcount" id="c-ena"></span></div>
+    <div class="strip" id="z-ena"></div>
+  </div>
+
+  <div class="row2">
+    <div class="zone" data-drop="deck" id="zone-deck">
+      <div class="zlabel">山札 <span class="zcount" id="c-deck"></span></div>
+      <div class="strip" id="z-deck"></div>
+    </div>
+    <div class="zone" data-drop="grave" id="zone-grave">
+      <div class="zlabel">墓地 <span class="zcount" id="c-grave"></span></div>
+      <div class="strip" id="z-grave"></div>
+    </div>
+  </div>
+
+  <div class="zone" data-drop="hand" id="zone-hand">
+    <div class="zlabel">手札 <span class="zcount" id="c-hand"></span></div>
+    <div class="strip" id="z-hand"></div>
+  </div>
+
+  <details class="doc" open>
+    <summary>準備手順（出典: 2026-08 公式ティザー）</summary>
+    <div class="steps">
+      <div class="step"><span class="n">①</span><button data-act="shuffle">デッキをよく混ぜて、デッキ置き場に置く</button></div>
+      <div class="step"><span class="n">②</span><span class="manual">じゃんけんで先手・後手を決める（手動）</span></div>
+      <div class="step"><span class="n">③</span><button data-act="draw6">山札からカードを6枚引き、手札にする</button></div>
+      <div class="step"><span class="n">④</span><button data-act="redraw">引き直す（手札を山札に戻す→混ぜる→6枚）</button></div>
+      <div class="step"><span class="n">⑤</span><button data-act="heart5">山札の上から5枚を裏向きでハートゾーンへ</button></div>
+      <div class="step"><span class="n">⑥</span><button data-act="ena1">山札から1枚を表向きでエナゾーンへ</button></div>
+    </div>
+    <div class="sgrid c2" style="margin-top:8px">
+      <button data-act="setupAll" class="primary">①③⑤⑥ を通しで実行</button>
+      <button data-act="reset">全部リセット</button>
+    </div>
+  </details>
+
+  <div class="hint">
+    山札・墓地をタップするとまとめて操作できます。<br>
+    「戻す」は全ての操作（フェイズ送りを含む）を1手ずつ取り消します。
+  </div>
+
+</main>
+
+<div id="sheetwrap">
+  <div id="sheetbg"></div>
+  <div id="sheet"></div>
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------
+   ホロビート 盤面シミュレーター
+   ルールの判定・強制は一切実装しない。カードを動かす場だけを提供する。
+   ゾーン名／デッキ50枚／準備手順／フェイズ名は docs/rules_confirmed.md
+   （出典: 2026-08 公式ティザー画像）の確定情報のみに基づく。
+   未確定のルールは推測で補わない。
+------------------------------------------------------------------ */
+
+var DECK_SIZE = 50;                                  // 確定: 1デッキ50枚
+var PHASES = ["召喚フェイズ", "バトルフェイズ", "エンドフェイズ"]; // 確定: この3つ・この順
+var LINE_COUNT = 5;                                  // 確定: 第1〜第5ライン（順序付き）
+var ZONE_NAME = {
+  heart:"ハートゾーン", line:"バトルライン", waza:"ワザゾーン",
+  ena:"エナゾーン", hand:"手札", deck:"山札", grave:"墓地"
+};
+
+var state, undoStack = [];
+
+function newCards(){
+  var a = [];
+  for (var i = 1; i <= DECK_SIZE; i++){
+    var n = ("0" + i).slice(-2);
+    a.push({ id:"D-" + n, no:n, up:false, ex:false });
+  }
+  return a;
+}
+
+function newState(){
+  return {
+    round: 1,
+    phase: -1,               // -1 = 準備（フェイズ開始前）
+    z: {
+      heart:[], waza:[], ena:[], hand:[], grave:[],
+      deck: newCards(),
+      line: [[],[],[],[],[]]  // 順序付き5枠
+    }
+  };
+}
+
+/* ---------------- undo ---------------- */
+function snap(){
+  undoStack.push(JSON.stringify(state));
+  if (undoStack.length > 200) undoStack.shift();
+}
+function undo(){
+  if (!undoStack.length) return;
+  state = JSON.parse(undoStack.pop());
+  render();
+}
+
+/* ---------------- 場所の探索・移動 ---------------- */
+function lists(){
+  var out = [state.z.heart, state.z.waza, state.z.ena, state.z.hand, state.z.grave, state.z.deck];
+  for (var i = 0; i < LINE_COUNT; i++) out.push(state.z.line[i]);
+  return out;
+}
+function findCard(id){
+  var ls = lists();
+  for (var i = 0; i < ls.length; i++){
+    for (var j = 0; j < ls[i].length; j++){
+      if (ls[i][j].id === id) return { list: ls[i], idx: j, card: ls[i][j] };
+    }
+  }
+  return null;
+}
+function targetList(zone, idx){
+  if (zone === "line") return state.z.line[idx || 0];
+  return state.z[zone];
+}
+// 移動のみ。置けるかどうかの判定はしない（ルール判定を実装しないため）。
+function moveCard(id, zone, idx, toBottom){
+  var f = findCard(id);
+  if (!f) return;
+  var dst = targetList(zone, idx);
+  if (!dst) return;
+  f.list.splice(f.idx, 1);
+  if (toBottom) dst.push(f.card); else if (zone === "deck") dst.unshift(f.card); else dst.push(f.card);
+}
+
+/* ---------------- 操作 ---------------- */
+function shuffleDeck(){
+  var d = state.z.deck;
+  for (var i = d.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = d[i]; d[i] = d[j]; d[j] = t;
+  }
+}
+function drawTo(n, zone, faceUp, idx){
+  for (var i = 0; i < n; i++){
+    if (!state.z.deck.length) break;
+    var c = state.z.deck.shift();
+    c.up = !!faceUp;
+    c.ex = false;
+    targetList(zone, idx).push(c);
+  }
+}
+function handBackToDeck(){
+  while (state.z.hand.length){
+    var c = state.z.hand.pop();
+    c.up = false; c.ex = false;
+    state.z.deck.push(c);
+  }
+}
+
+var ACTIONS = {
+  shuffle:  function(){ shuffleDeck(); },
+  draw6:    function(){ drawTo(6, "hand", true); },
+  redraw:   function(){ handBackToDeck(); shuffleDeck(); drawTo(6, "hand", true); },
+  heart5:   function(){ drawTo(5, "heart", false); },
+  ena1:     function(){ drawTo(1, "ena", true); },
+  setupAll: function(){ shuffleDeck(); drawTo(6, "hand", true); drawTo(5, "heart", false); drawTo(1, "ena", true); },
+  reset:    function(){ state = newState(); },
+  draw1:    function(){ drawTo(1, "hand", true); }
+};
+
+function nextPhase(){
+  if (state.phase < 0){ state.phase = 0; return; }
+  state.phase++;
+  if (state.phase >= PHASES.length){ state.phase = 0; state.round++; }
+}
+
+/* ---------------- 描画 ---------------- */
+function cardHTML(c, extra){
+  var cls = "card" + (c.ex ? " ex" : "") + (extra || "");
+  var inner = c.up
+    ? '<div class="ci up"><div class="no">' + c.no + '</div><div class="id">' + c.id + '</div></div>'
+    : '<div class="ci down"><div class="mark">裏</div></div>';
+  return '<div class="' + cls + '" data-cid="' + c.id + '">' + inner + '</div>';
+}
+function fillStrip(el, arr){
+  var h = "";
+  for (var i = 0; i < arr.length; i++) h += cardHTML(arr[i]);
+  el.innerHTML = h || '<div style="color:#6b6058;font-size:11px;padding:6px 2px">（なし）</div>';
+}
+function setCount(id, n){ document.getElementById(id).textContent = "(" + n + ")"; }
+
+function render(){
+  document.getElementById("roundLbl").textContent = "ラウンド " + state.round;
+  document.getElementById("phaseLbl").textContent = state.phase < 0 ? "準備" : PHASES[state.phase];
+  document.getElementById("btnUndo").disabled = !undoStack.length;
+
+  fillStrip(document.getElementById("z-heart"), state.z.heart);
+  fillStrip(document.getElementById("z-waza"),  state.z.waza);
+  fillStrip(document.getElementById("z-ena"),   state.z.ena);
+  fillStrip(document.getElementById("z-hand"),  state.z.hand);
+  fillStrip(document.getElementById("z-grave"), state.z.grave);
+
+  // 山札は積み札として表示（上から何枚目かは見せない）
+  var dz = document.getElementById("z-deck");
+  dz.innerHTML = state.z.deck.length
+    ? '<div class="pile" id="deckPile">' + state.z.deck.length + '<span style="font-size:9px;font-weight:400">枚</span></div>'
+    : '<div class="pile empty" id="deckPile">0枚</div>';
+
+  var lineHTML = "", total = 0;
+  for (var i = 0; i < LINE_COUNT; i++){
+    var stack = state.z.line[i], s = "";
+    total += stack.length;
+    for (var j = 0; j < stack.length; j++) s += cardHTML(stack[j]);
+    lineHTML +=
+      '<div class="lineslot" data-drop="line" data-idx="' + i + '">' +
+        '<span class="lineno">第' + (i + 1) + '</span>' +
+        '<div class="linestack">' + s + '</div>' +
+      '</div>';
+  }
+  document.getElementById("z-line").innerHTML = lineHTML;
+
+  setCount("c-heart", state.z.heart.length);
+  setCount("c-line",  total);
+  setCount("c-waza",  state.z.waza.length);
+  setCount("c-ena",   state.z.ena.length);
+  setCount("c-hand",  state.z.hand.length);
+  setCount("c-deck",  state.z.deck.length);
+  setCount("c-grave", state.z.grave.length);
+}
+
+/* ---------------- アクションシート ---------------- */
+var sheetWrap = document.getElementById("sheetwrap");
+var sheetEl   = document.getElementById("sheet");
+
+// シートを開いた直後、同じタップ由来の click がシート上に届いて誤爆するのを防ぐ
+var sheetGuardUntil = 0;
+function guarded(){ return performance.now() < sheetGuardUntil; }
+function openSheet(html){
+  sheetEl.innerHTML = html;
+  sheetWrap.classList.add("on");
+  sheetGuardUntil = performance.now() + 400;
+}
+function closeSheet(){ sheetWrap.classList.remove("on"); sheetEl.innerHTML = ""; }
+document.getElementById("sheetbg").addEventListener("click", function(){
+  if (guarded()) return;
+  closeSheet();
+});
+
+function destButtons(cid){
+  var b = "";
+  b += '<div class="sect">移動先</div><div class="sgrid">';
+  for (var i = 0; i < LINE_COUNT; i++){
+    b += '<button data-mv="line" data-idx="' + i + '" data-cid="' + cid + '">第' + (i + 1) + 'ライン</button>';
+  }
+  b += '<button data-mv="waza"  data-cid="' + cid + '">ワザゾーン</button>';
+  b += '<button data-mv="ena"   data-cid="' + cid + '">エナゾーン</button>';
+  b += '<button data-mv="heart" data-cid="' + cid + '">ハート</button>';
+  b += '<button data-mv="hand"  data-cid="' + cid + '">手札</button>';
+  b += '<button data-mv="grave" data-cid="' + cid + '">墓地</button>';
+  b += '<button data-mv="deck"  data-cid="' + cid + '">山札の上</button>';
+  b += '<button data-mv="deck"  data-bottom="1" data-cid="' + cid + '">山札の下</button>';
+  b += '</div>';
+  return b;
+}
+
+function openCardSheet(cid){
+  var f = findCard(cid);
+  if (!f) return;
+  var c = f.card;
+  var where = "";
+  for (var i = 0; i < LINE_COUNT; i++) if (state.z.line[i].indexOf(c) >= 0) where = "第" + (i + 1) + "ライン";
+  if (!where){
+    for (var k in state.z){
+      if (k === "line") continue;
+      if (state.z[k].indexOf(c) >= 0) where = ZONE_NAME[k];
+    }
+  }
+  var h = "";
+  h += '<h3>' + c.id + '（' + where + '）</h3>';
+  h += '<div class="sgrid c2">';
+  h += '<button data-tg="' + cid + '">' + (c.ex ? "未使用に戻す" : "使用済みにする") + '</button>';
+  h += '<button data-fl="' + cid + '">' + (c.up ? "裏向きにする" : "表向きにする") + '</button>';
+  h += '</div>';
+  h += destButtons(cid);
+  h += '<div class="sgrid c2"><button data-close="1">閉じる</button></div>';
+  openSheet(h);
+}
+
+function openDeckSheet(){
+  var h = "";
+  h += '<h3>山札（' + state.z.deck.length + '枚）</h3>';
+  h += '<div class="sgrid c2">';
+  h += '<button data-act="draw1">1枚引いて手札へ</button>';
+  h += '<button data-act="shuffle">シャッフル</button>';
+  h += '<button data-act="ena1">上から1枚を表でエナへ</button>';
+  h += '<button data-act="heart5">上から5枚を裏でハートへ</button>';
+  h += '<button data-act="draw6">6枚引く</button>';
+  h += '<button data-act="redraw">引き直す</button>';
+  h += '</div>';
+  h += '<div class="sect">山札の一番上のカード</div><div class="sgrid c2">';
+  if (state.z.deck.length){
+    h += '<button data-top="1">一番上を操作…</button>';
+  }
+  h += '<button data-close="1">閉じる</button></div>';
+  openSheet(h);
+}
+
+sheetEl.addEventListener("click", function(e){
+  if (guarded()) return;
+  var t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.close){ closeSheet(); return; }
+  if (t.dataset.top){ var top = state.z.deck[0]; closeSheet(); if (top) openCardSheet(top.id); return; }
+  if (t.dataset.act){ snap(); ACTIONS[t.dataset.act](); closeSheet(); render(); return; }
+  if (t.dataset.tg){ snap(); var f1 = findCard(t.dataset.tg); if (f1) f1.card.ex = !f1.card.ex; closeSheet(); render(); return; }
+  if (t.dataset.fl){ snap(); var f2 = findCard(t.dataset.fl); if (f2) f2.card.up = !f2.card.up; closeSheet(); render(); return; }
+  if (t.dataset.mv){
+    snap();
+    moveCard(t.dataset.cid, t.dataset.mv, parseInt(t.dataset.idx || "0", 10), !!t.dataset.bottom);
+    closeSheet(); render(); return;
+  }
+});
+
+/* ---------------- 準備手順ボタン ---------------- */
+document.querySelector("main").addEventListener("click", function(e){
+  var t = e.target.closest("button[data-act]");
+  if (!t) return;
+  snap();
+  ACTIONS[t.dataset.act]();
+  render();
+});
+
+/* ---------------- ヘッダー ---------------- */
+document.getElementById("btnPhase").addEventListener("click", function(){
+  snap(); nextPhase(); render();
+});
+document.getElementById("btnUndo").addEventListener("click", undo);
+
+/* ---------------- タップ / 長押し / ドラッグ ---------------- */
+var drag = null, ghost = null, lastOver = null;
+
+function clearOver(){
+  if (lastOver){ lastOver.classList.remove("over"); lastOver = null; }
+}
+function dropTargetAt(x, y){
+  var el = document.elementFromPoint(x, y);
+  return el ? el.closest("[data-drop]") : null;
+}
+function killGhost(){
+  if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+  ghost = null;
+}
+function endDrag(){
+  if (drag){
+    clearTimeout(drag.timer);
+    if (drag.el) drag.el.classList.remove("ghosting");
+  }
+  killGhost(); clearOver(); drag = null;
+}
+
+document.addEventListener("pointerdown", function(e){
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+
+  if (e.target.closest("#deckPile")){
+    drag = { pile:true, moved:false, longFired:false };
+    return;
+  }
+
+  var cardEl = e.target.closest(".card");
+  if (!cardEl) return;
+
+  drag = {
+    cid: cardEl.dataset.cid, el: cardEl,
+    x0: e.clientX, y0: e.clientY,
+    moved: false, longFired: false
+  };
+  drag.timer = setTimeout(function(){
+    if (!drag || drag.moved) return;
+    drag.longFired = true;
+    openCardSheet(drag.cid);
+    endDrag();
+  }, 420);
+}, { passive: true });
+
+document.addEventListener("pointermove", function(e){
+  if (!drag || drag.pile) return;
+  var dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+
+  if (!drag.moved){
+    if (Math.abs(dx) + Math.abs(dy) < 10) return;
+    // 横方向が優勢なら段のスクロールに委ねる（ドラッグ開始しない）
+    if (Math.abs(dx) > Math.abs(dy) * 1.4 && !drag.el.closest(".lineslot")){
+      clearTimeout(drag.timer); drag = null; return;
+    }
+    clearTimeout(drag.timer);
+    drag.moved = true;
+    ghost = drag.el.cloneNode(true);
+    ghost.id = "ghost";
+    ghost.classList.remove("sel");
+    document.body.appendChild(ghost);
+    drag.el.classList.add("ghosting");
+  }
+
+  if (e.cancelable) e.preventDefault();
+  ghost.style.left = e.clientX + "px";
+  ghost.style.top  = e.clientY + "px";
+
+  var tgt = dropTargetAt(e.clientX, e.clientY);
+  if (tgt !== lastOver){ clearOver(); if (tgt){ tgt.classList.add("over"); lastOver = tgt; } }
+}, { passive: false });
+
+document.addEventListener("pointerup", function(e){
+  if (!drag) return;
+  if (drag.pile){ endDrag(); openDeckSheet(); return; }
+  if (drag.moved){
+    var tgt = dropTargetAt(e.clientX, e.clientY);
+    if (tgt){
+      snap();
+      moveCard(drag.cid, tgt.dataset.drop, parseInt(tgt.dataset.idx || "0", 10), false);
+      endDrag(); render(); return;
+    }
+  } else if (!drag.longFired){
+    // タップ = 未使用 / 使用済み の切り替え
+    snap();
+    var f = findCard(drag.cid);
+    if (f) f.card.ex = !f.card.ex;
+    endDrag(); render(); return;
+  }
+  endDrag();
+});
+
+document.addEventListener("pointercancel", endDrag);
+
+// iOS Safari のスクロール中の誤爆を抑える
+document.addEventListener("contextmenu", function(e){
+  if (e.target.closest(".card, .pile")) e.preventDefault();
+});
+
+/* ---------------- 起動 ---------------- */
+state = newState();
+render();
+</script>
+</body>
+</html>
