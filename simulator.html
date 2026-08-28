@@ -144,6 +144,29 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 .sect{font-size:11px;color:var(--sub);margin:8px 0 4px}
 .hint{font-size:11px;color:var(--sub);padding:0 2px 10px;line-height:1.6}
 
+/* ---- 操作ヒント（常時表示）---- */
+.ophint{
+  display:flex;gap:5px;flex-wrap:wrap;align-items:center;
+  font-size:11px;color:var(--sub);background:#171313;border:1px solid var(--line);
+  border-radius:8px;padding:5px 8px;margin-bottom:8px;
+}
+.ophint b{color:var(--gold);font-weight:700}
+.ophint span{white-space:nowrap}
+.ophint span+span::before{content:"／";color:#4a3a3a;margin-right:5px}
+
+/* ---- はじめかたガイド（場が空のときだけ）---- */
+.guide{
+  background:linear-gradient(160deg,#241a1a,#1a1414);
+  border:1px solid var(--red2);border-radius:12px;padding:12px;margin-bottom:10px;
+}
+.guide h2{margin:0 0 8px;font-size:14px;color:var(--gold);letter-spacing:.05em}
+.guide ol{margin:0 0 10px;padding-left:1.3em;font-size:12.5px;line-height:1.85;color:var(--txt)}
+.guide ol b{color:var(--gold)}
+.guide .big{width:100%;font-size:15px;font-weight:700;min-height:48px}
+.guide .note{font-size:11px;color:var(--sub);margin:8px 0 0;line-height:1.6}
+
+.card.pressing .ci{outline:2px solid var(--gold);outline-offset:1px}
+
 /* ---- 広い画面（PC） ---- */
 @media (min-width:900px){
   :root{--cw:58px;--ch:81px}
@@ -181,6 +204,26 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 </header>
 
 <main>
+  <div class="ophint">
+    <span>カードを<b>タップ</b>＝縦向き⇄横向き</span>
+    <span><b>長押し</b>＝移動メニュー</span>
+    <span><b>ドラッグ</b>＝ゾーンへ移動</span>
+    <span><b>山札をタップ</b>＝引く・混ぜる</span>
+  </div>
+
+  <div class="guide" id="guide">
+    <h2>はじめかた</h2>
+    <ol>
+      <li>まず下の<b>「両者の準備をする」</b>を押します。山札を混ぜて、手札6枚・ハート5枚（裏向き）・エナ1枚（表向き）を両者に配ります。</li>
+      <li>カードを<b>長押し</b>すると、移動メニューが開きます。ここから任意のゾーンへ動かせます。</li>
+      <li>カードを<b>タップ</b>すると、縦向き⇄横向きが切り替わります。</li>
+      <li>カードを<b>上下にドラッグ</b>しても、ゾーンへ移動できます。</li>
+      <li>間違えたら上部の<b>「戻す」</b>で1手ずつ取り消せます。</li>
+    </ol>
+    <button data-act="setupAll" data-pi="2" class="primary big">両者の準備をする（①③⑤⑥）</button>
+    <p class="note">ルールの判定は一切しません。フェイズ送りも表示が変わるだけです。全て手で動かしてください。</p>
+  </div>
+
   <details class="doc">
     <summary>このシミュレーターについて / 操作方法</summary>
     <p><b>操作</b>：カードを<b>タップ</b>＝縦向き⇄横向き。<b>長押し</b>＝メニュー（移動・裏返す）。<b>上下にドラッグ</b>＝ゾーンへ移動。横スワイプは各段のスクロールです。PCではクリック／ドラッグ／長押しがそのまま使えます。</p>
@@ -412,7 +455,14 @@ function sideHTML(pi){
     ? head + hand + heart + ena + pile + waza + line
     : head + line + waza + ena + heart + pile + hand;
 }
+function boardIsEmpty(){
+  return state.players.every(function(P){
+    return !P.hand.length && !P.heart.length && !P.ena.length && !P.waza.length &&
+           !P.grave.length && P.line.every(function(l){ return !l.length; });
+  });
+}
 function render(){
+  document.getElementById("guide").style.display = boardIsEmpty() ? "" : "none";
   document.getElementById("roundLbl").textContent = "ラウンド " + state.round;
   document.getElementById("phaseLbl").textContent = state.phase < 0 ? "準備" : PHASES[state.phase];
   document.getElementById("btnUndo").disabled = !undoStack.length;
@@ -519,7 +569,10 @@ function clearOver(){ if (lastOver){ lastOver.classList.remove("over"); lastOver
 function dropTargetAt(x, y){ var el = document.elementFromPoint(x, y); return el ? el.closest("[data-drop]") : null; }
 function killGhost(){ if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost); ghost = null; }
 function endDrag(){
-  if (drag){ clearTimeout(drag.timer); if (drag.el) drag.el.classList.remove("ghosting"); }
+  if (drag){
+    clearTimeout(drag.timer);
+    if (drag.el){ drag.el.classList.remove("ghosting"); drag.el.classList.remove("pressing"); }
+  }
   killGhost(); clearOver(); drag = null;
 }
 
@@ -529,6 +582,7 @@ document.addEventListener("pointerdown", function(e){
   if (pileEl){ drag = { pile:+pileEl.dataset.pile, moved:false, longFired:false }; return; }
   var cardEl = e.target.closest(".card"); if (!cardEl) return;
   drag = { cid:cardEl.dataset.cid, el:cardEl, x0:e.clientX, y0:e.clientY, moved:false, longFired:false };
+  cardEl.classList.add("pressing");
   drag.timer = setTimeout(function(){
     if (!drag || drag.moved) return;
     drag.longFired = true; openCardSheet(drag.cid); endDrag();
@@ -541,11 +595,14 @@ document.addEventListener("pointermove", function(e){
   if (!drag.moved){
     if (Math.abs(dx) + Math.abs(dy) < 10) return;
     // 横方向が優勢なら段の横スクロールに委ねる（ドラッグを開始しない）
-    if (Math.abs(dx) > Math.abs(dy) * 1.4 && !drag.el.closest(".lineslot")){ clearTimeout(drag.timer); drag = null; return; }
+    if (Math.abs(dx) > Math.abs(dy) * 1.4 && !drag.el.closest(".lineslot")){
+      clearTimeout(drag.timer); drag.el.classList.remove("pressing"); drag = null; return;
+    }
     clearTimeout(drag.timer);
     drag.moved = true;
     ghost = drag.el.cloneNode(true); ghost.id = "ghost";
     document.body.appendChild(ghost);
+    drag.el.classList.remove("pressing");
     drag.el.classList.add("ghosting");
   }
   if (e.cancelable) e.preventDefault();
