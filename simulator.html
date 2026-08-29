@@ -140,6 +140,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 #sheet h3{margin:2px 0 8px;font-size:14px;color:var(--gold)}
 .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
 .sgrid.c2{grid-template-columns:repeat(2,1fr)}
+.sgrid.c1{grid-template-columns:1fr}
 .sgrid button{font-size:12px;padding:9px 4px;min-height:40px}
 .sect{font-size:11px;color:var(--sub);margin:8px 0 4px}
 .hint{font-size:11px;color:var(--sub);padding:0 2px 10px;line-height:1.6}
@@ -327,17 +328,23 @@ function findCard(id){
       if (ls[i][j].id === id) return { list: ls[i], idx: j, card: ls[i][j] };
   return null;
 }
-function whereCard(card){
+function zoneOfCard(card){
   for (var p = 0; p < 2; p++){
     var P = state.players[p];
     for (var i = 0; i < LINE_COUNT; i++)
-      if (P.line[i].indexOf(card) >= 0) return SIDE_NAME[p] + " 第" + (i+1) + "ライン";
+      if (P.line[i].indexOf(card) >= 0) return { pi:p, zone:"line", idx:i };
     for (var k in ZONE_NAME){
       if (k === "line") continue;
-      if (P[k] && P[k].indexOf(card) >= 0) return SIDE_NAME[p] + " " + ZONE_NAME[k];
+      if (P[k] && P[k].indexOf(card) >= 0) return { pi:p, zone:k };
     }
   }
-  return "";
+  return null;
+}
+function whereCard(card){
+  var loc = zoneOfCard(card);
+  if (!loc) return "";
+  return SIDE_NAME[loc.pi] + " " +
+         (loc.zone === "line" ? "第" + (loc.idx + 1) + "ライン" : ZONE_NAME[loc.zone]);
 }
 function targetList(pi, zone, idx){
   var P = state.players[pi];
@@ -504,11 +511,18 @@ function openCardSheet(cid, pi){
   var c = f.card;
   if (pi === undefined) pi = c.owner;
   sheetPi = pi;
+  var loc = zoneOfCard(c);
+  // 手札のカードは横向きにできない（依頼者の指示。→ docs/rules_guess.md A-16）。
+  // ただし既に横向きなら、直す手段として「縦向きに戻す」は出す。
+  var canTurn = !(loc && loc.zone === "hand") || c.turned;
+  var btns = [];
+  if (canTurn) btns.push('<button data-tg="' + cid + '">' + (c.turned ? "縦向きに戻す" : "横向きにする") + '</button>');
+  btns.push('<button data-fl="' + cid + '">' + (c.up ? "裏向きにする" : "表向きにする") + '</button>');
+
   var h = '<h3>' + c.id + '（' + whereCard(c) + '）</h3>';
   h += destHTML(cid, pi);
-  h += '<div class="sect">向き・表裏</div><div class="sgrid c2">';
-  h += '<button data-tg="' + cid + '">' + (c.turned ? "縦向きに戻す" : "横向きにする") + '</button>';
-  h += '<button data-fl="' + cid + '">' + (c.up ? "裏向きにする" : "表向きにする") + '</button></div>';
+  h += '<div class="sect">向き・表裏</div>';
+  h += '<div class="sgrid ' + (btns.length > 1 ? "c2" : "c1") + '">' + btns.join("") + '</div>';
   h += '<div class="sgrid c2"><button data-close="1">閉じる</button></div>';
   openSheet(h);
 }
