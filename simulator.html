@@ -10,7 +10,8 @@
   --bg:#0b0a0a; --panel:#151212; --line:#3a2b2b;
   --red:#c0272d; --red2:#8e1c21; --blue:#2f5aa8; --blue2:#1d3d78;
   --gold:#c9a44c; --txt:#efe9e3; --sub:#9a8f88;
-  --cw:48px; --ch:67px;
+  --c-red:#c9302c; --c-green:#4d9a3f; --c-blue:#2f6fc4; --c-unk:#6b6058;
+  --cw:52px; --ch:73px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
@@ -23,6 +24,7 @@ body{
   overscroll-behavior:none;
   padding-bottom:env(safe-area-inset-bottom);
 }
+input,textarea{-webkit-user-select:text;user-select:text}
 header{
   position:sticky; top:0; z-index:30;
   background:linear-gradient(180deg,#1a1414,#120e0e);
@@ -56,19 +58,16 @@ main{padding:8px 8px 24px;max-width:1400px;margin:0 auto}
 .side[data-pi="0"] .sidehead{color:#e79a9e}
 .side[data-pi="1"] .sidehead{color:#9dbaf0}
 .sidehead .who{font-weight:700;font-size:13px}
-.facing{
-  text-align:center;font-size:10px;color:var(--sub);letter-spacing:.3em;
-  margin:2px 0 8px;position:relative;
-}
-.facing::before,.facing::after{
-  content:"";position:absolute;top:50%;width:calc(50% - 60px);height:1px;background:var(--line);
-}
+.facing{text-align:center;font-size:10px;color:var(--sub);letter-spacing:.3em;margin:2px 0 8px;position:relative}
+.facing::before,.facing::after{content:"";position:absolute;top:50%;width:calc(50% - 60px);height:1px;background:var(--line)}
 .facing::before{left:0} .facing::after{right:0}
 
 /* ---- ゾーン ---- */
 .zone{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:4px 6px 6px}
 .zone.over{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,164,76,.35) inset}
 .zlabel{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--gold);letter-spacing:.05em;margin-bottom:3px}
+.zlabel.tappable{cursor:pointer}
+.zlabel.tappable::after{content:"…";color:var(--sub);margin-left:2px}
 .zcount{color:var(--sub);font-size:10px}
 .strip{display:flex;gap:4px;align-items:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;min-height:calc(var(--ch) + 4px);padding-bottom:2px}
 .strip.wrapy{flex-wrap:wrap;overflow-x:visible}
@@ -84,22 +83,44 @@ main{padding:8px 8px 24px;max-width:1400px;margin:0 auto}
   min-height:calc(var(--ch) + 40px);
 }
 .lineslot.over{border-color:var(--gold);border-style:solid;background:#231a1a}
-.lineno{font-size:9px;color:var(--sub)}
+.lineno{font-size:9px;color:var(--sub);display:flex;gap:4px;align-items:center}
+.stackn{background:var(--gold);color:#1a1212;font-weight:700;border-radius:4px;padding:0 4px;font-size:9px}
 .linestack{display:flex;flex-direction:column;align-items:center;width:100%}
-.linestack .card+.card{margin-top:calc(-1 * var(--ch) + 17px)}
+.linestack .card+.card{margin-top:calc(-1 * var(--ch) + 18px)}
 
 /* ---- カード ---- */
 .card{width:var(--cw);height:var(--ch);flex:0 0 auto;position:relative;touch-action:pan-x}
 .lineslot .card{touch-action:none}
 .ci{
   width:var(--cw);height:var(--ch);border-radius:5px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  display:flex;flex-direction:column;
   border:1px solid #000;overflow:hidden;transition:transform .12s ease;
+  position:relative;
 }
-.ci.up{background:linear-gradient(160deg,#f6f1e7,#ded4c4);color:#2a2020;border-color:#b9ac96}
-.ci.down{background:repeating-linear-gradient(45deg,#7d1a1f 0 6px,#8f2126 6px 12px);color:#f0d6d6;border-color:#4d1013}
-.card[data-owner="1"] .ci.up{background:linear-gradient(160deg,#eaf0f8,#c9d5e6);border-color:#94a6bd}
+.ci.up{background:linear-gradient(160deg,#f6f1e7,#e6ddcc);color:#2a2020;border-color:#b9ac96;padding:2px 3px 2px 5px}
+.ci.up::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c-unk)}
+.card[data-color="赤"] .ci.up::before{background:var(--c-red)}
+.card[data-color="緑"] .ci.up::before{background:var(--c-green)}
+.card[data-color="青"] .ci.up::before{background:var(--c-blue)}
+.ci.up.unk{background:repeating-linear-gradient(135deg,#3a3535 0 5px,#2e2a2a 5px 10px);color:#a89e96;border-color:#4a4040;justify-content:center;align-items:center}
+.ci.up.unk::before{display:none}
+.ci.down{background:repeating-linear-gradient(45deg,#7d1a1f 0 6px,#8f2126 6px 12px);color:#f0d6d6;border-color:#4d1013;align-items:center;justify-content:center}
 .card[data-owner="1"] .ci.down{background:repeating-linear-gradient(45deg,#1c3a6b 0 6px,#254a85 6px 12px);border-color:#0e1f3c;color:#d6e2f0}
+.ctop{display:flex;justify-content:space-between;align-items:center;line-height:1}
+.ccost{
+  width:15px;height:15px;border-radius:50%;background:var(--c-unk);color:#fff;
+  font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+}
+.card[data-color="赤"] .ccost{background:var(--c-red)}
+.card[data-color="緑"] .ccost{background:var(--c-green)}
+.card[data-color="青"] .ccost{background:var(--c-blue)}
+.cpow{font-size:9.5px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.cname{font-size:7.5px;line-height:1.25;font-weight:700;margin-top:2px;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;word-break:break-all}
+.ctype{font-size:7px;color:#6b5a5a;margin-top:auto}
+.cmod{font-size:7.5px;font-weight:700;color:#6b1a1a;margin-top:auto}
+.cnote{position:absolute;left:2px;right:2px;bottom:2px;background:rgba(201,164,76,.95);color:#1a1212;
+  font-size:7px;font-weight:700;border-radius:3px;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ci .no{font-size:15px;font-weight:800}
 .ci .id{font-size:8px;opacity:.72;margin-top:1px}
 .ci .mark{font-size:9px;opacity:.75}
@@ -109,6 +130,7 @@ main{padding:8px 8px 24px;max-width:1400px;margin:0 auto}
   font-size:9px;font-weight:700;border-radius:4px;padding:0 3px;
 }
 .card.ghosting{opacity:.25}
+.card.pressing .ci{outline:2px solid var(--gold);outline-offset:1px}
 #ghost{position:fixed;z-index:200;pointer-events:none;transform:translate(-50%,-50%) scale(1.15);opacity:.92;filter:drop-shadow(0 6px 12px rgba(0,0,0,.6))}
 .pile{
   width:var(--cw);height:var(--ch);border-radius:5px;
@@ -119,14 +141,25 @@ main{padding:8px 8px 24px;max-width:1400px;margin:0 auto}
 .side[data-pi="1"] .pile{border-color:#0e1f3c;background:repeating-linear-gradient(45deg,#1c3a6b 0 6px,#254a85 6px 12px);color:#d6e2f0;box-shadow:2px 2px 0 #0d1b33,4px 4px 0 #08111f}
 .pile.empty0{background:#1a1414;border:1px dashed #4a3636;color:var(--sub);box-shadow:none}
 
-/* ---- 説明・準備 ---- */
+/* ---- 説明・準備・デッキ ---- */
 details.doc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 8px;margin-bottom:8px;font-size:12px;color:var(--sub)}
 details.doc summary{color:var(--gold);font-size:12px;cursor:pointer}
 details.doc p{margin:6px 0}
 details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 .setrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:6px 0}
 .setrow .who{font-size:11px;width:2.6em;flex:0 0 auto}
-.setrow .who.me{color:#e79a9e} .setrow .who.opp{color:#9dbaf0}
+.who.me{color:#e79a9e} .who.opp{color:#9dbaf0}
+.deckcols{display:flex;flex-direction:column;gap:8px}
+.deckcol{border:1px solid var(--line);border-radius:8px;padding:6px}
+.deckcol h4{margin:0 0 4px;font-size:12px}
+.dkrow{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #221c1c;font-size:11.5px;color:var(--txt)}
+.dkrow:last-of-type{border-bottom:0}
+.dkname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dkmeta{color:var(--sub);font-size:10px;white-space:nowrap}
+.dkdot{width:9px;height:9px;border-radius:50%;background:var(--c-unk);flex:0 0 auto}
+.dkdot[data-color="赤"]{background:var(--c-red)} .dkdot[data-color="緑"]{background:var(--c-green)} .dkdot[data-color="青"]{background:var(--c-blue)}
+.dkn{width:1.6em;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.dksum{font-size:11px;color:var(--sub);margin:6px 0 4px}
 
 /* ---- シート ---- */
 #sheetwrap{position:fixed;inset:0;z-index:100;display:none}
@@ -135,49 +168,58 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 #sheet{
   position:absolute;left:0;right:0;bottom:0;background:#1a1414;border-top:1px solid var(--line);
   border-radius:14px 14px 0 0;padding:10px 10px calc(env(safe-area-inset-bottom) + 12px);
-  max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
 }
-#sheet h3{margin:2px 0 8px;font-size:14px;color:var(--gold)}
+#sheet h3{margin:2px 0 6px;font-size:14px;color:var(--gold);line-height:1.3}
+#sheet h3 small{color:var(--sub);font-weight:400;font-size:11px;margin-left:6px}
 .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
 .sgrid.c2{grid-template-columns:repeat(2,1fr)}
 .sgrid.c1{grid-template-columns:1fr}
+.sgrid.c5{grid-template-columns:repeat(5,1fr)}
 .sgrid button{font-size:12px;padding:9px 4px;min-height:40px}
+.sgrid.c5 button{padding:7px 2px;min-height:36px}
 .sect{font-size:11px;color:var(--sub);margin:8px 0 4px}
 .hint{font-size:11px;color:var(--sub);padding:0 2px 10px;line-height:1.6}
+.cdetail{background:#231c1c;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:12px;line-height:1.55;margin-bottom:8px;-webkit-user-select:text;user-select:text}
+.cdetail .row{display:flex;gap:8px;flex-wrap:wrap;color:var(--sub);font-size:11px;margin-bottom:4px}
+.cdetail .row b{color:var(--txt);font-weight:600}
+.cdetail .ab{margin:3px 0;padding-left:1em;text-indent:-1em;white-space:pre-wrap}
+.cdetail .tr{margin-top:5px;padding-top:5px;border-top:1px dashed var(--line)}
+.cdetail .tr .ic{display:inline-block;width:16px;height:16px;border-radius:50%;background:#efe9e3;color:#1a1212;font-size:10px;font-weight:800;text-align:center;line-height:16px;margin-right:4px}
+.cdetail .tr .kw{background:#1a1212;color:#fff;font-size:10px;padding:1px 6px;border-radius:3px;margin-right:6px}
+.cdetail .fl{color:var(--sub);font-size:11px;margin-top:5px;font-style:italic}
+.cdetail .pr{color:var(--sub);font-size:10px;margin-top:5px}
+.cdetail .unk{color:#c98f8f}
+.noterow{display:flex;gap:6px;margin-bottom:8px}
+.noterow input{flex:1;font:inherit;font-size:13px;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:#120e0e;color:var(--txt)}
 
-/* ---- 操作ヒント（常時表示）---- */
-.ophint{
-  display:flex;gap:5px;flex-wrap:wrap;align-items:center;
-  font-size:11px;color:var(--sub);background:#171313;border:1px solid var(--line);
-  border-radius:8px;padding:5px 8px;margin-bottom:8px;
-}
+/* ---- 操作ヒント / ガイド ---- */
+.ophint{display:flex;gap:5px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--sub);background:#171313;border:1px solid var(--line);border-radius:8px;padding:5px 8px;margin-bottom:8px}
 .ophint b{color:var(--gold);font-weight:700}
 .ophint span{white-space:nowrap}
 .ophint span+span::before{content:"／";color:#4a3a3a;margin-right:5px}
-
-/* ---- はじめかたガイド（場が空のときだけ）---- */
-.guide{
-  background:linear-gradient(160deg,#241a1a,#1a1414);
-  border:1px solid var(--red2);border-radius:12px;padding:12px;margin-bottom:10px;
-}
+.guide{background:linear-gradient(160deg,#241a1a,#1a1414);border:1px solid var(--red2);border-radius:12px;padding:12px;margin-bottom:10px}
 .guide h2{margin:0 0 8px;font-size:14px;color:var(--gold);letter-spacing:.05em}
 .guide ol{margin:0 0 10px;padding-left:1.3em;font-size:12.5px;line-height:1.85;color:var(--txt)}
 .guide ol b{color:var(--gold)}
 .guide .big{width:100%;font-size:15px;font-weight:700;min-height:48px}
 .guide .note{font-size:11px;color:var(--sub);margin:8px 0 0;line-height:1.6}
 
-.card.pressing .ci{outline:2px solid var(--gold);outline-offset:1px}
-
 /* ---- 広い画面（PC） ---- */
 @media (min-width:900px){
-  :root{--cw:58px;--ch:81px}
-  .side{display:grid;grid-template-columns:332px 1fr 176px;gap:7px;align-items:start}
+  :root{--cw:62px;--ch:87px}
+  .cname{font-size:8.5px}
+  .cpow{font-size:11px}
+  .ccost{width:17px;height:17px;font-size:10px}
+  .side{display:grid;grid-template-columns:352px 1fr 190px;gap:7px;align-items:start}
   .sidehead{grid-area:head}
   .z-hand{grid-area:hand} .z-heart{grid-area:heart} .z-ena{grid-area:ena}
   .z-waza{grid-area:waza} .z-line{grid-area:line} .z-pile{grid-area:pile}
   .side[data-pi="0"]{grid-template-areas:"line line line" "waza waza waza" "heart ena pile" "hand hand hand" "head head head"}
   .side[data-pi="1"]{grid-template-areas:"head head head" "hand hand hand" "heart ena pile" "waza waza waza" "line line line"}
   .jumpbar{display:none}
+  .deckcols{flex-direction:row}
+  .deckcol{flex:1}
 }
 </style>
 </head>
@@ -206,18 +248,18 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 
 <main>
   <div class="ophint">
-    <span>カードを<b>タップ</b>＝メニュー（移動・向き）</span>
+    <span>カードを<b>タップ</b>＝内容とメニュー</span>
     <span><b>ドラッグ</b>＝ゾーンへ直接移動</span>
-    <span><b>山札をタップ</b>＝引く・混ぜる</span>
+    <span><b>山札</b>・<b>エナゾーン</b>の見出しをタップ＝まとめて操作</span>
   </div>
 
   <div class="guide" id="guide">
     <h2>はじめかた</h2>
     <ol>
-      <li>まず下の<b>「両者の準備をする」</b>を押します。山札を混ぜて、手札6枚・ハート5枚（裏向き）・エナ1枚（表向き）を両者に配ります。</li>
-      <li>カードを<b>タップ</b>するとメニューが開きます。第1〜第5ラインやエナなど、任意のゾーンへ動かせます。</li>
-      <li>メニューの下の方で、<b>縦向き⇄横向き</b>と<b>表裏</b>も切り替えられます。</li>
-      <li>カードを<b>上下にドラッグ</b>すると、メニューを開かずにゾーンへ移動できます。</li>
+      <li>（任意）下の<b>「デッキ編集」</b>で、公開済みのカードをデッキに入れます。入れなかった枠は<b>未確定カード</b>（灰色）で埋まります。</li>
+      <li><b>「両者の準備をする」</b>を押します。山札を混ぜて、手札6枚・ハート5枚（裏向き）・エナ1枚（表向き）を両者に配ります。</li>
+      <li>カードを<b>タップ</b>すると、印字内容とメニューが開きます。任意のゾーンへ動かせます。</li>
+      <li>メニューの下の方で、<b>縦向き⇄横向き</b>、<b>表裏</b>、<b>メモ</b>も付けられます。</li>
       <li>間違えたら上部の<b>「戻す」</b>で1手ずつ取り消せます。</li>
     </ol>
     <button data-act="setupAll" data-pi="2" class="primary big">両者の準備をする（①③⑤⑥）</button>
@@ -226,12 +268,11 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 
   <details class="doc">
     <summary>このシミュレーターについて / 操作方法</summary>
-    <p><b>操作</b>：カードを<b>タップ</b>＝メニュー（移動・向き・表裏）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
+    <p><b>操作</b>：カードを<b>タップ</b>＝印字内容とメニュー（移動・向き・表裏・メモ）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
+    <p><b>まとめて操作</b>：山札の見出しをタップ＝N枚引く・混ぜる。エナゾーンの見出しをタップ＝未使用をN枚横向き／全て縦向き。<b>押すのは人間</b>で、フェイズには連動しません。</p>
     <p><b>「横向き」について</b>：卓上の「カードを横に倒す」という物理操作だけを持っています。エナでは「使用済み」、ホロビト・ハートでは「ダウン状態」と呼ばれますが（出典: 2026-08 公式ティザー）、この2つが同じ状態かは未確定のため、区別せず<b>向きだけ</b>を保持しています。</p>
-    <p><b>典拠</b>：ゾーン名・50枚・準備手順・フェイズ名・向きの扱いは <code>docs/rules_confirmed.md</code>（出典: 2026-08 公式ティザー画像）に基づきます。</p>
-    <p><b>実装していないもの</b>：バトルの勝敗、パワー比較、コストの支払い、エナドローの枚数、ハート破壊の条件、フェイズの強制。いずれも 2026-08 時点で未確定のため、推測で埋めていません。</p>
-    <p><b>1ラインの枚数は制限していません。</b>オーバービート（元々いるホロビトの上に重ねて出す）が確定しているため、重ねて置けます。ただし正面のラインの対応関係は未確定なので、両者とも第1〜第5を同じ向きに並べているだけです。</p>
-    <p>カードは ID と通し番号のみのダミーです（自分 <code>A-01</code>〜<code>A-50</code> / 相手 <code>B-01</code>〜<code>B-50</code>）。実カードのデータは含みません。</p>
+    <p><b>カードデータ</b>：<code>data/cards.json</code> の印字内容をそのまま表示します。読めない項目は <code>unknown</code> と出ます。効果の適用は人間が行い、シミュレーターは<b>読ませるだけ</b>です。</p>
+    <p><b>実装していないもの</b>：バトルの勝敗、パワー比較、コストの支払い、エナドローの枚数、ハート破壊の条件、フェイズの強制。いずれも 2026-08 時点で未確定のため、推測で埋めていません。1ラインの枚数も制限していません（オーバービート）。</p>
     <p>※ 元情報は「開発中の画像」であり、製品版と異なる場合があります。</p>
   </details>
 
@@ -262,9 +303,15 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <p style="margin:6px 0 0">②「じゃんけんで先手・後手を決める」は手動です。上部の「先手」で記録できます（表示のみ）。</p>
   </details>
 
+  <details class="doc" id="deckPanel">
+    <summary>デッキ編集（50枚・同名4枚まで）</summary>
+    <p>公開済みのカードを枚数指定で入れます。残りの枠は<b>未確定カード</b>で埋めて50枚にします。「このデッキで初期化」でその陣地を組み直します（盤面は消えます）。</p>
+    <div class="deckcols" id="deckcols"></div>
+  </details>
+
   <div class="hint">
     <b>非公式のファンツールです。</b>小学館／TOMY とは関係ありません。<br>
-    山札をタップするとまとめて操作できます。<br>
+    盤面はこの端末に自動保存されます。「全部リセット」で消えます。<br>
     「戻す」は全ての操作（フェイズ送り・先手の変更を含む）を1手ずつ取り消します。
   </div>
 </main>
@@ -276,42 +323,81 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 
 /* ------------------------------------------------------------------
    ホロビート 盤面シミュレーター（2人分）
-   ルールの判定・強制は一切実装しない。カードを動かす場だけを提供する。
-   ゾーン名 / デッキ50枚 / 準備手順 / フェイズ名 / 縦向き・横向きは
+   ルールの判定・強制は一切実装しない。カードを動かす場と、印字の表示だけを提供する。
+   ゾーン名 / デッキ50枚 / 同名4枚 / 準備手順 / フェイズ名 / 縦向き・横向きは
    docs/rules_confirmed.md（出典: 2026-08 公式ティザー画像）に基づく。
-   未確定のルールは推測で補わない。
+   カードデータは data/cards.json（印字の写し）。設計は docs/design.md。
 ------------------------------------------------------------------ */
 
+/* @@CARDS_BEGIN@@ */
+// 生成物。編集しないこと。正本は data/cards.json、更新は npm run build:cards
+var CARD_LIST = [{"key":"HB01-001","id":"HB01-001","type":"ホロビト","name":"雷獣 レオ","name_ruby":"ライジュウ","color_mark":"赤","cost":2,"power":4000,"family":"ライガ・ファミリー","left_edge":null,"abilities":[],"flavor":"お前のビート、俺の心にビリビリ響いたぜ。その想いと力があれば俺とお前はきっと最強のコンビになれる。俺と共に戦ってくれ！ジン！　―雷獣 レオ","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"teo","frame":"通常","source":"ティザー①／拡張パック告知／カード画像群","source_date":"2026-08","legibility":"high"}],"notes":["ルビは「雷獣」にのみ印字。「レオ」にルビはない"]},{"key":"PR-013","id":"PR-013","type":"ワザ","name":"電光攻火","name_ruby":"デンコウセッカ","color_mark":"unknown","cost":2,"power":null,"family":null,"left_edge":{"modifier":"+5000","cost":null},"abilities":[],"flavor":"バトル中にエナを使ってワザやブーストを放つことができる。それがホロビートの戦い方！　パワーで負けていてもバトル中にこのワザを放てば一気にパワーアップ。勝利に近付こうぜ！","trigger":{"icon":"unknown","keyword":"ドロー-T","text":"このワザを捨て、カードを3枚引く。"},"printings":[{"rarity_mark":"C","illustrator":"Ochika","frame":"通常","source":"ティザー①","source_date":"2026-08","legibility":"partial"}],"notes":["低解像度画像のみ。トリガーのアイコンは判読不能","キーワードの接尾辞の表記（ハイフンの有無）は未確定。他のカードは「エントリーT」「オーバーT」とハイフンなし","色はコスト丸の配色を判別できず unknown","テキスト欄の文はゲーム説明文に読めるが、印字どおり flavor に置く"]},{"key":"HB01-033","id":"HB01-033","type":"ホロビト","name":"雷迅合身 レオジン","name_ruby":"ライジンオーバービート","color_mark":"赤","cost":6,"power":7000,"family":"ライガ・ファミリー","left_edge":null,"abilities":["ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）","自分の赤のホロビトが4体以上ラインに出ているなら、このホロビトのパワーを+5000する。"],"flavor":"レオとジン、二人の心が重なり合った姿、それが「レオジン」だ！","trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"teo","frame":"通常","source":"ティザー⑪／拡張パック告知","source_date":"2026-08","legibility":"high"}]},{"key":"PR-001","id":"PR-001","type":"ホロビト","name":"壱合 レオジン","name_ruby":"ファーストビート","color_mark":"赤","cost":2,"power":1114,"family":"ライガ・ファミリー","left_edge":{"modifier":"+2000","cost":1},"abilities":[],"flavor":"戦略的決闘札／HORO-BEAT CARD GAME（ルビ: ホロビート）／2026年11月14日 発売／一騎打ちで敵を滅ぼせ！ 人間×怪異\"合戦\"カードゲーム開幕！","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"teo","frame":"プロモ（フレーバー欄に商品告知）","source":"PR-001画像","source_date":"unknown","legibility":"high"}],"notes":["パワー 1114 は印字どおり。丸めない（rules_guess.md A-11）","フレーバー欄の位置に商品告知とQRコードが印字されている。QRコードのリンク先は unknown","「予定は変更になる場合がございます。」の注記あり"]},{"key":"HB01-065","id":"HB01-065","type":"ホロビト","name":"霊炎合身 不死火翔","name_ruby":"ブレイズオーバービート シナズイショウ","color_mark":"緑","cost":9,"power":14000,"family":"スザク・ブラッド","left_edge":null,"abilities":["ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）","このホロビトがバトルに勝ったとき、このホロビトのパワーが正面のホロビトの2倍以上なら、正面のホロビトを破壊する。（バリアや敗北時の効果は発動しない）"],"flavor":null,"trigger":{"icon":"終","keyword":"ラストオーバーT","text":"このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"Tada","frame":"通常","source":"カード画像群","source_date":"unknown","legibility":"high"}]},{"key":"HB01-097","id":"HB01-097","type":"ホロビト","name":"正義合身 義郎坊","name_ruby":"セイギオーバービート ギロウボウ","color_mark":"青","cost":6,"power":6000,"family":"ジャスティス・オーダー","left_edge":null,"abilities":["ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）","このホロビトが2つ目のワザを使ったとき、正面のホロビトのコストが8以下なら、その一番上のカードを手札に戻す。"],"flavor":null,"trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"chiam","frame":"通常","source":"カード画像群","source_date":"unknown","legibility":"high"},{"rarity_mark":"DR","illustrator":"KARUTA SHIKI","frame":"縦札","source":"イベント実物写真","source_date":"unknown","legibility":"partial"}],"notes":["色名「青」は能力文で言及された例がなく、コスト丸の配色からの判定"]},{"key":"HB01-063","id":"HB01-063","type":"ホロビト","name":"一撃先戦！ 不死火&ショウ","name_ruby":"イチゲキセンセン シナズイ アンド ショウ","color_mark":"緑","cost":5,"power":7000,"family":"スザク・ブラッド","left_edge":{"modifier":"+2000","cost":1},"abilities":["エナ詠み ③（自分のエナゾーンに緑のエナが3枚以上あるなら、このホロビトは以下の効果を得る）\n・このホロビトがバトルに勝ったとき、第1〜2ラインにいるなら、相手は手札を1枚選んで捨てる。"],"flavor":null,"trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"Tada","frame":"通常","source":"カード画像群","source_date":"unknown","legibility":"high"}]},{"key":"HB01-031","id":"HB01-031","type":"ホロビト","name":"妖狐 七尾","name_ruby":"ヨウコ ナナオ","color_mark":"赤","cost":4,"power":5000,"family":"マボロシ・コミューン","left_edge":{"modifier":"+2000","cost":1},"abilities":["このホロビトのバトルが終わったとき、自分の赤のエナを1枚選ぶ。それを未使用にし、このホロビトを回復する。"],"flavor":null,"trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"YUMEKO","frame":"通常","source":"カード画像群","source_date":"unknown","legibility":"high"}]},{"key":"HB01-061","id":"HB01-061","type":"ホロビト","name":"樹霊千年 巨ダマ","name_ruby":"ジュレイセンネン キョダマ","color_mark":"緑","cost":10,"power":18000,"family":"タイジュ・ブラッド","left_edge":null,"abilities":[],"flavor":"人は知を得て古きを知る。我らホロビトも儚く消えゆくのみ。文明の歩みとは、かくも残酷なものよ。　―樹霊千年 巨ダマ","trigger":{"icon":"終","keyword":"ラストオーバーT","text":"このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）"},"printings":[{"rarity_mark":"R","illustrator":"YUKIHIRO MARUO","frame":"通常","source":"カード画像群","source_date":"unknown","legibility":"high"}],"notes":["能力欄が空。トリガーのみを持つ"]},{"key":"HB01-034","id":"HB01-034","type":"ホロビト","name":"しなずさま","name_ruby":"unknown","color_mark":"緑","cost":2,"power":2000,"family":"スザク・ブラッド","left_edge":null,"abilities":["このホロビトがラインに出ているなら、コストは1大きくなる。"],"flavor":"unknown","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"DR","illustrator":"NAGANO","frame":"縦札","source":"イベント実物写真","source_date":"unknown","legibility":"partial"}],"notes":["能力欄の「コストは1大きくなる」が何のコストを指すか、文の前半が判読できていない可能性がある","カード名の札の上部に小さくルビらしき印字があるが判読不能","フレーバーは古文調だが大半が判読不能"]},{"key":"HB01-049","id":"HB01-049","type":"ホロビト","name":"ふわふわイロハとぶかぶかジャンボ","name_ruby":"unknown","color_mark":"緑","cost":5,"power":6000,"family":"unknown","left_edge":null,"abilities":["自分の第1〜2ラインにいるホロビトの下にあるカードの合計が3枚以上なら、このホロビトのパワーを+3000し、ダブルダメージを得る。（ダブルダメージを持つホロビトがバトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"],"flavor":null,"trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"DR","illustrator":"tomy","frame":"縦札","source":"イベント実物写真","source_date":"unknown","legibility":"partial"}],"notes":["ファミリー名はカタカナ表記だが判読不能"]},{"key":"UNKNOWN-utsushimi","id":"unknown","type":"ワザ","name":"合術 うつし身の撃","name_ruby":"unknown","color_mark":"青","cost":2,"power":null,"family":"unknown","left_edge":"unknown","abilities":["このワザは自分がこのバトルで他のワザを使っているときのみ使える。","このバトルに勝ったなら、このホロビトが相手プレイヤーに与えるダメージを+1する。"],"flavor":"unknown","trigger":{"icon":"unknown","keyword":"unknown","text":"このワザを捨て、カードを3枚引く。"},"printings":[{"rarity_mark":"unknown","illustrator":"unknown","frame":"縦札","source":"イベント実物写真","source_date":"unknown","legibility":"partial"}],"notes":["カード番号と左下の記号が判読できないため、key は仮の値。番号が判明したら差し替える","左辺に何か縦書きの印字があるが判読不能"]}];
+/* @@CARDS_END@@ */
+
+var CARDS = {};
+CARD_LIST.forEach(function(c){ CARDS[c.key] = c; });
+
 var DECK_SIZE  = 50;                                   // 確定: 1デッキ50枚
+var SAME_NAME_MAX = 4;                                 // 確定: 同名カードは4枚まで
 var PHASES     = ["召喚フェイズ","バトルフェイズ","エンドフェイズ"]; // 確定: この3つ・この順
 var LINE_COUNT = 5;                                    // 確定: 第1〜第5ライン（順序付き）
 var SIDE_NAME  = ["自分","相手"];
 var ZONE_NAME  = { heart:"ハートゾーン", line:"バトルライン", waza:"ワザゾーン",
                    ena:"エナゾーン", hand:"手札", deck:"山札", grave:"墓地" };
+var STORE_KEY  = "horobeat-sim-v2";
 
 var state, undoStack = [];
 
-function newDeck(pi){
-  var pre = pi === 0 ? "A" : "B", a = [];
-  for (var i = 1; i <= DECK_SIZE; i++){
-    var n = ("0" + i).slice(-2);
-    a.push({ id: pre + "-" + n, no: n, owner: pi, up: false, turned: false });
+/* ---------------- 生成 ---------------- */
+function buildDeck(pi, decklist){
+  var pre = pi === 0 ? "A" : "B", a = [], n = 0;
+  var keys = Object.keys(decklist || {});
+  keys.forEach(function(k){
+    var cnt = Math.min(SAME_NAME_MAX, decklist[k] | 0);
+    for (var i = 0; i < cnt && n < DECK_SIZE; i++){
+      n++; a.push({ uid: pre + "-" + ("0" + n).slice(-2), owner: pi, key: k, up:false, turned:false, note:"" });
+    }
+  });
+  while (n < DECK_SIZE){
+    n++; a.push({ uid: pre + "-" + ("0" + n).slice(-2), owner: pi, key: null, up:false, turned:false, note:"" });
   }
   return a;
 }
-function newPlayer(pi){
-  return { heart:[], waza:[], ena:[], hand:[], grave:[], deck:newDeck(pi),
-           line:[[],[],[],[],[]] };   // 順序付き5枠
+function newPlayer(pi, decklist){
+  return { heart:[], waza:[], ena:[], hand:[], grave:[],
+           deck: buildDeck(pi, decklist), line:[[],[],[],[],[]],
+           decklist: decklist ? JSON.parse(JSON.stringify(decklist)) : {} };
 }
-function newState(){
-  return { round:1, phase:-1, first:0, players:[newPlayer(0), newPlayer(1)] };
+function newState(decklists){
+  decklists = decklists || [{}, {}];
+  return { round:1, phase:-1, first:0, players:[newPlayer(0, decklists[0]), newPlayer(1, decklists[1])] };
 }
+
+/* ---------------- 保存 ---------------- */
+function save(){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
+}
+function load(){
+  try {
+    var raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return null;
+    var s = JSON.parse(raw);
+    if (!s || !s.players || s.players.length !== 2) return null;
+    s.players.forEach(function(P){
+      if (!P.decklist) P.decklist = {};
+      ["heart","waza","ena","hand","grave","deck"].forEach(function(z){ if (!Array.isArray(P[z])) P[z] = []; });
+      if (!Array.isArray(P.line) || P.line.length !== LINE_COUNT) P.line = [[],[],[],[],[]];
+    });
+    return s;
+  } catch(e){ return null; }
+}
+function clearSaved(){ try { localStorage.removeItem(STORE_KEY); } catch(e){} }
 
 /* ---------------- undo ---------------- */
 function snap(){ undoStack.push(JSON.stringify(state)); if (undoStack.length > 300) undoStack.shift(); }
 function undo(){ if (!undoStack.length) return; state = JSON.parse(undoStack.pop()); render(); }
 
-/* ---------------- 場所の探索・移動 ---------------- */
+/* ---------------- 探索・移動 ---------------- */
 function allLists(){
   var out = [];
   for (var p = 0; p < 2; p++){
@@ -321,11 +407,11 @@ function allLists(){
   }
   return out;
 }
-function findCard(id){
+function findCard(uid){
   var ls = allLists();
   for (var i = 0; i < ls.length; i++)
     for (var j = 0; j < ls[i].length; j++)
-      if (ls[i][j].id === id) return { list: ls[i], idx: j, card: ls[i][j] };
+      if (ls[i][j].uid === uid) return { list: ls[i], idx: j, card: ls[i][j] };
   return null;
 }
 function zoneOfCard(card){
@@ -343,17 +429,15 @@ function zoneOfCard(card){
 function whereCard(card){
   var loc = zoneOfCard(card);
   if (!loc) return "";
-  return SIDE_NAME[loc.pi] + " " +
-         (loc.zone === "line" ? "第" + (loc.idx + 1) + "ライン" : ZONE_NAME[loc.zone]);
+  return SIDE_NAME[loc.pi] + " " + (loc.zone === "line" ? "第" + (loc.idx + 1) + "ライン" : ZONE_NAME[loc.zone]);
 }
 function targetList(pi, zone, idx){
-  var P = state.players[pi];
-  if (!P) return null;
+  var P = state.players[pi]; if (!P) return null;
   return zone === "line" ? P.line[idx || 0] : P[zone];
 }
 // 移動のみ。置けるかどうかの判定はしない（ルール判定を実装しないため）。
-function moveCard(id, pi, zone, idx, toBottom){
-  var f = findCard(id); if (!f) return;
+function moveCard(uid, pi, zone, idx, toBottom){
+  var f = findCard(uid); if (!f) return;
   var dst = targetList(pi, zone, idx); if (!dst) return;
   f.list.splice(f.idx, 1);
   if (zone === "deck" && !toBottom) dst.unshift(f.card); else dst.push(f.card);
@@ -380,6 +464,9 @@ function handBackToDeck(pi){
   var P = state.players[pi];
   while (P.hand.length){ var c = P.hand.pop(); c.up = false; c.turned = false; P.deck.push(c); }
 }
+function rebuildPlayer(pi){
+  state.players[pi] = newPlayer(pi, state.players[pi].decklist);
+}
 
 var ACTIONS = {
   shuffle:  function(pi){ shuffleDeck(pi); },
@@ -389,46 +476,71 @@ var ACTIONS = {
   heart5:   function(pi){ drawTo(pi, 5, "heart", false); },
   ena1:     function(pi){ drawTo(pi, 1, "ena", true); },
   setupAll: function(pi){ ACTIONS.shuffle(pi); ACTIONS.draw6(pi); ACTIONS.heart5(pi); ACTIONS.ena1(pi); },
-  reset:    function(){ state = newState(); }
+  rebuild:  function(pi){ rebuildPlayer(pi); },
+  reset:    function(){ var d = state.players.map(function(P){ return P.decklist; }); state = newState(d); clearSaved(); }
 };
-function runAction(name, pi){
-  if (pi === 2){ if (name === "reset") ACTIONS.reset(); else { ACTIONS[name](0); ACTIONS[name](1); } }
-  else ACTIONS[name](pi);
+function runAction(name, pi, arg){
+  if (pi === 2){ if (name === "reset") ACTIONS.reset(); else { ACTIONS[name](0, arg); ACTIONS[name](1, arg); } }
+  else ACTIONS[name](pi, arg);
 }
-
 function nextPhase(){
   if (state.phase < 0){ state.phase = 0; return; }
   state.phase++;
   if (state.phase >= PHASES.length){ state.phase = 0; state.round++; }
 }
 
+/* ---------------- 表示用の補助 ---------------- */
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function fmt(v){ return v === "unknown" ? '<span class="unk">unknown</span>' : (v === null ? "—" : esc(v)); }
+function cardDef(c){ return c.key ? (CARDS[c.key] || null) : null; }
+
 /* ---------------- 描画 ---------------- */
 function cardHTML(c){
+  var d = cardDef(c);
   var cls = "card" + (c.turned ? " turned" : "");
-  var inner = c.up
-    ? '<div class="ci up"><div class="no">' + c.no + '</div><div class="id">' + c.id + '</div></div>'
-    : '<div class="ci down"><div class="mark">裏</div></div>';
-  return '<div class="' + cls + '" data-cid="' + c.id + '" data-owner="' + c.owner + '">' + inner + '</div>';
+  var color = d ? d.color_mark : "";
+  var inner;
+  if (!c.up){
+    inner = '<div class="ci down"><div class="mark">裏</div></div>';
+  } else if (!d){
+    inner = '<div class="ci up unk"><div class="no" style="font-size:9px">未確定</div><div class="id">' + esc(c.uid) + '</div></div>';
+  } else {
+    var costTxt = d.cost === "unknown" ? "?" : d.cost;
+    var right = d.type === "ワザ"
+      ? (d.left_edge && d.left_edge !== "unknown" ? esc(d.left_edge.modifier) : "")
+      : (d.power === "unknown" ? "?" : (d.power === null ? "" : d.power));
+    var mod = (d.type !== "ワザ" && d.left_edge && d.left_edge !== "unknown")
+      ? '<div class="cmod">' + esc(d.left_edge.modifier) + (d.left_edge.cost !== null && d.left_edge.cost !== "unknown" ? " (" + d.left_edge.cost + ")" : "") + '</div>'
+      : (d.type === "ワザ" ? '<div class="ctype">ワザ</div>' : "");
+    inner = '<div class="ci up">' +
+              '<div class="ctop"><span class="ccost">' + esc(costTxt) + '</span><span class="cpow">' + right + '</span></div>' +
+              '<div class="cname">' + esc(d.name) + '</div>' + mod +
+              (c.note ? '<div class="cnote">' + esc(c.note) + '</div>' : "") +
+            '</div>';
+  }
+  return '<div class="' + cls + '" data-cid="' + esc(c.uid) + '" data-owner="' + c.owner + '" data-color="' + esc(color) + '">' + inner + '</div>';
 }
 function stripHTML(arr){
   if (!arr.length) return '<div class="empty">（なし）</div>';
   var h = ""; for (var i = 0; i < arr.length; i++) h += cardHTML(arr[i]); return h;
 }
-function zoneHTML(pi, zone, cls, extraClass){
+function zoneHTML(pi, zone, cls, extraClass, tappable){
   var arr = state.players[pi][zone];
   return '<div class="zone ' + cls + '" data-drop="' + zone + '" data-pi="' + pi + '">' +
-           '<div class="zlabel">' + ZONE_NAME[zone] + ' <span class="zcount">(' + arr.length + ')</span></div>' +
+           '<div class="zlabel' + (tappable ? ' tappable" data-zsheet="' + zone + '" data-pi="' + pi : "") + '">' +
+             ZONE_NAME[zone] + ' <span class="zcount">(' + arr.length + ')</span></div>' +
            '<div class="strip' + (extraClass || "") + '">' + stripHTML(arr) + '</div>' +
          '</div>';
 }
 function lineHTML(pi){
   var P = state.players[pi], total = 0, s = "";
   for (var i = 0; i < LINE_COUNT; i++){
-    total += P.line[i].length;
-    var st = ""; for (var j = 0; j < P.line[i].length; j++) st += cardHTML(P.line[i][j]);
+    var st = P.line[i], inner = "";
+    total += st.length;
+    for (var j = 0; j < st.length; j++) inner += cardHTML(st[j]);
     s += '<div class="lineslot" data-drop="line" data-pi="' + pi + '" data-idx="' + i + '">' +
-           '<span class="lineno">第' + (i+1) + '</span>' +
-           '<div class="linestack">' + st + '</div></div>';
+           '<span class="lineno">第' + (i+1) + (st.length >= 2 ? ' <span class="stackn">' + st.length + '枚</span>' : "") + '</span>' +
+           '<div class="linestack">' + inner + '</div></div>';
   }
   return '<div class="zone z-line" data-pi="' + pi + '">' +
            '<div class="zlabel">バトルライン <span class="zcount">(' + total + ')</span></div>' +
@@ -438,7 +550,7 @@ function pileHTML(pi){
   var P = state.players[pi];
   return '<div class="pilerow z-pile">' +
       '<div class="zone" data-drop="deck" data-pi="' + pi + '">' +
-        '<div class="zlabel">山札 <span class="zcount">(' + P.deck.length + ')</span></div>' +
+        '<div class="zlabel tappable" data-zsheet="deck" data-pi="' + pi + '">山札 <span class="zcount">(' + P.deck.length + ')</span></div>' +
         '<div class="strip">' + (P.deck.length
           ? '<div class="pile" data-pile="' + pi + '">' + P.deck.length + '<span style="font-size:9px;font-weight:400">枚</span></div>'
           : '<div class="pile empty0" data-pile="' + pi + '">0枚</div>') + '</div></div>' +
@@ -449,18 +561,35 @@ function pileHTML(pi){
 }
 function sideHTML(pi){
   var head = '<div class="sidehead"><span class="who">' + SIDE_NAME[pi] + '</span>' +
-             (state.first === pi ? '<span class="badge dark" style="font-size:10px;padding:1px 6px">先手</span>' : '') +
-             '</div>';
+             (state.first === pi ? '<span class="badge dark" style="font-size:10px;padding:1px 6px">先手</span>' : '') + '</div>';
   var hand  = zoneHTML(pi, "hand",  "z-hand");
   var heart = zoneHTML(pi, "heart", "z-heart", " wrapy");
-  var ena   = zoneHTML(pi, "ena",   "z-ena");
+  var ena   = zoneHTML(pi, "ena",   "z-ena", "", true);
   var waza  = zoneHTML(pi, "waza",  "z-waza");
   var line  = lineHTML(pi);
   var pile  = pileHTML(pi);
-  // 狭い画面ではこのDOM順どおりに縦に積む。中央でバトルラインが向かい合う。
-  return pi === 1
-    ? head + hand + heart + ena + pile + waza + line
-    : head + line + waza + ena + heart + pile + hand;
+  return pi === 1 ? head + hand + heart + ena + pile + waza + line
+                  : head + line + waza + ena + heart + pile + hand;
+}
+function deckPanelHTML(){
+  var h = "";
+  for (var pi = 0; pi < 2; pi++){
+    var dl = state.players[pi].decklist, known = 0;
+    var rows = CARD_LIST.map(function(d){
+      var n = dl[d.key] | 0; known += n;
+      var meta = (d.type === "ワザ" ? "ワザ" : "コスト" + fmt(d.cost) + " / " + fmt(d.power)) +
+                 (d.id === "unknown" ? " / 番号不明" : " / " + esc(d.id));
+      return '<div class="dkrow"><span class="dkdot" data-color="' + esc(d.color_mark) + '"></span>' +
+             '<span class="dkname">' + esc(d.name) + '</span><span class="dkmeta">' + meta + '</span>' +
+             '<button class="mini" data-dk="-" data-pi="' + pi + '" data-key="' + esc(d.key) + '"' + (n <= 0 ? " disabled" : "") + '>−</button>' +
+             '<span class="dkn">' + n + '</span>' +
+             '<button class="mini" data-dk="+" data-pi="' + pi + '" data-key="' + esc(d.key) + '"' + (n >= SAME_NAME_MAX || known >= DECK_SIZE ? " disabled" : "") + '>＋</button></div>';
+    }).join("");
+    h += '<div class="deckcol"><h4 class="who ' + (pi === 0 ? "me" : "opp") + '">' + SIDE_NAME[pi] + 'のデッキ</h4>' + rows +
+         '<div class="dksum">登録 ' + known + ' 枚 ＋ 未確定 ' + Math.max(0, DECK_SIZE - known) + ' 枚 ＝ ' + DECK_SIZE + ' 枚</div>' +
+         '<button data-act="rebuild" data-pi="' + pi + '" data-confirm="' + SIDE_NAME[pi] + 'の盤面を消して、このデッキで組み直します。よろしいですか？">このデッキで初期化</button></div>';
+  }
+  return h;
 }
 function boardIsEmpty(){
   return state.players.every(function(P){
@@ -477,38 +606,66 @@ function render(){
   document.getElementById("firstOpp").className = "mini" + (state.first === 1 ? " on" : "");
   document.getElementById("side-1").innerHTML = sideHTML(1);
   document.getElementById("side-0").innerHTML = sideHTML(0);
+  document.getElementById("deckcols").innerHTML = deckPanelHTML();
+  save();
 }
 
-/* ---------------- アクションシート ---------------- */
+/* ---------------- シート ---------------- */
 var sheetWrap = document.getElementById("sheetwrap");
 var sheetEl   = document.getElementById("sheet");
 var sheetGuardUntil = 0, sheetPi = 0;
 
 function guarded(){ return performance.now() < sheetGuardUntil; }
-function openSheet(html){ sheetEl.innerHTML = html; sheetWrap.classList.add("on"); sheetGuardUntil = performance.now() + 400; }
+function openSheet(html){ sheetEl.innerHTML = html; sheetWrap.classList.add("on"); sheetGuardUntil = performance.now() + 400; sheetEl.scrollTop = 0; }
 function closeSheet(){ sheetWrap.classList.remove("on"); sheetEl.innerHTML = ""; }
 document.getElementById("sheetbg").addEventListener("click", function(){ if (!guarded()) closeSheet(); });
 
-function destHTML(cid, pi){
+function detailHTML(c){
+  var d = cardDef(c);
+  if (!d){
+    return '<div class="cdetail"><div class="row"><b>未確定カード</b></div>' +
+           '公開されているカードだけではデッキ50枚を埋められないため、空席を表す札です。中身はありません。' +
+           '<div class="pr">実体ID: ' + esc(c.uid) + '</div></div>';
+  }
+  var h = '<div class="cdetail">';
+  h += '<div class="row"><span><b>' + esc(d.type) + '</b></span><span>色 <b>' + fmt(d.color_mark) + '</b></span>' +
+       '<span>コスト <b>' + fmt(d.cost) + '</b></span>' +
+       (d.type !== "ワザ" ? '<span>パワー <b>' + fmt(d.power) + '</b></span>' : "") +
+       (d.family !== null ? '<span>' + fmt(d.family) + '</span>' : "") + '</div>';
+  if (d.left_edge === "unknown") h += '<div class="row"><span>左辺 <span class="unk">unknown</span></span></div>';
+  else if (d.left_edge) h += '<div class="row"><span>左辺 <b>' + esc(d.left_edge.modifier) + '</b>' +
+       (d.left_edge.cost !== null ? '　丸数字 <b>' + fmt(d.left_edge.cost) + '</b>' : "") + '</span></div>';
+  if (d.abilities === "unknown") h += '<div class="ab unk">能力欄 unknown</div>';
+  else d.abilities.forEach(function(a){ h += '<div class="ab">●' + esc(a) + '</div>'; });
+  h += '<div class="tr"><span class="ic">' + (d.trigger.icon === "unknown" ? "?" : esc(d.trigger.icon)) + '</span>' +
+       '<span class="kw">' + fmt(d.trigger.keyword) + '</span>' + fmt(d.trigger.text) + '</div>';
+  if (d.flavor) h += '<div class="fl">' + fmt(d.flavor) + '</div>';
+  h += '<div class="pr">' + d.printings.map(function(p){
+         return esc(p.rarity_mark) + " / Illus:" + esc(p.illustrator) + " / " + esc(p.frame) + "（" + esc(p.source) + "）";
+       }).join("<br>") + '</div>';
+  h += '</div>';
+  return h;
+}
+function destHTML(uid, pi){
   var b = '<div class="sect">移動先</div><div class="sgrid c2" style="margin-bottom:6px">';
-  b += '<button data-tab="0" data-cid="' + cid + '" class="' + (pi===0?"on":"") + '">自分の場へ</button>';
-  b += '<button data-tab="1" data-cid="' + cid + '" class="' + (pi===1?"on":"") + '">相手の場へ</button></div>';
+  b += '<button data-tab="0" data-cid="' + uid + '" class="' + (pi===0?"on":"") + '">自分の場へ</button>';
+  b += '<button data-tab="1" data-cid="' + uid + '" class="' + (pi===1?"on":"") + '">相手の場へ</button></div>';
   b += '<div class="sgrid">';
   for (var i = 0; i < LINE_COUNT; i++)
-    b += '<button data-mv="line" data-idx="' + i + '" data-cid="' + cid + '">第' + (i+1) + 'ライン</button>';
-  b += '<button data-mv="waza"  data-cid="' + cid + '">ワザ</button>';
-  b += '<button data-mv="ena"   data-cid="' + cid + '">エナ</button>';
-  b += '<button data-mv="heart" data-cid="' + cid + '">ハート</button>';
-  b += '<button data-mv="hand"  data-cid="' + cid + '">手札</button>';
-  b += '<button data-mv="grave" data-cid="' + cid + '">墓地</button>';
-  b += '<button data-mv="deck"  data-cid="' + cid + '">山札の上</button>';
-  b += '<button data-mv="deck"  data-bottom="1" data-cid="' + cid + '">山札の下</button>';
+    b += '<button data-mv="line" data-idx="' + i + '" data-cid="' + uid + '">第' + (i+1) + 'ライン</button>';
+  b += '<button data-mv="waza"  data-cid="' + uid + '">ワザ</button>';
+  b += '<button data-mv="ena"   data-cid="' + uid + '">エナ</button>';
+  b += '<button data-mv="heart" data-cid="' + uid + '">ハート</button>';
+  b += '<button data-mv="hand"  data-cid="' + uid + '">手札</button>';
+  b += '<button data-mv="grave" data-cid="' + uid + '">墓地</button>';
+  b += '<button data-mv="deck"  data-cid="' + uid + '">山札の上</button>';
+  b += '<button data-mv="deck"  data-bottom="1" data-cid="' + uid + '">山札の下</button>';
   b += '</div>';
   return b;
 }
-function openCardSheet(cid, pi){
-  var f = findCard(cid); if (!f) return;
-  var c = f.card;
+function openCardSheet(uid, pi){
+  var f = findCard(uid); if (!f) return;
+  var c = f.card, d = cardDef(c);
   if (pi === undefined) pi = c.owner;
   sheetPi = pi;
   var loc = zoneOfCard(c);
@@ -516,11 +673,16 @@ function openCardSheet(cid, pi){
   // ただし既に横向きなら、直す手段として「縦向きに戻す」は出す。
   var canTurn = !(loc && loc.zone === "hand") || c.turned;
   var btns = [];
-  if (canTurn) btns.push('<button data-tg="' + cid + '">' + (c.turned ? "縦向きに戻す" : "横向きにする") + '</button>');
-  btns.push('<button data-fl="' + cid + '">' + (c.up ? "裏向きにする" : "表向きにする") + '</button>');
+  if (canTurn) btns.push('<button data-tg="' + uid + '">' + (c.turned ? "縦向きに戻す" : "横向きにする") + '</button>');
+  btns.push('<button data-fl="' + uid + '">' + (c.up ? "裏向きにする" : "表向きにする") + '</button>');
 
-  var h = '<h3>' + c.id + '（' + whereCard(c) + '）</h3>';
-  h += destHTML(cid, pi);
+  var title = d ? esc(d.name) + (d.name_ruby && d.name_ruby !== "unknown" ? '<small>' + esc(d.name_ruby) + '</small>' : "")
+                : "未確定カード";
+  var h = '<h3>' + title + '<small>' + esc(c.uid) + '・' + esc(whereCard(c)) + '</small></h3>';
+  h += detailHTML(c);
+  h += '<div class="noterow"><input id="noteIn" type="text" maxlength="24" placeholder="メモ（+3000、ダブルダメージ など）" value="' + esc(c.note || "") + '">' +
+       '<button data-note="' + uid + '">保存</button></div>';
+  h += destHTML(uid, pi);
   h += '<div class="sect">向き・表裏</div>';
   h += '<div class="sgrid ' + (btns.length > 1 ? "c2" : "c1") + '">' + btns.join("") + '</div>';
   h += '<div class="sgrid c2"><button data-close="1">閉じる</button></div>';
@@ -528,41 +690,91 @@ function openCardSheet(cid, pi){
 }
 function openDeckSheet(pi){
   var P = state.players[pi];
-  var h = '<h3>' + SIDE_NAME[pi] + ' の山札（' + P.deck.length + '枚）</h3><div class="sgrid c2">';
-  h += '<button data-act="draw1"  data-pi="' + pi + '">1枚引いて手札へ</button>';
+  var h = '<h3>' + SIDE_NAME[pi] + ' の山札<small>' + P.deck.length + '枚</small></h3>';
+  h += '<div class="sect">手札に引く（枚数は自分で決める。エナドロー等）</div><div class="sgrid c5">';
+  for (var n = 1; n <= 10; n++) h += '<button data-act="drawN" data-arg="' + n + '" data-pi="' + pi + '"' + (n > P.deck.length ? " disabled" : "") + '>' + n + '枚</button>';
+  h += '</div><div class="sgrid c2">';
   h += '<button data-act="shuffle" data-pi="' + pi + '">シャッフル</button>';
   h += '<button data-act="ena1"   data-pi="' + pi + '">上から1枚を表でエナへ</button>';
   h += '<button data-act="heart5" data-pi="' + pi + '">上から5枚を裏でハートへ</button>';
-  h += '<button data-act="draw6"  data-pi="' + pi + '">6枚引く</button>';
-  h += '<button data-act="redraw" data-pi="' + pi + '">引き直す</button></div>';
-  h += '<div class="sect">山札の一番上のカード</div><div class="sgrid c2">';
-  if (P.deck.length) h += '<button data-top="' + pi + '">一番上を操作…</button>';
+  h += '<button data-act="redraw" data-pi="' + pi + '">引き直す（手札を戻して6枚）</button></div>';
+  h += '<div class="sgrid c2">';
+  if (P.deck.length) h += '<button data-top="' + pi + '">一番上のカードを操作…</button>';
   h += '<button data-close="1">閉じる</button></div>';
+  openSheet(h);
+}
+function openEnaSheet(pi){
+  var P = state.players[pi];
+  var untapped = P.ena.filter(function(c){ return !c.turned; }).length;
+  var tapped = P.ena.length - untapped;
+  var h = '<h3>' + SIDE_NAME[pi] + ' のエナゾーン<small>' + P.ena.length + '枚（縦 ' + untapped + '・横 ' + tapped + '）</small></h3>';
+  h += '<div class="sect">未使用（縦向き）を左から N 枚横向きにする。コスト支払いの操作。押すのは人間</div><div class="sgrid c5">';
+  for (var n = 1; n <= 10; n++) h += '<button data-ena="tap" data-arg="' + n + '" data-pi="' + pi + '"' + (n > untapped ? " disabled" : "") + '>' + n + '枚</button>';
+  h += '</div><div class="sgrid c2">';
+  h += '<button data-ena="untapAll" data-pi="' + pi + '"' + (tapped ? "" : " disabled") + '>全て縦向きに戻す</button>';
+  h += '<button data-ena="tapAll" data-pi="' + pi + '"' + (untapped ? "" : " disabled") + '>全て横向きにする</button>';
+  h += '</div><div class="sgrid c2"><button data-close="1">閉じる</button></div>';
   openSheet(h);
 }
 
 sheetEl.addEventListener("click", function(e){
   if (guarded()) return;
   var t = e.target.closest("button"); if (!t) return;
-  if (t.dataset.close){ closeSheet(); return; }
-  if (t.dataset.top !== undefined && t.dataset.top !== ""){
-    var pi = +t.dataset.top, top = state.players[pi].deck[0];
-    closeSheet(); if (top) openCardSheet(top.id); return;
-  }
-  if (t.dataset.tab !== undefined && t.dataset.tab !== ""){ openCardSheet(t.dataset.cid, +t.dataset.tab); return; }
-  if (t.dataset.act){ snap(); runAction(t.dataset.act, +t.dataset.pi); closeSheet(); render(); return; }
-  if (t.dataset.tg){ snap(); var f1 = findCard(t.dataset.tg); if (f1) f1.card.turned = !f1.card.turned; closeSheet(); render(); return; }
-  if (t.dataset.fl){ snap(); var f2 = findCard(t.dataset.fl); if (f2) f2.card.up = !f2.card.up; closeSheet(); render(); return; }
-  if (t.dataset.mv){
+  var ds = t.dataset;
+  if (ds.close){ closeSheet(); return; }
+  if (ds.top !== undefined && ds.top !== ""){ var top = state.players[+ds.top].deck[0]; closeSheet(); if (top) openCardSheet(top.uid); return; }
+  if (ds.tab !== undefined && ds.tab !== ""){ openCardSheet(ds.cid, +ds.tab); return; }
+  if (ds.act === "drawN"){ snap(); drawTo(+ds.pi, +ds.arg, "hand", true); closeSheet(); render(); return; }
+  if (ds.act){ snap(); runAction(ds.act, +ds.pi); closeSheet(); render(); return; }
+  if (ds.ena){
     snap();
-    moveCard(t.dataset.cid, sheetPi, t.dataset.mv, parseInt(t.dataset.idx || "0", 10), !!t.dataset.bottom);
+    var P = state.players[+ds.pi], n = +ds.arg || 0;
+    P.ena.forEach(function(c){
+      if (ds.ena === "untapAll") c.turned = false;
+      else if (ds.ena === "tapAll") c.turned = true;
+      else if (ds.ena === "tap" && !c.turned && n > 0){ c.turned = true; n--; }
+    });
+    closeSheet(); render(); return;
+  }
+  if (ds.note){
+    snap();
+    var f0 = findCard(ds.note), inp = document.getElementById("noteIn");
+    if (f0) f0.card.note = (inp ? inp.value : "").trim().slice(0, 24);
+    closeSheet(); render(); return;
+  }
+  if (ds.tg){ snap(); var f1 = findCard(ds.tg); if (f1) f1.card.turned = !f1.card.turned; closeSheet(); render(); return; }
+  if (ds.fl){ snap(); var f2 = findCard(ds.fl); if (f2) f2.card.up = !f2.card.up; closeSheet(); render(); return; }
+  if (ds.mv){
+    snap();
+    moveCard(ds.cid, sheetPi, ds.mv, parseInt(ds.idx || "0", 10), !!ds.bottom);
     closeSheet(); render(); return;
   }
 });
+// メモ欄で Enter → 保存
+sheetEl.addEventListener("keydown", function(e){
+  if (e.key === "Enter" && e.target && e.target.id === "noteIn"){
+    var b = sheetEl.querySelector("button[data-note]"); if (b) b.click();
+  }
+});
 
-/* ---------------- ヘッダー / 準備手順 ---------------- */
+/* ---------------- 準備手順・デッキ編集・ヘッダー ---------------- */
 document.querySelector("main").addEventListener("click", function(e){
-  var t = e.target.closest("button[data-act]"); if (!t) return;
+  var t = e.target.closest("button[data-act], button[data-dk], .zlabel[data-zsheet]");
+  if (!t) return;
+  if (t.dataset.zsheet){
+    if (t.dataset.zsheet === "deck") openDeckSheet(+t.dataset.pi);
+    else if (t.dataset.zsheet === "ena") openEnaSheet(+t.dataset.pi);
+    return;
+  }
+  if (t.dataset.dk){
+    var dl = state.players[+t.dataset.pi].decklist, k = t.dataset.key;
+    var cur = dl[k] | 0, next = t.dataset.dk === "+" ? cur + 1 : cur - 1;
+    if (next < 0 || next > SAME_NAME_MAX) return;
+    snap();
+    if (next === 0) delete dl[k]; else dl[k] = next;
+    render(); return;
+  }
+  if (t.dataset.confirm && !window.confirm(t.dataset.confirm)) return;
   snap(); runAction(t.dataset.act, +t.dataset.pi); render();
 });
 document.getElementById("btnPhase").addEventListener("click", function(){ snap(); nextPhase(); render(); });
@@ -571,22 +783,18 @@ document.getElementById("firstMe").addEventListener("click",  function(){ snap()
 document.getElementById("firstOpp").addEventListener("click", function(){ snap(); state.first = 1; render(); });
 document.querySelector("header").addEventListener("click", function(e){
   var t = e.target.closest("button[data-jump]"); if (!t) return;
-  var el = t.dataset.jump === "mid" ? document.getElementById("facingMark")
-                                    : document.getElementById("side-" + t.dataset.jump);
+  var el = t.dataset.jump === "mid" ? document.getElementById("facingMark") : document.getElementById("side-" + t.dataset.jump);
   if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
 });
 
-/* ---------------- タップ / 長押し / ドラッグ ---------------- */
+/* ---------------- タップ / ドラッグ ---------------- */
 var drag = null, ghost = null, lastOver = null;
 
 function clearOver(){ if (lastOver){ lastOver.classList.remove("over"); lastOver = null; } }
 function dropTargetAt(x, y){ var el = document.elementFromPoint(x, y); return el ? el.closest("[data-drop]") : null; }
 function killGhost(){ if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost); ghost = null; }
 function endDrag(){
-  if (drag && drag.el){
-    drag.el.classList.remove("ghosting");
-    drag.el.classList.remove("pressing");
-  }
+  if (drag && drag.el){ drag.el.classList.remove("ghosting"); drag.el.classList.remove("pressing"); }
   killGhost(); clearOver(); drag = null;
 }
 
@@ -632,8 +840,7 @@ document.addEventListener("pointerup", function(e){
       endDrag(); render(); return;
     }
   } else {
-    // タップ = メニューを開く（移動・向き・裏返し）
-    var cid = drag.cid;
+    var cid = drag.cid;                       // タップ = 内容とメニュー
     endDrag(); openCardSheet(cid); return;
   }
   endDrag();
@@ -642,7 +849,7 @@ document.addEventListener("pointercancel", endDrag);
 document.addEventListener("contextmenu", function(e){ if (e.target.closest(".card, .pile")) e.preventDefault(); });
 
 /* ---------------- 起動 ---------------- */
-state = newState();
+state = load() || newState();
 render();
 </script>
 </body>
