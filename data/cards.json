@@ -1,0 +1,278 @@
+{
+  "_meta": {
+    "description": "ホロビートカードゲーム カード印字レコード。カード画像に印字されている文字列のみを転記する。要約・言い換え・補完をしない。",
+    "conventions": {
+      "null": "カード全体が鮮明に見えていて、その項目が印字されていないことが確定している",
+      "unknown": "存在するが読めない、または画像で確認できない",
+      "color_mark": "左上のコスト丸の配色から読み取った色。自分の色名を印字したカードは1枚もないため、この名前にしている",
+      "left_edge": "左辺の縦書き数値と丸数字。項目名は印字されていない（rules_guess.md A-10 でブーストと推測）",
+      "abilities": "● 1つにつき文字列1つ、印字どおり。解釈を混ぜない",
+      "key": "検索用の識別子。通常は id と同じ。番号が読めないカードは id を unknown にし、key に UNKNOWN- で始まる仮の値を付ける"
+    },
+    "sources": "docs/rules_confirmed.md §0 を参照",
+    "updated": "2026-08-28"
+  },
+  "cards": [
+    {
+      "key": "HB01-001",
+      "id": "HB01-001",
+      "type": "ホロビト",
+      "name": "雷獣 レオ",
+      "name_ruby": "ライジュウ",
+      "color_mark": "赤",
+      "cost": 2,
+      "power": 4000,
+      "family": "ライガ・ファミリー",
+      "left_edge": null,
+      "abilities": [],
+      "flavor": "お前のビート、俺の心にビリビリ響いたぜ。その想いと力があれば俺とお前はきっと最強のコンビになれる。俺と共に戦ってくれ！ジン！　―雷獣 レオ",
+      "trigger": { "icon": "出", "keyword": "エントリーT", "text": "このホロビトをラインに出す。（コストは支払わない）" },
+      "printings": [
+        { "rarity_mark": "C", "illustrator": "teo", "frame": "通常", "source": "ティザー①／拡張パック告知／カード画像群", "source_date": "2026-08", "legibility": "high" }
+      ],
+      "notes": ["ルビは「雷獣」にのみ印字。「レオ」にルビはない"]
+    },
+    {
+      "key": "PR-013",
+      "id": "PR-013",
+      "type": "ワザ",
+      "name": "電光攻火",
+      "name_ruby": "デンコウセッカ",
+      "color_mark": "unknown",
+      "cost": 2,
+      "power": null,
+      "family": null,
+      "left_edge": { "modifier": "+5000", "cost": null },
+      "abilities": [],
+      "flavor": "バトル中にエナを使ってワザやブーストを放つことができる。それがホロビートの戦い方！　パワーで負けていてもバトル中にこのワザを放てば一気にパワーアップ。勝利に近付こうぜ！",
+      "trigger": { "icon": "unknown", "keyword": "ドロー-T", "text": "このワザを捨て、カードを3枚引く。" },
+      "printings": [
+        { "rarity_mark": "C", "illustrator": "Ochika", "frame": "通常", "source": "ティザー①", "source_date": "2026-08", "legibility": "partial" }
+      ],
+      "notes": [
+        "低解像度画像のみ。トリガーのアイコンは判読不能",
+        "キーワードの接尾辞の表記（ハイフンの有無）は未確定。他のカードは「エントリーT」「オーバーT」とハイフンなし",
+        "色はコスト丸の配色を判別できず unknown",
+        "テキスト欄の文はゲーム説明文に読めるが、印字どおり flavor に置く"
+      ]
+    },
+    {
+      "key": "HB01-033",
+      "id": "HB01-033",
+      "type": "ホロビト",
+      "name": "雷迅合身 レオジン",
+      "name_ruby": "ライジンオーバービート",
+      "color_mark": "赤",
+      "cost": 6,
+      "power": 7000,
+      "family": "ライガ・ファミリー",
+      "left_edge": null,
+      "abilities": [
+        "ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）",
+        "自分の赤のホロビトが4体以上ラインに出ているなら、このホロビトのパワーを+5000する。"
+      ],
+      "flavor": "レオとジン、二人の心が重なり合った姿、それが「レオジン」だ！",
+      "trigger": { "icon": "上", "keyword": "オーバーT", "text": "このホロビトをオーバービートで出す。（コストは支払わない）" },
+      "printings": [
+        { "rarity_mark": "SR", "illustrator": "teo", "frame": "通常", "source": "ティザー⑪／拡張パック告知", "source_date": "2026-08", "legibility": "high" }
+      ]
+    },
+    {
+      "key": "PR-001",
+      "id": "PR-001",
+      "type": "ホロビト",
+      "name": "壱合 レオジン",
+      "name_ruby": "ファーストビート",
+      "color_mark": "赤",
+      "cost": 2,
+      "power": 1114,
+      "family": "ライガ・ファミリー",
+      "left_edge": { "modifier": "+2000", "cost": 1 },
+      "abilities": [],
+      "flavor": "戦略的決闘札／HORO-BEAT CARD GAME（ルビ: ホロビート）／2026年11月14日 発売／一騎打ちで敵を滅ぼせ！ 人間×怪異\"合戦\"カードゲーム開幕！",
+      "trigger": { "icon": "出", "keyword": "エントリーT", "text": "このホロビトをラインに出す。（コストは支払わない）" },
+      "printings": [
+        { "rarity_mark": "C", "illustrator": "teo", "frame": "プロモ（フレーバー欄に商品告知）", "source": "PR-001画像", "source_date": "unknown", "legibility": "high" }
+      ],
+      "notes": [
+        "パワー 1114 は印字どおり。丸めない（rules_guess.md A-11）",
+        "フレーバー欄の位置に商品告知とQRコードが印字されている。QRコードのリンク先は unknown",
+        "「予定は変更になる場合がございます。」の注記あり"
+      ]
+    },
+    {
+      "key": "HB01-065",
+      "id": "HB01-065",
+      "type": "ホロビト",
+      "name": "霊炎合身 不死火翔",
+      "name_ruby": "ブレイズオーバービート シナズイショウ",
+      "color_mark": "緑",
+      "cost": 9,
+      "power": 14000,
+      "family": "スザク・ブラッド",
+      "left_edge": null,
+      "abilities": [
+        "ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）",
+        "このホロビトがバトルに勝ったとき、このホロビトのパワーが正面のホロビトの2倍以上なら、正面のホロビトを破壊する。（バリアや敗北時の効果は発動しない）"
+      ],
+      "flavor": null,
+      "trigger": { "icon": "終", "keyword": "ラストオーバーT", "text": "このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）" },
+      "printings": [
+        { "rarity_mark": "SR", "illustrator": "Tada", "frame": "通常", "source": "カード画像群", "source_date": "unknown", "legibility": "high" }
+      ]
+    },
+    {
+      "key": "HB01-097",
+      "id": "HB01-097",
+      "type": "ホロビト",
+      "name": "正義合身 義郎坊",
+      "name_ruby": "セイギオーバービート ギロウボウ",
+      "color_mark": "青",
+      "cost": 6,
+      "power": 6000,
+      "family": "ジャスティス・オーダー",
+      "left_edge": null,
+      "abilities": [
+        "ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）",
+        "このホロビトが2つ目のワザを使ったとき、正面のホロビトのコストが8以下なら、その一番上のカードを手札に戻す。"
+      ],
+      "flavor": null,
+      "trigger": { "icon": "上", "keyword": "オーバーT", "text": "このホロビトをオーバービートで出す。（コストは支払わない）" },
+      "printings": [
+        { "rarity_mark": "SR", "illustrator": "chiam", "frame": "通常", "source": "カード画像群", "source_date": "unknown", "legibility": "high" },
+        { "rarity_mark": "DR", "illustrator": "KARUTA SHIKI", "frame": "縦札", "source": "イベント実物写真", "source_date": "unknown", "legibility": "partial" }
+      ],
+      "notes": ["色名「青」は能力文で言及された例がなく、コスト丸の配色からの判定"]
+    },
+    {
+      "key": "HB01-063",
+      "id": "HB01-063",
+      "type": "ホロビト",
+      "name": "一撃先戦！ 不死火&ショウ",
+      "name_ruby": "イチゲキセンセン シナズイ アンド ショウ",
+      "color_mark": "緑",
+      "cost": 5,
+      "power": 7000,
+      "family": "スザク・ブラッド",
+      "left_edge": { "modifier": "+2000", "cost": 1 },
+      "abilities": [
+        "エナ詠み ③（自分のエナゾーンに緑のエナが3枚以上あるなら、このホロビトは以下の効果を得る）\n・このホロビトがバトルに勝ったとき、第1〜2ラインにいるなら、相手は手札を1枚選んで捨てる。"
+      ],
+      "flavor": null,
+      "trigger": { "icon": "上", "keyword": "オーバーT", "text": "このホロビトをオーバービートで出す。（コストは支払わない）" },
+      "printings": [
+        { "rarity_mark": "SR", "illustrator": "Tada", "frame": "通常", "source": "カード画像群", "source_date": "unknown", "legibility": "high" }
+      ]
+    },
+    {
+      "key": "HB01-031",
+      "id": "HB01-031",
+      "type": "ホロビト",
+      "name": "妖狐 七尾",
+      "name_ruby": "ヨウコ ナナオ",
+      "color_mark": "赤",
+      "cost": 4,
+      "power": 5000,
+      "family": "マボロシ・コミューン",
+      "left_edge": { "modifier": "+2000", "cost": 1 },
+      "abilities": [
+        "このホロビトのバトルが終わったとき、自分の赤のエナを1枚選ぶ。それを未使用にし、このホロビトを回復する。"
+      ],
+      "flavor": null,
+      "trigger": { "icon": "上", "keyword": "オーバーT", "text": "このホロビトをオーバービートで出す。（コストは支払わない）" },
+      "printings": [
+        { "rarity_mark": "SR", "illustrator": "YUMEKO", "frame": "通常", "source": "カード画像群", "source_date": "unknown", "legibility": "high" }
+      ]
+    },
+    {
+      "key": "HB01-061",
+      "id": "HB01-061",
+      "type": "ホロビト",
+      "name": "樹霊千年 巨ダマ",
+      "name_ruby": "ジュレイセンネン キョダマ",
+      "color_mark": "緑",
+      "cost": 10,
+      "power": 18000,
+      "family": "タイジュ・ブラッド",
+      "left_edge": null,
+      "abilities": [],
+      "flavor": "人は知を得て古きを知る。我らホロビトも儚く消えゆくのみ。文明の歩みとは、かくも残酷なものよ。　―樹霊千年 巨ダマ",
+      "trigger": { "icon": "終", "keyword": "ラストオーバーT", "text": "このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）" },
+      "printings": [
+        { "rarity_mark": "R", "illustrator": "YUKIHIRO MARUO", "frame": "通常", "source": "カード画像群", "source_date": "unknown", "legibility": "high" }
+      ],
+      "notes": ["能力欄が空。トリガーのみを持つ"]
+    },
+    {
+      "key": "HB01-034",
+      "id": "HB01-034",
+      "type": "ホロビト",
+      "name": "しなずさま",
+      "name_ruby": "unknown",
+      "color_mark": "緑",
+      "cost": 2,
+      "power": 2000,
+      "family": "スザク・ブラッド",
+      "left_edge": null,
+      "abilities": [
+        "このホロビトがラインに出ているなら、コストは1大きくなる。"
+      ],
+      "flavor": "unknown",
+      "trigger": { "icon": "出", "keyword": "エントリーT", "text": "このホロビトをラインに出す。（コストは支払わない）" },
+      "printings": [
+        { "rarity_mark": "DR", "illustrator": "NAGANO", "frame": "縦札", "source": "イベント実物写真", "source_date": "unknown", "legibility": "partial" }
+      ],
+      "notes": [
+        "能力欄の「コストは1大きくなる」が何のコストを指すか、文の前半が判読できていない可能性がある",
+        "カード名の札の上部に小さくルビらしき印字があるが判読不能",
+        "フレーバーは古文調だが大半が判読不能"
+      ]
+    },
+    {
+      "key": "HB01-049",
+      "id": "HB01-049",
+      "type": "ホロビト",
+      "name": "ふわふわイロハとぶかぶかジャンボ",
+      "name_ruby": "unknown",
+      "color_mark": "緑",
+      "cost": 5,
+      "power": 6000,
+      "family": "unknown",
+      "left_edge": null,
+      "abilities": [
+        "自分の第1〜2ラインにいるホロビトの下にあるカードの合計が3枚以上なら、このホロビトのパワーを+3000し、ダブルダメージを得る。（ダブルダメージを持つホロビトがバトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"
+      ],
+      "flavor": null,
+      "trigger": { "icon": "上", "keyword": "オーバーT", "text": "このホロビトをオーバービートで出す。（コストは支払わない）" },
+      "printings": [
+        { "rarity_mark": "DR", "illustrator": "tomy", "frame": "縦札", "source": "イベント実物写真", "source_date": "unknown", "legibility": "partial" }
+      ],
+      "notes": ["ファミリー名はカタカナ表記だが判読不能"]
+    },
+    {
+      "key": "UNKNOWN-utsushimi",
+      "id": "unknown",
+      "type": "ワザ",
+      "name": "合術 うつし身の撃",
+      "name_ruby": "unknown",
+      "color_mark": "青",
+      "cost": 2,
+      "power": null,
+      "family": "unknown",
+      "left_edge": "unknown",
+      "abilities": [
+        "このワザは自分がこのバトルで他のワザを使っているときのみ使える。",
+        "このバトルに勝ったなら、このホロビトが相手プレイヤーに与えるダメージを+1する。"
+      ],
+      "flavor": "unknown",
+      "trigger": { "icon": "unknown", "keyword": "unknown", "text": "このワザを捨て、カードを3枚引く。" },
+      "printings": [
+        { "rarity_mark": "unknown", "illustrator": "unknown", "frame": "縦札", "source": "イベント実物写真", "source_date": "unknown", "legibility": "partial" }
+      ],
+      "notes": [
+        "カード番号と左下の記号が判読できないため、key は仮の値。番号が判明したら差し替える",
+        "左辺に何か縦書きの印字があるが判読不能"
+      ]
+    }
+  ]
+}

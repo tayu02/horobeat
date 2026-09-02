@@ -1,0 +1,15 @@
+{
+  "name": "horobeat-simulator",
+  "private": true,
+  "type": "module",
+  "description": "ホロビートカードゲーム 盤面シミュレーター（非公式・ルール判定なし）",
+  "scripts": {
+    "validate": "node tools/validate-cards.mjs",
+    "build:cards": "node tools/build-cards.mjs",
+    "build:artifact": "node tools/build-artifact.mjs",
+    "build": "npm run build:cards && npm run build:artifact"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1"
+  }
+}

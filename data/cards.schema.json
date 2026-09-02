@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ホロビート カード印字レコード",
+  "type": "object",
+  "required": ["_meta", "cards"],
+  "additionalProperties": false,
+  "properties": {
+    "_meta": { "type": "object" },
+    "cards": { "type": "array", "items": { "$ref": "#/definitions/card" } }
+  },
+  "definitions": {
+    "unknown": { "const": "unknown" },
+    "nonEmpty": { "type": "string", "minLength": 1 },
+    "card": {
+      "type": "object",
+      "required": ["key", "id", "type", "name", "name_ruby", "color_mark", "cost", "power", "family", "left_edge", "abilities", "flavor", "trigger", "printings"],
+      "additionalProperties": false,
+      "properties": {
+        "key":  { "type": "string", "pattern": "^(HB[0-9]{2}-[0-9]{3}|PR-[0-9]{3}|UNKNOWN-[a-z0-9-]+)$" },
+        "id":   { "oneOf": [ { "type": "string", "pattern": "^(HB[0-9]{2}-[0-9]{3}|PR-[0-9]{3})$" }, { "$ref": "#/definitions/unknown" } ] },
+        "type": { "enum": ["ホロビト", "ワザ", "unknown"] },
+        "name": { "$ref": "#/definitions/nonEmpty" },
+        "name_ruby":  { "oneOf": [ { "$ref": "#/definitions/nonEmpty" }, { "type": "null" } ] },
+        "color_mark": { "enum": ["赤", "緑", "青", "unknown"] },
+        "cost":  { "oneOf": [ { "type": "integer", "minimum": 0 }, { "$ref": "#/definitions/unknown" } ] },
+        "power": { "oneOf": [ { "type": "integer", "minimum": 0 }, { "type": "null" }, { "$ref": "#/definitions/unknown" } ] },
+        "family": { "oneOf": [ { "$ref": "#/definitions/nonEmpty" }, { "type": "null" } ] },
+        "left_edge": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/unknown" },
+            {
+              "type": "object",
+              "required": ["modifier", "cost"],
+              "additionalProperties": false,
+              "properties": {
+                "modifier": { "type": "string", "pattern": "^[+-][0-9]+$" },
+                "cost": { "oneOf": [ { "type": "integer", "minimum": 0 }, { "type": "null" }, { "$ref": "#/definitions/unknown" } ] }
+              }
+            }
+          ]
+        },
+        "abilities": { "oneOf": [ { "type": "array", "items": { "$ref": "#/definitions/nonEmpty" } }, { "$ref": "#/definitions/unknown" } ] },
+        "flavor": { "oneOf": [ { "$ref": "#/definitions/nonEmpty" }, { "type": "null" } ] },
+        "trigger": {
+          "type": "object",
+          "required": ["icon", "keyword", "text"],
+          "additionalProperties": false,
+          "properties": {
+            "icon":    { "oneOf": [ { "type": "string", "minLength": 1, "maxLength": 1 }, { "$ref": "#/definitions/unknown" } ] },
+            "keyword": { "$ref": "#/definitions/nonEmpty" },
+            "text":    { "$ref": "#/definitions/nonEmpty" }
+          }
+        },
+        "printings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["rarity_mark", "illustrator", "frame", "source", "source_date", "legibility"],
+            "additionalProperties": false,
+            "properties": {
+              "rarity_mark": { "$ref": "#/definitions/nonEmpty" },
+              "illustrator": { "$ref": "#/definitions/nonEmpty" },
+              "frame":       { "$ref": "#/definitions/nonEmpty" },
+              "source":      { "$ref": "#/definitions/nonEmpty" },
+              "source_date": { "type": "string", "pattern": "^([0-9]{4}-[0-9]{2}(-[0-9]{2})?|unknown)$" },
+              "legibility":  { "enum": ["high", "partial"] }
+            }
+          }
+        },
+        "notes": { "type": "array", "items": { "$ref": "#/definitions/nonEmpty" } }
+      }
+    }
+  }
+}
