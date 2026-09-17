@@ -16,8 +16,8 @@
       "required": ["key", "id", "type", "name", "name_ruby", "color_mark", "cost", "power", "family", "left_edge", "abilities", "flavor", "trigger", "printings"],
       "additionalProperties": false,
       "properties": {
-        "key":  { "type": "string", "pattern": "^(HB[0-9]{2}-[0-9]{3}|PR-[0-9]{3}|UNKNOWN-[a-z0-9-]+)$" },
-        "id":   { "oneOf": [ { "type": "string", "pattern": "^(HB[0-9]{2}-[0-9]{3}|PR-[0-9]{3})$" }, { "$ref": "#/definitions/unknown" } ] },
+        "key":  { "type": "string", "pattern": "^([A-Z]{2}[0-9]{2}-[0-9]{3}|PR-[0-9]{3}|UNKNOWN-[a-z0-9-]+)$" },
+        "id":   { "oneOf": [ { "type": "string", "pattern": "^([A-Z]{2}[0-9]{2}-[0-9]{3}|PR-[0-9]{3})$" }, { "$ref": "#/definitions/unknown" } ] },
         "type": { "enum": ["ホロビト", "ワザ", "unknown"] },
         "name": { "$ref": "#/definitions/nonEmpty" },
         "name_ruby":  { "oneOf": [ { "$ref": "#/definitions/nonEmpty" }, { "type": "null" } ] },

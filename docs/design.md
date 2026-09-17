@@ -121,8 +121,26 @@ data/cards.json           印字レコード（正本）
 data/cards.schema.json    形式の強制
 tools/validate-cards.mjs  検証。通らなければ埋め込まない
 tools/build-cards.mjs     cards.json を simulator.html の @@CARDS@@ ブロックへ埋め込む
-tools/build-artifact.mjs  Artifact 公開用 HTML の生成（既存）
+tools/build-artifact.mjs  Artifact 公開用 HTML の生成
+tools/crop-card.py        告知バナーからカード領域を切り出す（読み取り用）
 ```
+
+## 5-1. 告知バナーからの切り出し
+
+1920x1080 の告知バナーをそのまま読むと、カード内の小さな文字（能力文・カード番号）が
+実効解像度で潰れる。カード領域だけを切り出して拡大すると、**同じ元画像から読める文字が増える**。
+
+```
+python3 tools/crop-card.py IN.jpg OUT.png --scale 1.6 --pad 4   # 自動検出
+python3 tools/crop-card.py IN.jpg OUT.png --box 244,116,624,848 # 手動指定
+```
+
+自動検出は「細かい絵柄が密な領域のうち、縦横比がカードらしいもの」を選ぶ。
+レイアウトが変わると外すため、**出力画像を必ず目視で確認してから読む**。
+外したときは `--box` で指定し直す。
+
+読み取り精度そのものが上がるわけではない。読める画素数が増えるだけであり、
+それでも読めない箇所は従来どおり `unknown` とする。
 
 ## 6. 作業の順序
 
@@ -138,3 +156,4 @@ tools/build-artifact.mjs  Artifact 公開用 HTML の生成（既存）
 | 日付 | 内容 |
 |---|---|
 | 2026-08-28 | 初版。見直しとカードデータ形式を合意 |
+| 2026-09-17 | §5-1 を追加。告知バナーからカード領域を切り出す手順とツールを記載 |
