@@ -40,6 +40,87 @@ export function validateCards(path = "data/cards.json") {
       if (unk.length) errors.push(`${c.key}: legibility=high の版があるのに unknown が残っている: ${unk.join(", ")}`);
     }
   }
+
+  // --- 転記ゆれの検出 ---------------------------------------------------
+  // カードが増えるほど、同じ文面を少しだけ違えて写す事故が起きやすい。
+  // 「完全一致か、まったく別物か」のどちらかであるべき箇所で、
+  // **惜しい違い**が出たら止める。誤検出が出たら閾値ではなく例外で直すこと。
+
+  // 同じトリガーのキーワードなら、アイコンと効果文は一致するはず
+  const trig = new Map();
+  for (const c of data.cards) {
+    const t = c.trigger;
+    if (!t || t.keyword === "unknown") continue;
+    if (!trig.has(t.keyword)) trig.set(t.keyword, []);
+    trig.get(t.keyword).push(c);
+  }
+  for (const [kw, list] of trig) {
+    for (const f of ["icon", "text"]) {
+      const byVal = new Map();
+      for (const c of list) {
+        const v = c.trigger[f];
+        if (v === "unknown") continue;
+        if (!byVal.has(v)) byVal.set(v, []);
+        byVal.get(v).push(c.key);
+      }
+      if (byVal.size > 1)
+        errors.push(`トリガー「${kw}」の ${f} が一致しない:\n` +
+          [...byVal].map(([v, keys]) => `      ${JSON.stringify(v)} … ${keys.length}枚 (${keys.join(", ")})`).join("\n"));
+    }
+  }
+
+  // 能力文どうしの「惜しい違い」
+  const dist = (a, b) => {
+    // レーベンシュタイン距離。短い方の長さを超えたら打ち切る。
+    if (Math.abs(a.length - b.length) > 4) return 99;
+    const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+      let diag = prev[0];
+      prev[0] = i;
+      for (let j = 1; j <= b.length; j++) {
+        const tmp = prev[j];
+        prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
+        diag = tmp;
+      }
+    }
+    return prev[b.length];
+  };
+  // 同じ文面はまず1つにまとめる。まとめた「種類」どうしを比べるので、
+  // 1件の取り違えが枚数分の警告に膨らまない。
+  const byLine = new Map();
+  for (const c of data.cards) {
+    if (c.abilities === "unknown") continue;
+    for (const a of c.abilities) for (const l of a.split("\n")) {
+      if (l.length < 12) continue;
+      if (!byLine.has(l)) byLine.set(l, []);
+      byLine.get(l).push(c.key);
+    }
+  }
+  const uniq = [...byLine.keys()];
+  for (let i = 0; i < uniq.length; i++)
+    for (let j = i + 1; j < uniq.length; j++) {
+      const d = dist(uniq[i], uniq[j]);
+      if (d > 0 && d <= 3)
+        errors.push(`能力文が ${d} 文字だけ違う。転記ミスでないか確認すること:\n` +
+          `      ${uniq[i]}\n        … ${byLine.get(uniq[i]).join(", ")}\n` +
+          `      ${uniq[j]}\n        … ${byLine.get(uniq[j]).join(", ")}`);
+    }
+
+  // フレーバー中の書名（『…』）の表記ゆれ
+  const titles = new Map();
+  for (const c of data.cards) {
+    if (typeof c.flavor !== "string") continue;
+    for (const m of c.flavor.matchAll(/『([^』]+)』/g)) {
+      if (!titles.has(m[1])) titles.set(m[1], []);
+      titles.get(m[1]).push(c.key);
+    }
+  }
+  const tkeys = [...titles.keys()];
+  for (let i = 0; i < tkeys.length; i++)
+    for (let j = i + 1; j < tkeys.length; j++)
+      if (dist(tkeys[i], tkeys[j]) <= 1)
+        errors.push(`フレーバー中の書名が1文字違いで2種類ある: 『${tkeys[i]}』(${titles.get(tkeys[i]).join(", ")}) / 『${tkeys[j]}』(${titles.get(tkeys[j]).join(", ")})`);
+
   return { data, errors };
 }
 
