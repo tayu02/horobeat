@@ -656,9 +656,11 @@ var PART_FX = {
   // ---- 効果 ----
   draw:                    { how:"自動", why:"山札から手札へ（§8）",
     run:function(x, a, next){
-      var P = state.players[x.pi], k = Math.min(a.n, P.deck.length);
+      // 記録には「実際に引けた枚数」を書く（引く前に計算した数を書くと、実際と食い違っても気づけない）
+      var P = state.players[x.pi], before = P.hand.length;
       drawTo(x.pi, a.n, "hand", true);
-      fxLog(SIDE_NAME[x.pi] + "はカードを" + k + "枚引いた" + (k < a.n ? "（山札が足りない）" : ""));
+      var k = P.hand.length - before;
+      fxLog(SIDE_NAME[x.pi] + "はカードを" + k + "枚引いた" + (k < a.n ? "（" + a.n + "枚のはずが、山札が足りない）" : ""));
       next(); } },
   destroy:                 { how:"選択", why:"「正面」を選ばせる。破壊されたホロビトは墓地へ（§9-1）。束の下の扱いは未確定なので聞く",
     run:function(x, a, next, stop){

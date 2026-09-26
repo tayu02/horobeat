@@ -1,0 +1,26 @@
+#!/bin/sh
+# コミットの前に、すべての検査を走らせる。1つでも失敗したらコミットしない。
+# （CLAUDE.md「コミットの前に」。テスト結果を見ずにコミットしないための仕組み）
+#
+# 有効にする: npm install（prepare が core.hooksPath を .githooks にする）
+#             または git config core.hooksPath .githooks
+set -e
+cd "$(git rev-parse --show-toplevel)"
+
+echo "コミット前の検査を実行します（2分ほどかかります）..."
+if ! npm test --silent; then
+  echo ""
+  echo "✗ 検査に失敗したのでコミットを中止しました。"
+  echo "  失敗の一覧は上。全出力は test-results/<名前>.log、失敗時の画面は test-results/*.png"
+  exit 1
+fi
+
+# 検査の中で生成物を作り直すので、作り直した結果がコミットに入っていることを確かめる
+GEN="simulator.html data/abilities.json docs/rules_confirmed.md docs/design.md"
+if ! git diff --quiet -- $GEN; then
+  echo ""
+  echo "✗ 生成物が作り直されたが、コミットに含まれていません:"
+  git diff --name-only -- $GEN | sed 's/^/    /'
+  echo "  git add してからコミットし直してください。"
+  exit 1
+fi

@@ -145,7 +145,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const { data, errors } = validateCards();
   if (errors.length) {
     console.error(`NG: ${errors.length} 件`);
-    for (const e of errors) console.error("  - " + e);
+    for (const e of errors) console.error("  FAIL " + e);
     process.exit(1);
   }
   console.log(`OK: ${data.cards.length} 枚、問題なし`);

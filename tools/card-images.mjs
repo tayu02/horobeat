@@ -34,7 +34,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(JSON.stringify(files));
     if (missing.length) console.error(`手元にない画像 ${missing.length} 枚（アーティファクトに既にあれば問題ない）: ${missing.join(", ")}`);
   } else {
-    if (errors.length) { console.error(`NG: ${errors.length} 件`); errors.forEach(e => console.error("  - " + e)); process.exit(1); }
+    if (errors.length) { console.error(`NG: ${errors.length} 件`); errors.forEach(e => console.error("  FAIL " + e)); process.exit(1); }
     console.log(`OK: 画像 ${Object.keys(manifest.images).length} 枚、保留 ${Object.keys(manifest.pending).length} 枚` +
       (missing.length ? `（手元にない画像 ${missing.length} 枚: ${missing.join(", ")}）` : ""));
   }
