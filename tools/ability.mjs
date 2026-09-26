@@ -2,6 +2,8 @@
 //
 // 文の形:
 //   [発火条件1]が[発火条件2]とき、[効果条件]なら、…[効果]。[補足]
+//   効果が「。」で終わったあと、次の文の頭に [効果条件]なら、を置ける
+//   （例: 「…見せてもよい。そうしたなら、カードを1枚引く。」）。これは効果の if に入る
 //   [キーワード]（[説明]）[\n・続く文]
 // のどちらか。各 [ ] は省略されうる（効果は1つ以上）。
 //
@@ -28,7 +30,7 @@ const FX_END = "<!-- @@PART_FX_TABLE_END@@ -->";
 const BEGIN = "<!-- @@ABILITY_INDEX_BEGIN@@ -->";
 const END = "<!-- @@ABILITY_INDEX_END@@ -->";
 
-const NUMERIC = new Set(["n", "from", "to"]);
+const NUMERIC = new Set(["n", "m", "from", "to"]);
 const circled = n => String.fromCharCode(0x2460 + n - 1);
 const uncircled = ch => ch.charCodeAt(0) - 0x2460 + 1;
 
@@ -77,6 +79,9 @@ export function render(ab, parts = loadParts()) {
   effs.forEach((e, i) => {
     const { p, args } = P(e);
     const last = i === effs.length - 1;
+    // 文の頭（最初の効果、または直前の効果が「。」で終わった）にだけ if の条件を書く
+    if (ref(e).if && (i === 0 || ref(effs[i - 1]).then === "。"))
+      s += ref(e).if.map(c => { const q = P(c); return fill(q.p.text, q.args) + "なら、"; }).join("");
     if (last || ref(e).then === "。") s += fill(p.text, args) + "。";
     else {
       if (!p.ren) throw new Error(`部品 ${ref(e).part} に「し」「び」で続ける形（ren）がない`);
@@ -113,6 +118,17 @@ function compile(tpl) {
     src += ch.replace(/[.*+?^${}()|\\\/]/g, "\\$&");
   }
   return { src, names };
+}
+
+// 1行が、ある部品の文面テンプレートにまるごと一致するか。
+// 転記ゆれの検出で「同じ部品に違う値が入っているだけ」の組を除くのに使う。
+export function sameTemplate(a, b, parts = loadParts()) {
+  for (const p of Object.values(parts)) {
+    const src = p.reminder ? compile(p.text).src + "（" + compile(p.reminder).src + "）" : compile(p.text).src;
+    const re = new RegExp("^(?:" + src + ")$");
+    if (re.test(a) && re.test(b)) return true;
+  }
+  return false;
 }
 
 // 同じ名前の引数が2回出たら、同じ値でなければ一致とみなさない
@@ -184,25 +200,40 @@ export function parse(text, parts = loadParts()) {
       yield* conditions(r.end, [...acc, mkref(id, r.args[0])], cost + freeLen(r.args[0]), trig);
     }
   }
-  function* effects(pos, acc, cost) {
+  // 効果1つ分の記録。if は、その効果が属する文の頭にある条件
+  const ent = (id, args, extra, ifs) => {
+    const o = { part: id, ...argsOrNone(args), ...(extra || {}) };
+    if (ifs.length) o.if = ifs;
+    return Object.keys(o).length === 1 ? id : o;
+  };
+  function* effects(pos, acc, cost, ifs = []) {
+    // 「。」のあとの文の頭には条件を置ける（「そうしたなら、」など）
+    const last = acc[acc.length - 1];
+    if (last && ref(last).then === "。")
+      for (const [cid, cp] of byRole("効果条件")) {
+        const r = tryAt(text, pos, [{ tpl: cp.text }, { lit: "なら、" }]);
+        if (!r) continue;
+        note(r.end, "効果");
+        yield* effects(r.end, acc, cost + freeLen(r.args[0]), [...ifs, mkref(cid, r.args[0])]);
+      }
     for (const [id, p] of [...byRole("効果"), ...byRole("制限")]) {
       const r = tryAt(text, pos, [{ tpl: p.text }, { lit: "。" }]);
       if (r) {
         const c = cost + freeLen(r.args[0]);
-        const eff = [...acc, mkref(id, r.args[0])];
+        const eff = [...acc, ent(id, r.args[0], null, ifs)];
         if (r.end === text.length || text.startsWith("\n・", r.end)) yield { ab: { effects: eff }, end: r.end, cost: c };
         for (const sep of ["", "\n"])
           for (const [nid, np] of byRole("補足"))
             if (text.slice(r.end) === sep + np.text)
               yield { ab: { effects: eff, note: sep ? { part: nid, sep } : nid }, end: text.length, cost: c };
         note(r.end, "補足 または 次の効果");
-        yield* effects(r.end, [...acc, { part: id, ...argsOrNone(r.args[0]), then: "。" }], c);
+        yield* effects(r.end, [...acc, ent(id, r.args[0], { then: "。" }, ifs)], c);
       }
       if (p.ren) {
         const q = tryAt(text, pos, [{ tpl: p.ren }, { lit: "、" }]);
         if (q) {
           note(q.end, "続く効果");
-          yield* effects(q.end, [...acc, mkref(id, q.args[0])], cost + freeLen(q.args[0]));
+          yield* effects(q.end, [...acc, ent(id, q.args[0], null, ifs)], cost + freeLen(q.args[0]), ifs);
         }
       }
     }
@@ -276,7 +307,8 @@ export function buildAll(cards = JSON.parse(readFileSync(CARDS_PATH, "utf8")).ca
     if (!ab) return;
     mark(ab.keyword); mark(ab.note);
     if (ab.trigger) { mark(ab.trigger.subject); mark(ab.trigger.event); }
-    (ab.conditions || []).forEach(mark); (ab.effects || []).forEach(mark);
+    (ab.conditions || []).forEach(mark);
+    (ab.effects || []).forEach(e => { mark(e); (ref(e).if || []).forEach(mark); });
     walk(ab.sub);
   };
   Object.values(out).flat().forEach(walk);
@@ -305,7 +337,8 @@ function usage(abilities) {
     if (!ab) return;
     add(ab.keyword, key); add(ab.note, key);
     if (ab.trigger) { add(ab.trigger.subject, key); add(ab.trigger.event, key); }
-    (ab.conditions || []).forEach(r => add(r, key)); (ab.effects || []).forEach(r => add(r, key));
+    (ab.conditions || []).forEach(r => add(r, key));
+    (ab.effects || []).forEach(r => { add(r, key); (ref(r).if || []).forEach(c => add(c, key)); });
     walk(ab.sub, key);
   };
   for (const [key, list] of Object.entries(abilities)) list.forEach(ab => walk(ab, key));

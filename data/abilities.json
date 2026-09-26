@@ -453,5 +453,65 @@
         }
       }
     }
+  ],
+  "HD02-011": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "緑"
+        }
+      },
+      "sub": {
+        "trigger": {
+          "subject": "this_holobito",
+          "event": "entered"
+        },
+        "effects": [
+          {
+            "part": "may_reveal_from_hand",
+            "args": {
+              "n": 7,
+              "m": 1
+            },
+            "then": "。"
+          },
+          {
+            "part": "draw",
+            "args": {
+              "n": 1
+            },
+            "if": [
+              "did_so"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "HD01-011": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "赤"
+        }
+      },
+      "sub": {
+        "conditions": [
+          "not_down"
+        ],
+        "effects": [
+          {
+            "part": "power_plus",
+            "args": {
+              "n": 3000
+            }
+          }
+        ]
+      }
+    }
   ]
 }

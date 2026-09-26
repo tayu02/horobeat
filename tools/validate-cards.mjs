@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import Ajv from "ajv";
 import { existsSync } from "node:fs";
-import { buildAll } from "./ability.mjs";
+import { buildAll, sameTemplate } from "./ability.mjs";
 
 export function validateCards(path = "data/cards.json") {
   const data = JSON.parse(readFileSync(path, "utf8"));
@@ -102,7 +102,8 @@ export function validateCards(path = "data/cards.json") {
   for (let i = 0; i < uniq.length; i++)
     for (let j = i + 1; j < uniq.length; j++) {
       const d = dist(uniq[i], uniq[j]);
-      if (d > 0 && d <= 3)
+      // 同じ部品に違う値が入っているだけなら正当（例: エナ詠みの「緑」と「赤」）
+      if (d > 0 && d <= 3 && !sameTemplate(uniq[i], uniq[j]))
         errors.push(`能力文が ${d} 文字だけ違う。転記ミスでないか確認すること:\n` +
           `      ${uniq[i]}\n        … ${byLine.get(uniq[i]).join(", ")}\n` +
           `      ${uniq[j]}\n        … ${byLine.get(uniq[j]).join(", ")}`);

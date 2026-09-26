@@ -16,47 +16,167 @@
     "キーワード": "名前（説明）の形で印字されるもの"
   },
   "parts": {
-    "this_holobito":          { "role": "発火条件1", "text": "このホロビト" },
-    "this_holobito_battle":   { "role": "発火条件1", "text": "このホロビトのバトル" },
-
-    "entered":                { "role": "発火条件2", "text": "出た" },
-    "won_battle":             { "role": "発火条件2", "text": "バトルに勝った" },
-    "overbeaten":             { "role": "発火条件2", "text": "オーバービートされる" },
-    "ended":                  { "role": "発火条件2", "text": "終わった" },
-    "used_nth_waza":          { "role": "発火条件2", "text": "{n}つ目のワザを使った" },
-
-    "no_cards_under":         { "role": "効果条件", "text": "下にカードがない" },
-    "cards_under_ge":         { "role": "効果条件", "text": "このホロビトの下にカードが{n}枚以上ある" },
-    "lines_under_total_ge":   { "role": "効果条件", "text": "自分の第{from}〜{to}ラインにいるホロビトの下にあるカードの合計が{n}枚以上" },
-    "in_lines":               { "role": "効果条件", "text": "[{subject}が]第{from}〜{to}ラインにいる" },
-    "is_down":                { "role": "効果条件", "text": "[{subject}が]ダウンしている" },
-    "on_line":                { "role": "効果条件", "text": "[{subject}が]ラインに出ている" },
-    "own_color_count_on_line":{ "role": "効果条件", "text": "自分の{color}のホロビトが{n}体以上ラインに出ている" },
-    "power_ratio_vs_front":   { "role": "効果条件", "text": "このホロビトのパワーが正面のホロビトの{n}倍以上" },
-    "front_cost_le":          { "role": "効果条件", "text": "正面のホロビトのコストが{n}以下" },
-    "won_this_battle":        { "role": "効果条件", "text": "このバトルに勝った" },
-
-    "draw":                   { "role": "効果", "text": "カードを{n}枚引く" },
-    "power_plus":             { "role": "効果", "text": "[{target}の]パワーを+{n}する", "ren": "[{target}の]パワーを+{n}し" },
-    "destroy":                { "role": "効果", "text": "{target}を破壊する" },
-    "return_top_to_hand":     { "role": "効果", "text": "その一番上のカードを手札に戻す" },
-    "cost_bigger":            { "role": "効果", "text": "コストは{n}大きくなる" },
-    "select_own":             { "role": "効果", "text": "自分の[{color}の]{what}を{n}{unit}選ぶ", "ren": "自分の[{color}の]{what}を{n}{unit}選び" },
-    "make_unused":            { "role": "効果", "text": "{target}を未使用にする", "ren": "{target}を未使用にし" },
-    "recover":                { "role": "効果", "text": "[{target}を]回復する" },
-    "opponent_discard":       { "role": "効果", "text": "相手は手札を{n}枚選んで捨てる" },
-    "gain_keyword":           { "role": "効果", "text": "{keyword}を得る" },
-    "indestructible":         { "role": "効果", "text": "{subject}は破壊されない" },
-    "damage_to_opponent_plus":{ "role": "効果", "text": "このホロビトが相手プレイヤーに与えるダメージを+{n}する" },
-
-    "only_if_other_waza_used":{ "role": "制限", "text": "このワザは自分がこのバトルで他のワザを使っているときのみ使える" },
-
-    "note_no_barrier":        { "role": "補足", "text": "（バリアや敗北時の効果は発動しない）" },
-    "note_indestructible":    { "role": "補足", "text": "（ダウンしているこのホロビトがダメージを受けるとき、ダウンしたままラインに残る）" },
-    "note_double_damage_held":{ "role": "補足", "text": "（ダブルダメージを持つホロビトがバトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）" },
-
-    "double_damage":          { "role": "キーワード", "text": "ダブルダメージ", "reminder": "バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える" },
-    "barrier":                { "role": "キーワード", "text": "{n}バリア", "reminder": "バトルに負けたとき、プレイヤーが受けるダメージは{n}減る" },
-    "ena_yomi":               { "role": "キーワード", "text": "エナ詠み {n:circled}", "reminder": "自分のエナゾーンに{color}のエナが{n}枚以上あるなら、このホロビトは以下の効果を得る" }
+    "this_holobito": {
+      "role": "発火条件1",
+      "text": "このホロビト"
+    },
+    "this_holobito_battle": {
+      "role": "発火条件1",
+      "text": "このホロビトのバトル"
+    },
+    "entered": {
+      "role": "発火条件2",
+      "text": "出た"
+    },
+    "won_battle": {
+      "role": "発火条件2",
+      "text": "バトルに勝った"
+    },
+    "overbeaten": {
+      "role": "発火条件2",
+      "text": "オーバービートされる"
+    },
+    "ended": {
+      "role": "発火条件2",
+      "text": "終わった"
+    },
+    "used_nth_waza": {
+      "role": "発火条件2",
+      "text": "{n}つ目のワザを使った"
+    },
+    "no_cards_under": {
+      "role": "効果条件",
+      "text": "下にカードがない"
+    },
+    "cards_under_ge": {
+      "role": "効果条件",
+      "text": "このホロビトの下にカードが{n}枚以上ある"
+    },
+    "lines_under_total_ge": {
+      "role": "効果条件",
+      "text": "自分の第{from}〜{to}ラインにいるホロビトの下にあるカードの合計が{n}枚以上"
+    },
+    "in_lines": {
+      "role": "効果条件",
+      "text": "[{subject}が]第{from}〜{to}ラインにいる"
+    },
+    "is_down": {
+      "role": "効果条件",
+      "text": "[{subject}が]ダウンしている"
+    },
+    "not_down": {
+      "role": "効果条件",
+      "text": "[{subject}が]ダウンしていない"
+    },
+    "on_line": {
+      "role": "効果条件",
+      "text": "[{subject}が]ラインに出ている"
+    },
+    "own_color_count_on_line": {
+      "role": "効果条件",
+      "text": "自分の{color}のホロビトが{n}体以上ラインに出ている"
+    },
+    "power_ratio_vs_front": {
+      "role": "効果条件",
+      "text": "このホロビトのパワーが正面のホロビトの{n}倍以上"
+    },
+    "front_cost_le": {
+      "role": "効果条件",
+      "text": "正面のホロビトのコストが{n}以下"
+    },
+    "won_this_battle": {
+      "role": "効果条件",
+      "text": "このバトルに勝った"
+    },
+    "did_so": {
+      "role": "効果条件",
+      "text": "そうした"
+    },
+    "draw": {
+      "role": "効果",
+      "text": "カードを{n}枚引く"
+    },
+    "power_plus": {
+      "role": "効果",
+      "text": "[{target}の]パワーを+{n}する",
+      "ren": "[{target}の]パワーを+{n}し"
+    },
+    "destroy": {
+      "role": "効果",
+      "text": "{target}を破壊する"
+    },
+    "return_top_to_hand": {
+      "role": "効果",
+      "text": "その一番上のカードを手札に戻す"
+    },
+    "cost_bigger": {
+      "role": "効果",
+      "text": "コストは{n}大きくなる"
+    },
+    "select_own": {
+      "role": "効果",
+      "text": "自分の[{color}の]{what}を{n}{unit}選ぶ",
+      "ren": "自分の[{color}の]{what}を{n}{unit}選び"
+    },
+    "make_unused": {
+      "role": "効果",
+      "text": "{target}を未使用にする",
+      "ren": "{target}を未使用にし"
+    },
+    "recover": {
+      "role": "効果",
+      "text": "[{target}を]回復する"
+    },
+    "opponent_discard": {
+      "role": "効果",
+      "text": "相手は手札を{n}枚選んで捨てる"
+    },
+    "may_reveal_from_hand": {
+      "role": "効果",
+      "text": "自分の手札からコスト{n}以上のホロビトを{m}体見せてもよい"
+    },
+    "gain_keyword": {
+      "role": "効果",
+      "text": "{keyword}を得る"
+    },
+    "indestructible": {
+      "role": "効果",
+      "text": "{subject}は破壊されない"
+    },
+    "damage_to_opponent_plus": {
+      "role": "効果",
+      "text": "このホロビトが相手プレイヤーに与えるダメージを+{n}する"
+    },
+    "only_if_other_waza_used": {
+      "role": "制限",
+      "text": "このワザは自分がこのバトルで他のワザを使っているときのみ使える"
+    },
+    "note_no_barrier": {
+      "role": "補足",
+      "text": "（バリアや敗北時の効果は発動しない）"
+    },
+    "note_indestructible": {
+      "role": "補足",
+      "text": "（ダウンしているこのホロビトがダメージを受けるとき、ダウンしたままラインに残る）"
+    },
+    "note_double_damage_held": {
+      "role": "補足",
+      "text": "（ダブルダメージを持つホロビトがバトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"
+    },
+    "double_damage": {
+      "role": "キーワード",
+      "text": "ダブルダメージ",
+      "reminder": "バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える"
+    },
+    "barrier": {
+      "role": "キーワード",
+      "text": "{n}バリア",
+      "reminder": "バトルに負けたとき、プレイヤーが受けるダメージは{n}減る"
+    },
+    "ena_yomi": {
+      "role": "キーワード",
+      "text": "エナ詠み {n:circled}",
+      "reminder": "自分のエナゾーンに{color}のエナが{n}枚以上あるなら、このホロビトは以下の効果を得る"
+    }
   }
 }
