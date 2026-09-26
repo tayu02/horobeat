@@ -222,6 +222,27 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
   .deckcols{flex-direction:row}
   .deckcol{flex:1}
 }
+/* ---- 効果の自動処理 ---- */
+.fxb{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;margin-top:4px;width:100%}
+.fxb span{background:rgba(201,164,76,.95);color:#1a1212;font-size:9px;font-weight:700;border-radius:3px;line-height:13px;padding:0 3px;text-align:center}
+.fxb span.q{background:#6b6058;color:#fff}
+.fxb span.off{display:none}
+.card.pickable .ci{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 10px rgba(201,164,76,.9)}
+.card.pickable .ci{animation:pk .9s ease-in-out infinite alternate}
+@keyframes pk{from{box-shadow:0 0 4px rgba(201,164,76,.5)}to{box-shadow:0 0 14px rgba(201,164,76,1)}}
+#pickbar{position:fixed;left:8px;right:8px;top:8px;z-index:95;display:none;background:#2a2020;border:2px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:13px;gap:8px;align-items:center;box-shadow:0 4px 18px rgba(0,0,0,.6)}
+#pickbar.on{display:flex}
+#pickbar span{flex:1}
+#fxlog{position:fixed;left:8px;right:8px;bottom:8px;z-index:90;display:none;background:#1b1414;border:1px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:0 4px 18px rgba(0,0,0,.6);max-height:40vh;overflow:auto}
+#fxlog.on{display:block}
+#fxlog .fxlines div{padding:1px 0;border-bottom:1px dashed #3a2b2b}
+#fxlog .fxbtns{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
+.fxq{font-size:14px;line-height:1.6;margin:6px 0 10px}
+.fxbtn{width:100%;margin:3px 0;background:#2a2412;border-color:var(--gold)}
+.fxst{font-size:12px;padding:4px 6px;border-radius:6px;margin:3px 0;background:#241c1c}
+.fxst.on{border-left:3px solid var(--gold)}
+.fxst.off{color:var(--sub)}
+.fxst.q{border-left:3px solid #6b6058}
 </style>
 </head>
 <body>
@@ -232,6 +253,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <span class="badge" id="phaseLbl">準備</span>
     <button id="btnPhase" class="primary">フェイズ送り ▶</button>
     <button id="btnUndo" disabled>戻す</button>
+    <button id="btnFx" class="mini">効果: 自動</button>
     <span class="spacer"></span>
     <span class="jumpbar">
       <button class="mini" data-jump="1">相手へ</button>
@@ -243,7 +265,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <span class="badge dark">先手</span>
     <button class="mini" id="firstMe">自分</button>
     <button class="mini" id="firstOpp">相手</button>
-    <div class="warn">ルール判定なし。フェイズ・コスト・バトル・勝敗は一切自動処理しません。全て手で動かしてください。</div>
+    <div class="warn">効果だけは自動処理します（確定している部分だけ。未確定の部分は聞きます）。フェイズ・コスト・バトル・勝敗は自動処理しません。</div>
   </div>
 </header>
 
@@ -252,6 +274,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <span>カードを<b>タップ</b>＝内容とメニュー</span>
     <span><b>ドラッグ</b>＝ゾーンへ直接移動</span>
     <span><b>山札</b>・<b>エナゾーン</b>の見出しをタップ＝まとめて操作</span>
+    <span><b>効果</b>は自動（光ったカードをタップで選ぶ）</span>
   </div>
 
   <div class="guide" id="guide">
@@ -319,6 +342,8 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 </main>
 
 <div id="sheetwrap"><div id="sheetbg"></div><div id="sheet"></div></div>
+<div id="pickbar"><span id="pickmsg"></span><button class="mini" id="pickCancel">やめる</button></div>
+<div id="fxlog"></div>
 
 <script>
 "use strict";
@@ -335,6 +360,12 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 // 生成物。編集しないこと。正本は data/cards.json、更新は npm run build:cards
 var CARD_LIST = [{"key":"HB01-001","id":"HB01-001","type":"ホロビト","name":"雷獣 レオ","name_ruby":"ライジュウ","color_mark":"赤","cost":2,"power":4000,"family":"ライガ・ファミリー","left_edge":null,"abilities":[],"flavor":"お前のビート、俺の心にビリビリ響いたぜ。その想いと力があれば俺とお前はきっと最強のコンビになれる。俺と共に戦ってくれ！ジン！　―雷獣 レオ","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"teo","frame":"通常","source":"ティザー①／拡張パック告知／カード画像群／スタートデッキ レオジン 告知画像","source_date":"2026-08","legibility":"high"}],"notes":["ルビは「雷獣」にのみ印字。「レオ」にルビはない"]},{"key":"PR-013","id":"PR-013","type":"ワザ","name":"電光攻火","name_ruby":"デンコウセッカ","color_mark":"赤","cost":2,"power":null,"family":null,"left_edge":{"modifier":"+5000","cost":null},"abilities":[],"flavor":"バトル中にエナを使ってワザやブーストを放つことができる。それがホロビートの戦い方！　パワーで負けていてもバトル中にこのワザを放てば一気にパワーアップ。勝利に近付こうぜ！","trigger":{"icon":"札","keyword":"ドローT","text":"このワザを捨て、カードを3枚引く。"},"printings":[{"rarity_mark":"C","illustrator":"Ochika","frame":"通常","source":"ティザー①／スタートデッキ レオジン 告知画像","source_date":"2026-08","legibility":"high"}],"notes":["ルビは「電光攻火」全体に「デンコウセッカ」","左辺は +5000 のみ。丸数字の印字はない","能力欄が空。トリガーのみを持つ","フレーバーの文はゲーム説明文に読めるが、印字どおり flavor に置く","2026-09-22 訂正: 低解像度と判断して color_mark を unknown、トリガーのアイコンを unknown としていたが、ティザー②の該当部分を拡大したところコスト丸は赤、アイコンは丸囲みの「札」と読めた。legibility も partial から high に変更","2026-09-23 訂正: 高解像度画像（スタートデッキ レオジン 告知）により、キーワードの印字は「ドローT」でハイフンがないことを確定。ティザー①（低解像度）から「ドロー-T」と転記していたのは誤読。他の3つのキーワードと同じくハイフンなしで揃う"]},{"key":"HB01-033","id":"HB01-033","type":"ホロビト","name":"雷迅合身 レオジン","name_ruby":"ライジンオーバービート","color_mark":"赤","cost":6,"power":7000,"family":"ライガ・ファミリー","left_edge":null,"abilities":["ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）","自分の赤のホロビトが4体以上ラインに出ているなら、このホロビトのパワーを+5000する。"],"flavor":"レオとジン、二人の心が重なり合った姿、それが「レオジン」だ！","trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"teo","frame":"通常","source":"ティザー⑪／拡張パック告知","source_date":"2026-08","legibility":"high"}]},{"key":"PR-001","id":"PR-001","type":"ホロビト","name":"壱合 レオジン","name_ruby":"ファーストビート","color_mark":"赤","cost":2,"power":1114,"family":"ライガ・ファミリー","left_edge":{"modifier":"+2000","cost":1},"abilities":[],"flavor":"戦略的決闘札／HORO-BEAT CARD GAME（ルビ: ホロビート）／2026年11月14日 発売／一騎打ちで敵を滅ぼせ！ 人間×怪異\"合戦\"カードゲーム開幕！","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"teo","frame":"プロモ（フレーバー欄に商品告知）","source":"PR-001画像","source_date":"unknown","legibility":"high"}],"notes":["パワー 1114 は印字どおり。丸めない（rules_guess.md A-11）","フレーバー欄の位置に商品告知とQRコードが印字されている。QRコードのリンク先は unknown","「予定は変更になる場合がございます。」の注記あり"]},{"key":"HB01-065","id":"HB01-065","type":"ホロビト","name":"霊炎合身 不死火翔","name_ruby":"ブレイズオーバービート シナズイショウ","color_mark":"緑","cost":9,"power":14000,"family":"スザク・ブラッド","left_edge":null,"abilities":["ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）","このホロビトがバトルに勝ったとき、このホロビトのパワーが正面のホロビトの2倍以上なら、正面のホロビトを破壊する。（バリアや敗北時の効果は発動しない）"],"flavor":null,"trigger":{"icon":"終","keyword":"ラストオーバーT","text":"このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"Tada","frame":"通常","source":"カード画像群","source_date":"unknown","legibility":"high"}]},{"key":"HB01-097","id":"HB01-097","type":"ホロビト","name":"正義合身 義郎坊","name_ruby":"セイギオーバービート ギロウボウ","color_mark":"青","cost":6,"power":6000,"family":"ジャスティス・オーダー","left_edge":null,"abilities":["ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）","このホロビトが2つ目のワザを使ったとき、正面のホロビトのコストが8以下なら、その一番上のカードを手札に戻す。"],"flavor":null,"trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"chiam","frame":"通常","source":"カード画像群","source_date":"unknown","legibility":"high"},{"rarity_mark":"DR","illustrator":"KARUTA SHIKI","frame":"縦札","source":"イベント実物写真","source_date":"unknown","legibility":"partial"}],"notes":["色名「青」は能力文で言及された例がなく、コスト丸の配色からの判定"]},{"key":"HB01-063","id":"HB01-063","type":"ホロビト","name":"一撃先戦！ 不死火&ショウ","name_ruby":"イチゲキセンセン シナズイ アンド ショウ","color_mark":"緑","cost":5,"power":7000,"family":"スザク・ブラッド","left_edge":{"modifier":"+2000","cost":1},"abilities":["エナ詠み ③（自分のエナゾーンに緑のエナが3枚以上あるなら、このホロビトは以下の効果を得る）\n・このホロビトがバトルに勝ったとき、第1〜2ラインにいるなら、相手は手札を1枚選んで捨てる。"],"flavor":null,"trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"Tada","frame":"通常","source":"カード画像群","source_date":"unknown","legibility":"high"}]},{"key":"HB01-031","id":"HB01-031","type":"ホロビト","name":"妖狐 七尾","name_ruby":"ようこ ななお","color_mark":"赤","cost":4,"power":5000,"family":"マボロシ・コミューン","left_edge":{"modifier":"+2000","cost":1},"abilities":["このホロビトのバトルが終わったとき、自分の赤のエナを1枚選ぶ。それを未使用にし、このホロビトを回復する。"],"flavor":null,"trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"YUMEKO","frame":"通常","source":"カード画像群","source_date":"unknown","legibility":"high"}],"notes":["ルビはひらがな。以前カタカナ「ヨウコ ナナオ」と記録していたものを、原画像の再確認により訂正（2026-09-21）"]},{"key":"HB01-061","id":"HB01-061","type":"ホロビト","name":"樹霊千年 巨ダマ","name_ruby":"ジュレイ せんねん キヨ","color_mark":"緑","cost":10,"power":18000,"family":"タイジュ・ブラッド","left_edge":null,"abilities":[],"flavor":"人は知を得て古きを知る。我らホロビトも儚く消えゆくのみ。文明の歩みとは、かくも残酷なものよ。　―樹霊千年 巨ダマ","trigger":{"icon":"終","keyword":"ラストオーバーT","text":"このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）"},"printings":[{"rarity_mark":"R","illustrator":"YUKIHIRO MARUO","frame":"通常","source":"カード画像群","source_date":"unknown","legibility":"high"}],"notes":["能力欄が空。トリガーのみを持つ","ルビは「樹霊」にジュレイ（カタカナ）、「千年」にせんねん（ひらがな）、「巨」にキヨ（カタカナ）。1枚のカード内で文字種が混在する。「ダマ」にルビはない。以前「ジュレイセンネン キョダマ」と記録していたものを、16倍拡大での再確認により訂正（2026-09-21）"]},{"key":"HB01-034","id":"HB01-034","type":"ホロビト","name":"しなずいさま","name_ruby":"unknown","color_mark":"緑","cost":2,"power":2000,"family":"スザク・ブラッド","left_edge":null,"abilities":["このホロビトがラインに出ているなら、コストは1大きくなる。"],"flavor":"unknown","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"DR","illustrator":"NAGANO","frame":"縦札","source":"イベント実物写真","source_date":"unknown","legibility":"partial"}],"notes":["能力欄の「コストは1大きくなる」が何のコストを指すか、文の前半が判読できていない可能性がある","2026-09-18 訂正: カード名を「しなずさま」から「しなずいさま」に修正。フォイルのグレアで「い」を落として読んでいた。同じ実物写真の名前札を拡大して確認した（HD02-001 からの類推ではない）","カード名の札の上部に小さくルビらしき印字があるが判読不能","フレーバーは古文調だが大半が判読不能"]},{"key":"HB01-049","id":"HB01-049","type":"ホロビト","name":"ふわふわイロハとぶかぶかジャンボ","name_ruby":"unknown","color_mark":"緑","cost":5,"power":6000,"family":"unknown","left_edge":null,"abilities":["自分の第1〜2ラインにいるホロビトの下にあるカードの合計が3枚以上なら、このホロビトのパワーを+3000し、ダブルダメージを得る。（ダブルダメージを持つホロビトがバトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"],"flavor":null,"trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"DR","illustrator":"tomy","frame":"縦札","source":"イベント実物写真","source_date":"unknown","legibility":"partial"}],"notes":["ファミリー名はカタカナ表記だが、フォイルのグレアで独立して判読できない","2026-09-18: ラベルの字形を HD02-003「ユルフワ・クラブ」と並べて比較したところ、グリフ数と区切り「・」の位置が一致し（4文字＋・＋3文字）、末尾の「クラブ」は濁点まで読める。ただし前半4文字を単独で読めたわけではないため family は unknown のままとし、読みは docs/rules_guess.md A-19 に隔離する"]},{"key":"UNKNOWN-utsushimi","id":"unknown","type":"ワザ","name":"合術 うつし身の撃","name_ruby":"unknown","color_mark":"青","cost":2,"power":null,"family":"unknown","left_edge":"unknown","abilities":["このワザは自分がこのバトルで他のワザを使っているときのみ使える。","このバトルに勝ったなら、このホロビトが相手プレイヤーに与えるダメージを+1する。"],"flavor":"unknown","trigger":{"icon":"unknown","keyword":"unknown","text":"このワザを捨て、カードを3枚引く。"},"printings":[{"rarity_mark":"unknown","illustrator":"unknown","frame":"縦札","source":"イベント実物写真","source_date":"unknown","legibility":"partial"}],"notes":["カード番号と左下の記号が判読できないため、key は仮の値。番号が判明したら差し替える","左辺に何か縦書きの印字があるが判読不能"]},{"key":"HD01-017","id":"HD01-017","type":"ホロビト","name":"雷合 レオジン","name_ruby":"ライビート","color_mark":"赤","cost":7,"power":11000,"family":"ライガ・ファミリー","left_edge":{"modifier":"+2000","cost":1},"abilities":["ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）","このホロビトは破壊されない。\n（ダウンしているこのホロビトがダメージを受けるとき、ダウンしたままラインに残る）"],"flavor":"生きとし生けるもの、死を実感したときに響く鼓動の音。その高鳴りが重なり、奇跡を起こす。それが合身「オーバービート」だ！","trigger":{"icon":"終","keyword":"ラストオーバーT","text":"このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"teo","frame":"通常","source":"スタートデッキ レオジン 告知画像","source_date":"unknown","legibility":"high"}],"notes":["ルビは「雷合」に対して「ライビート」。カード名全体のルビではない"]},{"key":"HD01-001","id":"HD01-001","type":"ホロビト","name":"レオまる","name_ruby":null,"color_mark":"赤","cost":2,"power":2000,"family":"ライガ・ファミリー","left_edge":{"modifier":"+2000","cost":1},"abilities":["このホロビトが出たとき、カードを1枚引く。"],"flavor":"雷獣レオは己にとってベストなパートナーを探すため、そして現代を生き抜くため、世を忍ぶ術を模索した。その結果身に付けたのが、キュートな仔猫への変化能力だった。","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"O-G Osahune","frame":"通常","source":"スタートデッキ レオジン 告知画像","source_date":"unknown","legibility":"high"}]},{"key":"HD02-001","id":"HD02-001","type":"ホロビト","name":"しなずいさま","name_ruby":null,"color_mark":"緑","cost":2,"power":2000,"family":"スザク・ブラッド","left_edge":null,"abilities":["このホロビトがラインに出ているなら、コストは1大きくなる。"],"flavor":"不死火は世を忍ぶため、その火を小さく小さく燃やした。すると彼は、まるで聖なる火から生まれた頃のような、小さな火の鳥の姿となった。そうして彼は「しなずいさま」を名乗り、その火を大きく燃やす日を待ち続けた。","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"kodama","frame":"通常","source":"スタートデッキ 不死火翔 告知画像","source_date":"unknown","legibility":"high"}],"notes":["HB01-034 と同名・同コスト・同パワー・同能力文だが、カード番号とイラストが異なる"]},{"key":"HD02-002","id":"HD02-002","type":"ホロビト","name":"けうけげん","name_ruby":null,"color_mark":"緑","cost":2,"power":2000,"family":"ラシャ・ブラッド","left_edge":{"modifier":"+2000","cost":1},"abilities":["1バリア（バトルに負けたとき、プレイヤーが受けるダメージは1減る）"],"flavor":"全身を毛で覆われ、日当たりの悪いジメジメした家屋の床下などに好んで住むホロビト。疫病神の一種とされているが、気に入った人間には協力してくれる気まぐれさも持っている。滅多に人前に姿を現さないので見つけた人はラッキー？ アンラッキー！？　―『滅徒大全』〜第一巻 毛髪の項〜","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"O-G Osahune","frame":"通常","source":"スタートデッキ 不死火翔 告知画像","source_date":"unknown","legibility":"high"}],"notes":["「バリア」の内容が印字された初のカード","フレーバー末尾の出典名『滅徒大全』は字形から読んだもので、確度は中"]},{"key":"HD02-017","id":"HD02-017","type":"ホロビト","name":"霊合 不死火翔","name_ruby":"レイズビート シナズイショウ","color_mark":"緑","cost":9,"power":12000,"family":"スザク・ブラッド","left_edge":{"modifier":"+2000","cost":1},"abilities":["ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）","このホロビトの下にカードが2枚以上あるなら、パワーを+3000する。"],"flavor":"決して折れず、勝ちたいと願い、戦い抜いた者から響く生の鼓動。その負けぬ心が重なり合い新たな力を得る。これが合身「オーバービート」だ。","trigger":{"icon":"終","keyword":"ラストオーバーT","text":"このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）"},"printings":[{"rarity_mark":"SR","illustrator":"TATSUMA DAISUKE","frame":"通常","source":"スタートデッキ 不死火翔 告知画像","source_date":"unknown","legibility":"high"}],"notes":["HB01-065「霊炎合身 不死火翔」とは別カード（名前・コスト・パワー・能力が異なる）"]},{"key":"HD01-003","id":"HD01-003","type":"ホロビト","name":"雷徒キュウソと内野ジロウ","name_ruby":"ライト ウチノ","color_mark":"赤","cost":2,"power":3000,"family":"ライガ・ファミリー","left_edge":{"modifier":"+2000","cost":1},"abilities":[],"flavor":"滅びの危機を乗り越えるために必要なもの、それは知恵と力と、心が通ったパートナーだ。","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"Naoki Eguchi","frame":"通常","source":"スタートデッキ レオジン 告知画像","source_date":"unknown","legibility":"high"}],"notes":["ルビは「雷徒」に「ライト」、「内野」に「ウチノ」。「キュウソ」「ジロウ」にルビはない","能力欄が空。トリガーのみを持つ"]},{"key":"HD02-003","id":"HD02-003","type":"ホロビト","name":"つくものジャンボ","name_ruby":null,"color_mark":"緑","cost":2,"power":4000,"family":"ユルフワ・クラブ","left_edge":null,"abilities":[],"flavor":"ジャンボはただの飛行機じゃないジャン！ 付喪のジャンボジャン！ 人を乗せて空を飛ぶのが大好きジャン〜！　―つくものジャンボ","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"itohiro","frame":"通常","source":"スタートデッキ 不死火翔 告知画像","source_date":"unknown","legibility":"high"}],"notes":["能力欄が空。トリガーのみを持つ"]},{"key":"HD01-005","id":"HD01-005","type":"ホロビト","name":"疾風のカマイチ","name_ruby":"ハヤテ","color_mark":"赤","cost":3,"power":3000,"family":"フウガ・ファミリー","left_edge":{"modifier":"+2000","cost":1},"abilities":["このホロビトが第2〜5ラインにいるなら、このホロビトのパワーを+2500する。"],"flavor":"歓楽街。夜な夜な怪しい商売で界隈を牛耳り、時には疾風の如く刃で斬る。カマブキ商會はナワバリを荒らす奴らに容赦がねえんだ。　―カマイタチ子分カマチョ","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"UKAI bakuinu","frame":"通常","source":"スタートデッキ レオジン 告知画像","source_date":"unknown","legibility":"high"}],"notes":["ルビは「疾風」に「ハヤテ」。「のカマイチ」にルビはない","フレーバー中の固有名詞「カマブキ商會」は拡大して濁点まで確認した"]},{"key":"HD02-004","id":"HD02-004","type":"ホロビト","name":"怪鳥ふらり火と理系インテ","name_ruby":"かいちょう び りけい","color_mark":"緑","cost":3,"power":5000,"family":"スザク・ブラッド","left_edge":null,"abilities":[],"flavor":"データによるとホロビトは人間のパートナーを得ることで更に力を発揮し、勝率は野生のホロビトよりも約6割以上も高くなる傾向にある！ これは興味深い統計ですぞ、ふらり氏！　―理系インテ\n善きかな…。我ら誇り高き怪鳥血族の契りにより、栄光へ導かん。　―怪鳥ふらり火","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"CANO","frame":"通常","source":"スタートデッキ 不死火翔 告知画像","source_date":"unknown","legibility":"high"}],"notes":["ルビは「怪鳥」に「カイチョウ」、「火」に「ビ」、「理系」に「リケイ」の3箇所。カード名全体のルビではない","フレーバーに話者の異なる2つの文が並ぶ（―理系インテ / ―怪鳥ふらり火）。改行で区切って記録した","能力欄が空。トリガーのみを持つ","ルビはひらがな。以前カタカナ「カイチョウ ビ リケイ」と記録していたものを、原画像の再確認により訂正（2026-09-21）"]},{"key":"HD01-004","id":"HD01-004","type":"ホロビト","name":"かたきらうわ","name_ruby":null,"color_mark":"赤","cost":2,"power":4000,"family":"ナガレモノ","left_edge":null,"abilities":[],"flavor":"豚の姿の妖怪、かたきらうわは片耳がチャームポイント。見た目とは裏腹に股下をくぐられると魂を抜かれてしまうという伝説があり、かたきらうわが出ると噂の地域の人は皆足を交差して歩くのだとか。　―『滅徒大全』〜第三巻 獣の項〜","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"Pannya","frame":"通常","source":"スタートデッキ レオジン 告知画像","source_date":"unknown","legibility":"high"}],"notes":["カード名下の行は「ナガレモノ」。これまで確認したファミリー名と異なり「・」の区切りがない","フレーバーの出典表記が人物ではなく書名（『滅徒大全』〜第三巻 獣の項〜）。2026-09-21 訂正: 書名を出典とする初例と記載していたが、けうけげん(HD02-002、第一巻 毛髪の項) が先行していた","能力欄が空。トリガーのみを持つ"]},{"key":"HD02-005","id":"HD02-005","type":"ホロビト","name":"ヒトダマモルン","name_ruby":null,"color_mark":"緑","cost":4,"power":5500,"family":"ナガレモノ","left_edge":null,"abilities":["1バリア（バトルに負けたとき、プレイヤーが受けるダメージは1減る）"],"flavor":"古来よりホロビトに伝承されし守りの秘術「破離阿（ばりあ）」。ヒトダマモルンはそのチカラを使い、死してなおパートナーを守るのだ。","trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"Hiyori","frame":"通常","source":"スタートデッキ 不死火翔 告知画像","source_date":"unknown","legibility":"high"}],"notes":["カード名下の行は「ナガレモノ」。赤の かたきらうわ(HD01-004) と同じ文字列が緑のカードに印字されている","「1バリア」の2例目（1例目は HD02-002 けうけげん）。印字文はけうけげんと同一","フレーバーに「破離阿（ばりあ）」という漢字表記が出るが、能力欄の印字は「1バリア」"]},{"key":"HD01-006","id":"HD01-006","type":"ホロビト","name":"幻癒師 七尾","name_ruby":"げんゆし ななお","color_mark":"赤","cost":3,"power":4000,"family":"マボロシ・コミューン","left_edge":{"modifier":"+2000","cost":1},"abilities":["このホロビトが出たとき、自分のホロビトを1体選び、回復する。"],"flavor":"ヒナタのパートナーである七尾は、七本の尾を持つ妖狐のホロビト。妖狐は100年歳を重ねるごとに尻尾が1本増えるとされているので、実はとても高齢だ。レオが言うには、年齢に言及すると妖術をかけられ酷い目にあうらしい。","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"IRIA","frame":"通常","source":"スタートデッキ レオジン 告知画像","source_date":"unknown","legibility":"high"}],"notes":["ルビはひらがな（「幻癒師」にげんゆし、「七尾」にななお）。カタカナのルビを持つカードと混在する","妖狐 七尾(HB01-031) と同じ「七尾」を含むが、カード名は異なる（幻癒師 七尾 / 妖狐 七尾）","「回復する」を用いる能力の2例目（1例目は HB01-031）。対象はホロビト"]},{"key":"HD02-006","id":"HD02-006","type":"ホロビト","name":"金づち乱坊","name_ruby":"かな ランボー","color_mark":"緑","cost":7,"power":9000,"family":"スザク・ブラッド","left_edge":{"modifier":"+2000","cost":1},"abilities":["ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"],"flavor":"近づくものを金槌でめった打ちにするスザク血族のホロビト。果敢に戦う姿とは似つかわず、慎重で臆病な性格と言われているが、その詳細の多くは不明である。　―『滅徒大全』〜第三巻 金鳥の項〜","trigger":{"icon":"終","keyword":"ラストオーバーT","text":"このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"Ishikawa Kenta","frame":"通常","source":"スタートデッキ 不死火翔 告知画像","source_date":"unknown","legibility":"high"}],"notes":["ルビは「金」にかな（ひらがな）、「乱坊」にランボー（カタカナ）。1枚の中で文字種が混在する2例目（1例目は HB01-061）。「づち」にルビはない","フレーバーの出典が『滅徒大全』〜第三巻 金鳥の項〜。同じ書名は けうけげん(HD02-002、第一巻 毛髪の項) と かたきらうわ(HD01-004、第三巻 獣の項) にもあり、これで3枚目。同じ巻の中に複数の項がある","ラストオーバーT の5例目。印字文はこれまでの4枚と一字一句同じ"]},{"key":"HD01-007","id":"HD01-007","type":"ホロビト","name":"Jr. 赤えい","name_ruby":"ジュニア あか","color_mark":"赤","cost":4,"power":4000,"family":"ライガ・ファミリー","left_edge":{"modifier":"+2000","cost":1},"abilities":["このホロビトは破壊されない。\n（ダウンしているこのホロビトがダメージを受けるとき、ダウンしたままラインに残る）"],"flavor":"嵐を起こし船を襲う災いの妖怪。海に現れた100メートルを優に超える、巨大な魚の影に驚くなかれ。彼はまだまだジュニア。やがては大陸と見紛う巨体に成長するという。　―『滅徒大全』〜第三巻 海獣の項〜","trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"Shusuke Unno","frame":"通常","source":"スタートデッキ レオジン 告知画像","source_date":"unknown","legibility":"high"}],"notes":["ルビは「Jr.」にジュニア（カタカナ）、「赤」にあか（ひらがな）。1枚の中で文字種が混在する3例目。ラテン文字にルビが振られた初の例。「えい」にルビはない","「このホロビトは破壊されない。」の2例目。印字文は 雷合 レオジン(HD01-017) と一字一句同じ","フレーバーの出典は『滅徒大全』〜第三巻 海獣の項〜。同書の4枚目で、第三巻の3つ目の項"]},{"key":"HD02-007","id":"HD02-007","type":"ホロビト","name":"イツキと怪樹ふるそま","name_ruby":"かいじゅ","color_mark":"緑","cost":4,"power":6000,"family":"タイジュ・ブラッド","left_edge":{"modifier":"+2000","cost":1},"abilities":[],"flavor":"ホロビトたちは古来より人間たちと奇妙な絆で結ばれている。ホロビトは人間たちの脅威となる怪奇な存在でありながら、人間に忘れ去られればこの世で生きることはできないのだ。","trigger":{"icon":"上","keyword":"オーバーT","text":"このホロビトをオーバービートで出す。（コストは支払わない）"},"printings":[{"rarity_mark":"C","illustrator":"Moopic","frame":"通常","source":"スタートデッキ 不死火翔 告知画像","source_date":"unknown","legibility":"high"}],"notes":["ルビは「怪樹」に「かいじゅ」（ひらがな）の1箇所のみ。「イツキと」「ふるそま」にルビはない","能力欄が空。トリガーのみを持つ","フレーバーに話者や出典の表記がなく、世界観の説明文になっている","カード名が「A と B」の形で人間とホロビトを並べる例"]},{"key":"HD02-008","id":"HD02-008","type":"ワザ","name":"翠炎よ、燃えさかれ！","name_ruby":"ヒエン も","color_mark":"緑","cost":2,"power":null,"family":null,"left_edge":{"modifier":"+5000","cost":null},"abilities":[],"flavor":"決して負けられぬ戦いがある。そんな時もホロビトたちはワザを用いて己を強化し、恐れず戦い抜くのだ。","trigger":{"icon":"札","keyword":"ドローT","text":"このワザを捨て、カードを3枚引く。"},"printings":[{"rarity_mark":"C","illustrator":"taku","frame":"通常","source":"スタートデッキ 不死火翔 告知画像","source_date":"unknown","legibility":"high"}],"notes":["ルビは「翠炎」に「ヒエン」（カタカナ）、「燃」に「も」（ひらがな）。1枚の中で文字種が混在する","ワザのカードで色を判別できた初の例（コスト丸が緑）。ファミリー名の行は印字されていない","左辺は +5000 のみ。丸数字の印字はない（PR-013 と同じ）","能力欄が空。トリガーのみを持つ","トリガーの印字・効果文は PR-013 と一字一句同じ（札 / ドローT / このワザを捨て、カードを3枚引く。）","フレーバーに話者も出典もなく、世界観の説明文になっている"]},{"key":"HD02-009","id":"HD02-009","type":"ホロビト","name":"すやすやジャンボ","name_ruby":null,"color_mark":"緑","cost":2,"power":2000,"family":"ユルフワ・クラブ","left_edge":{"modifier":"+2000","cost":1},"abilities":["このホロビトがオーバービートされるとき、このホロビトがダウンしているなら、カードを1枚引く。"],"flavor":"現代社会に身を潜め戦い続ける「ホロビト」。彼らは文明の発展と共に生きる力と場所を失い、滅び消えかけていた妖怪なのである。","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"UC","illustrator":"O-G Osahune","frame":"通常","source":"スタートデッキ 不死火翔 告知画像","source_date":"unknown","legibility":"high"}],"notes":["左下の記号が UC。C / R / SR / DR に続く5種類目","「オーバービートされる」という受け身の表現が印字された初の例。オーバービートで下になる側のカードにも能力が働く","フレーバーに話者も出典もなく、世界観の説明文になっている","つくものジャンボ(HD02-003) と同じ ユルフワ・クラブ だが、カード名は異なる"]},{"key":"HD01-009","id":"HD01-009","type":"ホロビト","name":"怪機 センプウジン","name_ruby":"カイキ","color_mark":"赤","cost":2,"power":2500,"family":"フウガ・ファミリー","left_edge":{"modifier":"+2000","cost":1},"abilities":["このホロビトがバトルに勝ったとき、第2〜5ラインにいるなら、カードを1枚引く。"],"flavor":"この世には古くから妖怪や怪異といった化け物たちが住んでいる。だが、彼らは文明の進歩とともに人間に忘れ去られ、滅亡の危機にあった。そんな滅びゆく化け物たちは、いつしか「ホロビト」と呼ばれるようになった。","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"UC","illustrator":"Ragi","frame":"通常","source":"スタートデッキ レオジン 告知画像","source_date":"unknown","legibility":"high"}],"notes":["左下の記号が UC","ルビは「怪機」に「カイキ」（カタカナ）の1箇所のみ。「センプウジン」にルビはない","「第2〜5ラインにいるなら」という範囲指定は 疾風のカマイチ(HD01-005) と同じ","フレーバーが「ホロビト」という呼称の由来を説明している"]},{"key":"HD01-010","id":"HD01-010","type":"ホロビト","name":"ウキウキ学生 アカナー","name_ruby":"ガクセイ","color_mark":"赤","cost":3,"power":4000,"family":"コンガ・ファミリー","left_edge":{"modifier":"+2000","cost":1},"abilities":["このホロビトが出たとき、下にカードがないなら、カードを1枚引く。"],"flavor":"赤い顔に赤い身体のアカナーは、穏やかで大人しいホロビトだ。その昔、狡猾な猿と桃を巡った争いに巻き込まれたが、月に助けられ、その後はウキウキで月に住むようになったと言われている。　―『滅徒大全』〜第三巻 獣の項〜","trigger":{"icon":"出","keyword":"エントリーT","text":"このホロビトをラインに出す。（コストは支払わない）"},"printings":[{"rarity_mark":"UC","illustrator":"Fukuyokana Kuma","frame":"通常","source":"スタートデッキ レオジン 告知画像","source_date":"unknown","legibility":"high"}],"notes":["ファミリー「コンガ・ファミリー」は初確認。赤では5つ目","ルビは「学生」に「ガクセイ」（カタカナ）の1箇所のみ","「下にカードがないなら」という条件は初確認。オーバービートの束を、上になっている側から参照している","フレーバーの出典『滅徒大全』〜第三巻 獣の項〜 は かたきらうわ(HD01-004) と同じ巻・同じ項。1つの項に複数のカードが属する"]}];
 /* @@CARDS_END@@ */
+
+/* @@ABIL_BEGIN@@ */
+// 生成物。編集しないこと。正本は data/ability-parts.json と data/abilities.json
+var PARTS = {"this_holobito":{"role":"発火条件1","text":"このホロビト"},"this_holobito_battle":{"role":"発火条件1","text":"このホロビトのバトル"},"entered":{"role":"発火条件2","text":"出た"},"won_battle":{"role":"発火条件2","text":"バトルに勝った"},"overbeaten":{"role":"発火条件2","text":"オーバービートされる"},"ended":{"role":"発火条件2","text":"終わった"},"used_nth_waza":{"role":"発火条件2","text":"{n}つ目のワザを使った"},"no_cards_under":{"role":"効果条件","text":"下にカードがない"},"cards_under_ge":{"role":"効果条件","text":"このホロビトの下にカードが{n}枚以上ある"},"lines_under_total_ge":{"role":"効果条件","text":"自分の第{from}〜{to}ラインにいるホロビトの下にあるカードの合計が{n}枚以上"},"in_lines":{"role":"効果条件","text":"[{subject}が]第{from}〜{to}ラインにいる"},"is_down":{"role":"効果条件","text":"[{subject}が]ダウンしている"},"on_line":{"role":"効果条件","text":"[{subject}が]ラインに出ている"},"own_color_count_on_line":{"role":"効果条件","text":"自分の{color}のホロビトが{n}体以上ラインに出ている"},"power_ratio_vs_front":{"role":"効果条件","text":"このホロビトのパワーが正面のホロビトの{n}倍以上"},"front_cost_le":{"role":"効果条件","text":"正面のホロビトのコストが{n}以下"},"won_this_battle":{"role":"効果条件","text":"このバトルに勝った"},"draw":{"role":"効果","text":"カードを{n}枚引く"},"power_plus":{"role":"効果","text":"[{target}の]パワーを+{n}する","ren":"[{target}の]パワーを+{n}し"},"destroy":{"role":"効果","text":"{target}を破壊する"},"return_top_to_hand":{"role":"効果","text":"その一番上のカードを手札に戻す"},"cost_bigger":{"role":"効果","text":"コストは{n}大きくなる"},"select_own":{"role":"効果","text":"自分の[{color}の]{what}を{n}{unit}選ぶ","ren":"自分の[{color}の]{what}を{n}{unit}選び"},"make_unused":{"role":"効果","text":"{target}を未使用にする","ren":"{target}を未使用にし"},"recover":{"role":"効果","text":"[{target}を]回復する"},"opponent_discard":{"role":"効果","text":"相手は手札を{n}枚選んで捨てる"},"gain_keyword":{"role":"効果","text":"{keyword}を得る"},"indestructible":{"role":"効果","text":"{subject}は破壊されない"},"damage_to_opponent_plus":{"role":"効果","text":"このホロビトが相手プレイヤーに与えるダメージを+{n}する"},"only_if_other_waza_used":{"role":"制限","text":"このワザは自分がこのバトルで他のワザを使っているときのみ使える"},"note_no_barrier":{"role":"補足","text":"（バリアや敗北時の効果は発動しない）"},"note_indestructible":{"role":"補足","text":"（ダウンしているこのホロビトがダメージを受けるとき、ダウンしたままラインに残る）"},"note_double_damage_held":{"role":"補足","text":"（ダブルダメージを持つホロビトがバトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"},"double_damage":{"role":"キーワード","text":"ダブルダメージ","reminder":"バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える"},"barrier":{"role":"キーワード","text":"{n}バリア","reminder":"バトルに負けたとき、プレイヤーが受けるダメージは{n}減る"},"ena_yomi":{"role":"キーワード","text":"エナ詠み {n:circled}","reminder":"自分のエナゾーンに{color}のエナが{n}枚以上あるなら、このホロビトは以下の効果を得る"}};
+var ABILITY_MAP = {"HB01-033":[{"keyword":"double_damage"},{"conditions":[{"part":"own_color_count_on_line","args":{"color":"赤","n":4}}],"effects":[{"part":"power_plus","args":{"target":"このホロビト","n":5000}}]}],"HB01-065":[{"keyword":"double_damage"},{"trigger":{"subject":"this_holobito","event":"won_battle"},"conditions":[{"part":"power_ratio_vs_front","args":{"n":2}}],"effects":[{"part":"destroy","args":{"target":"正面のホロビト"}}],"note":"note_no_barrier"}],"HB01-097":[{"keyword":"double_damage"},{"trigger":{"subject":"this_holobito","event":{"part":"used_nth_waza","args":{"n":2}}},"conditions":[{"part":"front_cost_le","args":{"n":8}}],"effects":["return_top_to_hand"]}],"HB01-063":[{"keyword":{"part":"ena_yomi","args":{"n":3,"color":"緑"}},"sub":{"trigger":{"subject":"this_holobito","event":"won_battle"},"conditions":[{"part":"in_lines","args":{"from":1,"to":2}}],"effects":[{"part":"opponent_discard","args":{"n":1}}]}}],"HB01-031":[{"trigger":{"subject":"this_holobito_battle","event":"ended"},"effects":[{"part":"select_own","args":{"color":"赤","what":"エナ","n":1,"unit":"枚"},"then":"。"},{"part":"make_unused","args":{"target":"それ"}},{"part":"recover","args":{"target":"このホロビト"}}]}],"HB01-034":[{"conditions":[{"part":"on_line","args":{"subject":"このホロビト"}}],"effects":[{"part":"cost_bigger","args":{"n":1}}]}],"HB01-049":[{"conditions":[{"part":"lines_under_total_ge","args":{"from":1,"to":2,"n":3}}],"effects":[{"part":"power_plus","args":{"target":"このホロビト","n":3000}},{"part":"gain_keyword","args":{"keyword":"ダブルダメージ"}}],"note":"note_double_damage_held"}],"UNKNOWN-utsushimi":[{"effects":["only_if_other_waza_used"]},{"conditions":["won_this_battle"],"effects":[{"part":"damage_to_opponent_plus","args":{"n":1}}]}],"HD01-017":[{"keyword":"double_damage"},{"effects":[{"part":"indestructible","args":{"subject":"このホロビト"}}],"note":{"part":"note_indestructible","sep":"\n"}}],"HD01-001":[{"trigger":{"subject":"this_holobito","event":"entered"},"effects":[{"part":"draw","args":{"n":1}}]}],"HD02-001":[{"conditions":[{"part":"on_line","args":{"subject":"このホロビト"}}],"effects":[{"part":"cost_bigger","args":{"n":1}}]}],"HD02-002":[{"keyword":{"part":"barrier","args":{"n":1}}}],"HD02-017":[{"keyword":"double_damage"},{"conditions":[{"part":"cards_under_ge","args":{"n":2}}],"effects":[{"part":"power_plus","args":{"n":3000}}]}],"HD01-005":[{"conditions":[{"part":"in_lines","args":{"subject":"このホロビト","from":2,"to":5}}],"effects":[{"part":"power_plus","args":{"target":"このホロビト","n":2500}}]}],"HD02-005":[{"keyword":{"part":"barrier","args":{"n":1}}}],"HD01-006":[{"trigger":{"subject":"this_holobito","event":"entered"},"effects":[{"part":"select_own","args":{"what":"ホロビト","n":1,"unit":"体"}},"recover"]}],"HD02-006":[{"keyword":"double_damage"}],"HD01-007":[{"effects":[{"part":"indestructible","args":{"subject":"このホロビト"}}],"note":{"part":"note_indestructible","sep":"\n"}}],"HD02-009":[{"trigger":{"subject":"this_holobito","event":"overbeaten"},"conditions":[{"part":"is_down","args":{"subject":"このホロビト"}}],"effects":[{"part":"draw","args":{"n":1}}]}],"HD01-009":[{"trigger":{"subject":"this_holobito","event":"won_battle"},"conditions":[{"part":"in_lines","args":{"from":2,"to":5}}],"effects":[{"part":"draw","args":{"n":1}}]}],"HD01-010":[{"trigger":{"subject":"this_holobito","event":"entered"},"conditions":["no_cards_under"],"effects":[{"part":"draw","args":{"n":1}}]}]};
+/* @@ABIL_END@@ */
 
 var CARDS = {};
 CARD_LIST.forEach(function(c){ CARDS[c.key] = c; });
@@ -393,7 +424,7 @@ function newPlayer(pi, decklist){
 }
 function newState(decklists){
   decklists = decklists || [{}, {}];
-  return { round:1, phase:-1, first:0, players:[newPlayer(0, decklists[0]), newPlayer(1, decklists[1])] };
+  return { round:1, phase:-1, first:0, fxAuto:true, players:[newPlayer(0, decklists[0]), newPlayer(1, decklists[1])] };
 }
 
 /* ---------------- 保存 ---------------- */
@@ -500,7 +531,7 @@ var ACTIONS = {
   ena1:     function(pi){ drawTo(pi, 1, "ena", true); },
   setupAll: function(pi){ ACTIONS.shuffle(pi); ACTIONS.draw6(pi); ACTIONS.heart5(pi); ACTIONS.ena1(pi); },
   rebuild:  function(pi){ rebuildPlayer(pi); },
-  reset:    function(){ var d = state.players.map(function(P){ return P.decklist; }); state = newState(d); clearSaved(); }
+  reset:    function(){ var d = state.players.map(function(P){ return P.decklist; }), fx = state.fxAuto; state = newState(d); state.fxAuto = fx; clearSaved(); }
 };
 function runAction(name, pi, arg){
   if (pi === 2){ if (name === "reset") ACTIONS.reset(); else { ACTIONS[name](0, arg); ACTIONS[name](1, arg); } }
@@ -517,10 +548,354 @@ function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").rep
 function fmt(v){ return v === "unknown" ? '<span class="unk">unknown</span>' : (v === null ? "—" : esc(v)); }
 function cardDef(c){ return c.key ? (CARDS[c.key] || null) : null; }
 
+/* ---------------- 効果の自動処理 ----------------
+   依頼者の指示（2026-09-26）により、能力欄の効果に限って判定と実行を行う。
+   フェイズ・コスト・バトル・勝敗は従来どおり扱わない。
+   確定情報で決まるものだけを自動で行い、決まらないものはプレイヤーに聞く・選ばせる。
+   部品ごとの扱いは PART_FX に1か所でまとめる（docs/design.md §2-2 に一覧を生成）。 */
+
+var YES = "yes", NO = "no", FRONT = { front:true };
+function ASK(q){ return { ask:q }; }
+function fxOn(){ return state.fxAuto !== false; }
+function nm(c){ var d = cardDef(c); return d ? d.name : "未確定カード"; }
+function isHolo(c){ var d = cardDef(c); return !!d && d.type === "ホロビト"; }
+function refOf(r){ return typeof r === "string" ? { part:r } : r; }
+function fillT(tpl, a){
+  a = a || {};
+  var has = function(n){ return a[n] !== undefined && a[n] !== ""; };
+  tpl = tpl.replace(/\[([^\[\]]*)\]/g, function(_, inner){
+    var ok = true; inner.replace(/\{(\w+)(?::\w+)?\}/g, function(m, n){ if (!has(n)) ok = false; return m; });
+    return ok ? inner : "";
+  });
+  return tpl.replace(/\{(\w+)(?::(\w+))?\}/g, function(_, n, f){
+    return f === "circled" ? String.fromCharCode(0x2460 + a[n] - 1) : String(a[n]);
+  });
+}
+function partText(r){ r = refOf(r); var p = PARTS[r.part]; return p ? fillT(p.text, r.args) : r.part; }
+
+// カードの位置。ラインなら束の中の位置（0 が一番下）も返す
+function locOf(card){
+  var loc = zoneOfCard(card); if (!loc) return null;
+  if (loc.zone === "line"){
+    var st = state.players[loc.pi].line[loc.idx];
+    loc.pos = st.indexOf(card); loc.top = loc.pos === st.length - 1; loc.stack = st;
+  }
+  return loc;
+}
+function ctxOf(card){ var loc = locOf(card) || { zone:"?" }; return { card:card, loc:loc, pi: loc.pi !== undefined ? loc.pi : card.owner }; }
+
+// 色つきの枚数を「確実に数えられる最小」と「未確定の色を含めた最大」で数える。
+// 両者で結論が同じなら確定、割れたらプレイヤーに聞く。
+function colorCount(cards, color){
+  var min = 0, max = 0;
+  cards.forEach(function(c){
+    var d = cardDef(c), col = d ? d.color_mark : "unknown";
+    if (col === color){ min++; max++; } else if (col === "unknown") max++;
+  });
+  return { min:min, max:max };
+}
+function atLeast(cnt, n, q){ return cnt.min >= n ? YES : cnt.max < n ? NO : ASK(q); }
+
+/* @@PART_FX_BEGIN@@ */
+var PART_FX = {
+  // ---- 発火条件1 ----
+  this_holobito:           { how:"自動", why:"カード自身" },
+  this_holobito_battle:    { how:"ボタン", why:"バトル処理は作らないため、バトルの出来事はプレイヤーが知らせる" },
+  // ---- 発火条件2 ----
+  entered:                 { how:"自動", why:"ラインの外からラインへ置いたとき。束の上に置いた場合も含む（§10「ラインに出すとき…上に重ね」）" },
+  overbeaten:              { how:"自動", why:"ラインの束の上に別のカードが置かれたとき、置かれた側（§10）" },
+  won_battle:              { how:"ボタン", why:"バトル処理は作らない" },
+  ended:                   { how:"ボタン", why:"バトル処理は作らない" },
+  used_nth_waza:           { how:"ボタン", why:"ワザの使用は数えない" },
+  // ---- 効果条件 ----
+  no_cards_under:          { how:"自動", why:"束の枚数を数える",
+    cond:function(x){ return x.loc.zone === "line" && x.loc.pos === 0 ? YES : NO; } },
+  cards_under_ge:          { how:"自動", why:"束の枚数を数える",
+    cond:function(x, a){ return x.loc.zone === "line" && x.loc.pos >= a.n ? YES : NO; } },
+  lines_under_total_ge:    { how:"自動", why:"束の枚数を数える",
+    cond:function(x, a){
+      var P = state.players[x.pi], s = 0;
+      for (var i = a.from - 1; i < a.to; i++) s += Math.max(0, P.line[i].length - 1);
+      return s >= a.n ? YES : NO; } },
+  in_lines:                { how:"自動", why:"ラインの番号を見る",
+    cond:function(x, a){ if (x.loc.zone !== "line") return NO; var n = x.loc.idx + 1; return n >= a.from && n <= a.to ? YES : NO; } },
+  is_down:                 { how:"自動", why:"横向き＝ダウン（§9-1）",
+    cond:function(x){ return x.card.turned ? YES : NO; } },
+  on_line:                 { how:"自動", why:"束の一番上ならライン上。束の下にある場合は未確定（§10）なので聞く",
+    cond:function(x){
+      if (x.loc.zone !== "line") return NO;
+      return x.loc.top ? YES : ASK("このホロビトは束の下にあります。下にあるカードが「ラインに出ている」に当たるかは未確定です。当たるとして扱いますか？"); } },
+  own_color_count_on_line: { how:"自動", why:"数える。束の下を数えるかは未確定（§10）なので、数え方で結論が割れたときだけ聞く",
+    cond:function(x, a){
+      var P = state.players[x.pi], tops = [], all = [];
+      P.line.forEach(function(st){ if (st.length){ tops.push(st[st.length - 1]); all = all.concat(st); } });
+      var t = colorCount(tops, a.color), b = colorCount(all, a.color);
+      var r = { min:Math.min(t.min, b.min), max:Math.max(t.max, b.max) };
+      return atLeast(r, a.n, "自分の" + a.color + "のホロビトは、束の一番上だけ数えると" + t.min + "体、束の下も数えると" + b.min +
+        "体です（色が未確定のカードを除く）。どう数えるかは未確定です。" + a.n + "体以上として扱いますか？"); } },
+  power_ratio_vs_front:    { how:"質問", why:"パワーの計算はしない",
+    cond:function(x, a){ return ASK("このホロビトのパワーは、正面のホロビトの" + a.n + "倍以上ですか？（パワーの計算はシミュレーターでは行いません）"); } },
+  front_cost_le:           { how:"選択＋質問", why:"「正面」は未確定（A-2）なので選ばせる。コストの増減は計算しないので聞く",
+    cond:function(x, a){
+      if (!x.front) return FRONT;
+      var d = cardDef(x.front);
+      return ASK("正面のホロビト「" + nm(x.front) + "」の印字のコストは " + (d ? d.cost : "unknown") + " です。コストが" + a.n +
+        "以下として扱いますか？（コストの増減はシミュレーターでは計算しません）"); } },
+  won_this_battle:         { how:"質問", why:"バトル処理は作らない",
+    cond:function(){ return ASK("このバトルに勝ちましたか？"); } },
+  // ---- 効果 ----
+  draw:                    { how:"自動", why:"山札から手札へ（§8）",
+    run:function(x, a, next){
+      var P = state.players[x.pi], k = Math.min(a.n, P.deck.length);
+      drawTo(x.pi, a.n, "hand", true);
+      fxLog(SIDE_NAME[x.pi] + "はカードを" + k + "枚引いた" + (k < a.n ? "（山札が足りない）" : ""));
+      next(); } },
+  destroy:                 { how:"選択", why:"「正面」を選ばせる。破壊されたホロビトは墓地へ（§9-1）。束の下の扱いは未確定なので聞く",
+    run:function(x, a, next, stop){
+      if (a.target !== "正面のホロビト") return fxManual(a, "destroy", next);
+      needFront(x, function(){
+        var loc = locOf(x.front), st = loc.stack;
+        var put = function(cards){
+          cards.forEach(function(c){ moveCard(c.uid, c.owner, "grave"); });
+          fxLog(nm(x.front) + " を破壊し、墓地に置いた" + (cards.length > 1 ? "（束の " + cards.length + " 枚）" : ""));
+          next(); };
+        if (st.length === 1) return put([x.front]);
+        fxChoose("正面のホロビトの下に " + (st.length - 1) + " 枚あります。破壊したとき下のカードをどうするかは未確定です。",
+          ["一番上だけ墓地へ", "束ごと墓地へ", "何もしない（手で処理する）"], function(i){
+            if (i === 0) put([x.front]); else if (i === 1) put(st.slice()); else { fxLog("破壊は手で処理してください"); next(); } }, stop);
+      }, stop); } },
+  return_top_to_hand:      { how:"選択", why:"「正面」を選ばせる。「その一番上のカード」は印字どおり束の一番上",
+    run:function(x, a, next, stop){
+      needFront(x, function(){
+        var c = x.front; moveCard(c.uid, c.owner, "hand"); c.up = true; c.turned = false;
+        fxLog(nm(c) + " を" + SIDE_NAME[c.owner] + "の手札に戻した"); next(); }, stop); } },
+  cost_bigger:             { how:"表示", why:"コストの計算はしない。条件を満たしている間、印を付ける", badge:function(a){ return "コスト+" + a.n; } },
+  select_own:              { how:"選択", why:"エナならエナゾーンから選ばせる。ホロビトを選ぶ範囲は未確定なので手で",
+    run:function(x, a, next, stop){
+      if (a.what !== "エナ") return fxManual(a, "select_own", next);
+      var P = state.players[x.pi];
+      var cands = P.ena.filter(function(c){ var d = cardDef(c); return !a.color || (d && d.color_mark === a.color); });
+      startPick(cands.map(function(c){ return c.uid; }),
+        "自分の" + (a.color ? a.color + "の" : "") + "エナを" + a.n + "枚選んでください" +
+        (a.color ? "（色が未確定のエナは候補に入れていません）" : ""),
+        function(uid){ x.sel = [findCard(uid).card]; fxLog(nm(x.sel[0]) + " を選んだ"); next(); }, stop); } },
+  make_unused:             { how:"自動", why:"未使用＝縦向き（§8 §9-2）",
+    run:function(x, a, next){
+      if (a.target !== "それ" || !x.sel) return fxManual(a, "make_unused", next);
+      x.sel.forEach(function(c){ c.turned = false; });
+      fxLog(x.sel.map(nm).join("・") + " を未使用（縦向き）にした"); next(); } },
+  recover:                 { how:"手動", why:"「回復する」の定義が未確定（A-15）",
+    run:function(x, a, next){
+      fxLog("「回復する」は定義が未確定のため処理しません。" + (a.target || "対象") + "を手で処理してください（→ A-15）"); next(); } },
+  opponent_discard:        { how:"選択", why:"相手の手札から選ばせる。捨てる先は未確定なので手で",
+    run:function(x, a, next, stop){
+      var o = 1 - x.pi;
+      startPick(state.players[o].hand.map(function(c){ return c.uid; }),
+        SIDE_NAME[o] + "が捨てる手札を" + a.n + "枚選んでください（選ぶのは" + SIDE_NAME[o] + "）",
+        function(uid){
+          fxLog("捨てるカード: " + nm(findCard(uid).card) + "。捨てる先は未確定なので、開いたメニューから置き場所を選んでください");
+          next(); openCardSheet(uid, o); }, stop); } },
+  gain_keyword:            { how:"表示", why:"条件を満たしている間、印を付ける", badge:function(a){ return a.keyword; } },
+  power_plus:              { how:"表示", why:"パワーの計算はしない。条件を満たしている間、印を付ける", badge:function(a){ return "+" + a.n; } },
+  indestructible:          { how:"表示", why:"印を付ける。破壊の処理はしない", badge:function(){ return "破壊されない"; } },
+  damage_to_opponent_plus: { how:"手動", why:"ワザの使用とダメージは扱わない" },
+  // ---- 制限 ----
+  only_if_other_waza_used: { how:"手動", why:"ワザの使用は数えない" },
+  // ---- 補足 ----
+  note_no_barrier:         { how:"表示", why:"注記" },
+  note_indestructible:     { how:"表示", why:"注記" },
+  note_double_damage_held: { how:"表示", why:"注記" },
+  // ---- キーワード ----
+  double_damage:           { how:"表示", why:"印を付ける。ダメージの計算はしない", badge:function(){ return "ダブルダメージ"; } },
+  barrier:                 { how:"表示", why:"印を付ける。ダメージの計算はしない", badge:function(a){ return a.n + "バリア"; } },
+  ena_yomi:                { how:"自動", why:"エナゾーンの色つきの枚数を数える",
+    cond:function(x, a){
+      var cnt = colorCount(state.players[x.pi].ena, a.color);
+      return atLeast(cnt, a.n, "エナゾーンに" + a.color + "のエナが確実に" + cnt.min + "枚あり、色が未確定のエナを含めると" + cnt.max +
+        "枚です。" + a.n + "枚以上として扱いますか？"); },
+    badge:function(a){ return "エナ詠み" + String.fromCharCode(0x2460 + a.n - 1); } }
+};
+/* @@PART_FX_END@@ */
+
+function condOf(x, r){
+  r = refOf(r);
+  var fx = PART_FX[r.part];
+  if (!fx || !fx.cond) return ASK("「" + partText(r) + "」はシミュレーターでは判定しません。満たしているとして扱いますか？");
+  return fx.cond(x, r.args || {});
+}
+function fxManual(a, id, next){ fxLog("「" + partText({ part:id, args:a }) + "」はシミュレーターでは処理しません。手で処理してください"); next(); }
+function triggeredOf(ab){ return ab.trigger ? ab : (ab.keyword && ab.sub && ab.sub.trigger ? ab.sub : null); }
+
+// 常時の効果の状態（印の表示用）。on / off / q（未確定）と、表示する印
+function contEval(x, ab){
+  if (ab.keyword){
+    var k = refOf(ab.keyword), fx = PART_FX[k.part], st = fx.cond ? fx.cond(x, k.args || {}) : YES;
+    return { st: st === YES ? "on" : st === NO ? "off" : "q", labels:[fx.badge ? fx.badge(k.args || {}) : partText(k)] };
+  }
+  if (triggeredOf(ab)) return null;
+  var s = "on";
+  (ab.conditions || []).forEach(function(r){
+    var res = condOf(x, r);
+    if (res === NO) s = "off"; else if (res !== YES && s !== "off") s = "q";
+  });
+  var labels = [];
+  (ab.effects || []).forEach(function(r){ r = refOf(r); var fx = PART_FX[r.part]; if (fx && fx.badge) labels.push(fx.badge(r.args || {})); });
+  return labels.length ? { st:s, labels:labels } : null;
+}
+// ラインの束の一番上にあるカードに付ける印。束の下のカードの常時効果は未確定（§10）なので付けない
+function fxBadges(){
+  var out = {};
+  if (!fxOn()) return out;
+  state.players.forEach(function(P){
+    P.line.forEach(function(st){
+      var c = st[st.length - 1];
+      if (!c || !c.up || !isHolo(c)) return;
+      var list = ABILITY_MAP[c.key]; if (!list) return;
+      var x = ctxOf(c), b = [];
+      list.forEach(function(ab){
+        var r = contEval(x, ab); if (!r || r.st === "off") return;
+        r.labels.forEach(function(l){ b.push({ t:l + (r.st === "q" ? "?" : ""), cls:r.st }); });
+      });
+      if (b.length) out[c.uid] = b;
+    });
+  });
+  return out;
+}
+
+// ---- 処理の進行 ----
+function needFront(x, cb, stop){
+  if (x.front) return cb();
+  var o = 1 - x.pi, cands = [];
+  state.players[o].line.forEach(function(st){ if (st.length) cands.push(st[st.length - 1].uid); });
+  startPick(cands, "「正面のホロビト」を選んでください（どれが正面かは未確定のため、シミュレーターは決めません）",
+    function(uid){ x.front = findCard(uid).card; fxLog("正面のホロビト: " + nm(x.front)); cb(); }, stop);
+}
+function resolveAb(x, ab, done){
+  var stop = function(){ fxLog("処理を中断した"); done(); };
+  if (ab.keyword){
+    var k = refOf(ab.keyword), st = condOf(x, k);
+    var go = function(){ if (ab.sub) resolveAb(x, ab.sub, done); else done(); };
+    if (st === YES) return go();
+    if (st === NO){ fxLog(partText(k) + " の条件を満たしていないため発動しない"); return done(); }
+    return fxChoose(st.ask, ["満たしている", "満たしていない"], function(i){
+      if (i === 0) go(); else { fxLog(partText(k) + " の条件を満たしていないため発動しない"); done(); } }, stop);
+  }
+  var conds = (ab.conditions || []).slice(), effs = (ab.effects || []).slice();
+  function stepC(){
+    if (!conds.length) return stepE();
+    var r = refOf(conds[0]), res = condOf(x, r);
+    if (res === FRONT) return needFront(x, stepC, stop);
+    if (res === YES){ conds.shift(); return stepC(); }
+    var no = function(){ fxLog("「" + partText(r) + "」を満たさないため発動しない"); done(); };
+    if (res === NO) return no();
+    fxChoose(res.ask, ["はい", "いいえ"], function(i){ if (i === 0){ conds.shift(); stepC(); } else no(); }, stop);
+  }
+  function stepE(){
+    render();
+    if (!effs.length) return done();
+    var r = refOf(effs.shift()), fx = PART_FX[r.part];
+    if (!fx || !fx.run) return fxManual(r.args || {}, r.part, stepE);
+    fx.run(x, r.args || {}, stepE, stop);
+  }
+  stepC();
+}
+function fire(t, done){
+  fxLog("【" + nm(t.card) + "】" + t.why);
+  resolveAb(ctxOf(t.card), t.ab, function(){ render(); if (done) done(); });
+}
+// 同時に複数発動するときの順番は未確定なので、プレイヤーに選ばせる
+function runQueue(q){
+  if (!q.length){ render(); return; }
+  if (q.length === 1) return fire(q.shift(), function(){ render(); });
+  fxChoose("同時に " + q.length + " つの効果が発動します。処理する順番は未確定なので、先に処理するものを選んでください。",
+    q.map(function(t){ return nm(t.card) + "：" + t.why; }),
+    function(i){ var t = q.splice(i, 1)[0]; fire(t, function(){ runQueue(q); }); },
+    function(){ fxLog("処理を中断した"); render(); });
+}
+function triggersOf(card, event, why){
+  var out = [], list = ABILITY_MAP[card.key] || [];
+  list.forEach(function(ab){
+    var t = triggeredOf(ab);
+    if (t && refOf(t.trigger.event).part === event) out.push({ card:card, ab:ab, why:why });
+  });
+  return out;
+}
+// 移動のあとに呼ぶ。before は移動前の位置
+function fxAfterMove(uid, before){
+  if (!fxOn()) return;
+  var f = findCard(uid); if (!f) return;
+  var c = f.card, loc = locOf(c), q = [];
+  if (loc && loc.zone === "line" && before && before.zone !== "line" && c.up && isHolo(c)){
+    q = q.concat(triggersOf(c, "entered", "ラインに出た"));
+    if (loc.pos > 0){
+      var under = loc.stack[loc.pos - 1];
+      if (under.up && isHolo(under)) q = q.concat(triggersOf(under, "overbeaten", "オーバービートされた"));
+    }
+  }
+  if (!q.length) return;
+  snap(); fxClear(); runQueue(q);
+}
+
+// ---- 画面：記録・選択・質問 ----
+var fxLines = [], picking = null, fxAsk = null;
+function fxLog(s){ fxLines.push(s); if (fxLines.length > 8) fxLines.shift(); fxShowLog(); }
+function fxClear(){ fxLines = []; fxShowLog(); }
+function fxShowLog(){
+  var el = document.getElementById("fxlog");
+  if (!fxLines.length){ el.classList.remove("on"); el.innerHTML = ""; return; }
+  el.innerHTML = '<div class="fxlines">' + fxLines.map(function(s){ return "<div>" + esc(s) + "</div>"; }).join("") + '</div>' +
+    '<div class="fxbtns"><button class="mini" data-fxlog="undo">戻す</button><button class="mini" data-fxlog="close">閉じる</button></div>';
+  el.classList.add("on");
+}
+function startPick(uids, prompt, onPick, onCancel){
+  if (!uids.length){ fxLog("選べる候補がない"); return onCancel(); }
+  picking = { set:{}, prompt:prompt, pick:onPick, cancel:onCancel };
+  uids.forEach(function(u){ picking.set[u] = true; });
+  closeSheet(); render();
+  var el = document.querySelector("#side-0 .card.pickable, #side-1 .card.pickable");
+  if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
+}
+function fxChoose(question, labels, cb, cancel){
+  fxAsk = { cb:cb, cancel:cancel };
+  var h = '<h3>効果の処理</h3><div class="fxq">' + esc(question) + '</div><div class="sgrid c1">';
+  labels.forEach(function(l, i){ h += '<button data-fxa="' + i + '">' + esc(l) + '</button>'; });
+  h += '<button data-fxa="-1">中断する</button></div>';
+  render(); openSheet(h);
+}
+function fxSectionHTML(c){
+  if (!fxOn()) return "";
+  var d = cardDef(c), list = ABILITY_MAP[c.key];
+  if (!d || !list || !list.length) return "";
+  var h = '<div class="sect">効果の処理</div>';
+  if (d.type === "ワザ") return h + '<div class="fxst off">ワザの効果はシミュレーターでは処理しません（ワザの使用を扱わないため）。</div>';
+  var x = ctxOf(c), loc = x.loc;
+  list.forEach(function(ab, i){
+    var t = triggeredOf(ab);
+    if (ab.keyword && loc.zone === "line" && loc.top){
+      var kr = contEval(x, ab);
+      h += '<div class="fxst ' + kr.st + '">' + esc(kr.labels.join("・")) + '：' +
+           (kr.st === "on" ? "有効" : kr.st === "off" ? "条件を満たしていない" : "未確定（判定できない条件を含む）") + '</div>';
+      if (!t) return;
+    }
+    if (t){
+      h += '<button class="fxbtn" data-fxr="' + esc(c.uid) + '" data-fxi="' + i + '">' +
+           '「' + esc(partText(t.trigger.subject) + "が" + partText(t.trigger.event) + "とき") + '」の効果を処理する</button>';
+      return;
+    }
+    if (loc.zone !== "line"){ h += '<div class="fxst off">常時の効果（ラインにいないため表示しません）</div>'; return; }
+    if (!loc.top){ h += '<div class="fxst q">常時の効果（束の下にあるカードの効果の扱いは未確定）</div>'; return; }
+    var r = contEval(x, ab);
+    if (!r){ h += '<div class="fxst off">この効果はシミュレーターでは処理しません</div>'; return; }
+    h += '<div class="fxst ' + r.st + '">' + esc(r.labels.join("・")) + '：' +
+         (r.st === "on" ? "有効" : r.st === "off" ? "条件を満たしていない" : "未確定（判定できない条件を含む）") + '</div>';
+  });
+  return h;
+}
+
 /* ---------------- 描画 ---------------- */
 function cardHTML(c){
   var d = cardDef(c);
-  var cls = "card" + (c.turned ? " turned" : "");
+  var cls = "card" + (c.turned ? " turned" : "") + (picking && picking.set[c.uid] ? " pickable" : "");
   var color = d ? d.color_mark : "";
   var inner;
   if (!c.up){
@@ -543,6 +918,11 @@ function cardHTML(c){
   }
   return '<div class="' + cls + '" data-cid="' + esc(c.uid) + '" data-owner="' + c.owner + '" data-color="' + esc(color) + '">' + inner + '</div>';
 }
+// 常時の効果の印。カードの印字を隠さないよう、ラインの枠の中で束の下に出す
+function fxRowHTML(c){
+  if (!c || !FXB[c.uid]) return "";
+  return '<div class="fxb">' + FXB[c.uid].map(function(b){ return '<span class="' + b.cls + '">' + esc(b.t) + '</span>'; }).join("") + '</div>';
+}
 function stripHTML(arr){
   if (!arr.length) return '<div class="empty">（なし）</div>';
   var h = ""; for (var i = 0; i < arr.length; i++) h += cardHTML(arr[i]); return h;
@@ -563,7 +943,7 @@ function lineHTML(pi){
     for (var j = 0; j < st.length; j++) inner += cardHTML(st[j]);
     s += '<div class="lineslot" data-drop="line" data-pi="' + pi + '" data-idx="' + i + '">' +
            '<span class="lineno">第' + (i+1) + (st.length >= 2 ? ' <span class="stackn">' + st.length + '枚</span>' : "") + '</span>' +
-           '<div class="linestack">' + inner + '</div></div>';
+           '<div class="linestack">' + inner + '</div>' + fxRowHTML(st[st.length - 1]) + '</div>';
   }
   return '<div class="zone z-line" data-pi="' + pi + '">' +
            '<div class="zlabel">バトルライン <span class="zcount">(' + total + ')</span></div>' +
@@ -623,7 +1003,14 @@ function boardIsEmpty(){
            !P.grave.length && P.line.every(function(l){ return !l.length; });
   });
 }
+var FXB = {};
 function render(){
+  FXB = fxBadges();
+  document.getElementById("btnFx").textContent = fxOn() ? "効果: 自動" : "効果: 手動";
+  document.getElementById("btnFx").className = "mini" + (fxOn() ? " on" : "");
+  document.getElementById("pickbar").className = picking ? "on" : "";
+  document.getElementById("pickmsg").textContent = picking ? picking.prompt : "";
+  document.getElementById("fxlog").style.display = picking ? "none" : "";
   document.getElementById("guide").style.display = boardIsEmpty() ? "" : "none";
   document.getElementById("roundLbl").textContent = "ラウンド " + state.round;
   document.getElementById("phaseLbl").textContent = state.phase < 0 ? "準備" : PHASES[state.phase];
@@ -644,7 +1031,11 @@ var sheetGuardUntil = 0, sheetPi = 0;
 function guarded(){ return performance.now() < sheetGuardUntil; }
 function openSheet(html){ sheetEl.innerHTML = html; sheetWrap.classList.add("on"); sheetGuardUntil = performance.now() + 400; sheetEl.scrollTop = 0; }
 function closeSheet(){ sheetWrap.classList.remove("on"); sheetEl.innerHTML = ""; }
-document.getElementById("sheetbg").addEventListener("click", function(){ if (!guarded()) closeSheet(); });
+document.getElementById("sheetbg").addEventListener("click", function(){
+  if (guarded()) return;
+  closeSheet();
+  if (fxAsk){ var a = fxAsk; fxAsk = null; a.cancel(); }
+});
 
 function detailHTML(c){
   var d = cardDef(c);
@@ -708,6 +1099,7 @@ function openCardSheet(uid, pi){
   h += detailHTML(c);
   h += '<div class="noterow"><input id="noteIn" type="text" maxlength="24" placeholder="メモ（+3000、ダブルダメージ など）" value="' + esc(c.note || "") + '">' +
        '<button data-note="' + uid + '">保存</button></div>';
+  h += fxSectionHTML(c);
   h += destHTML(uid, pi);
   h += '<div class="sect">向き・表裏</div>';
   h += '<div class="sgrid ' + (btns.length > 1 ? "c2" : "c1") + '">' + btns.join("") + '</div>';
@@ -747,7 +1139,17 @@ sheetEl.addEventListener("click", function(e){
   if (guarded()) return;
   var t = e.target.closest("button"); if (!t) return;
   var ds = t.dataset;
-  if (ds.close){ closeSheet(); return; }
+  if (ds.close){ closeSheet(); if (fxAsk){ var a0 = fxAsk; fxAsk = null; a0.cancel(); } return; }
+  if (ds.fxa !== undefined && ds.fxa !== ""){
+    var a1 = fxAsk; fxAsk = null; closeSheet();
+    if (a1){ if (+ds.fxa < 0) a1.cancel(); else a1.cb(+ds.fxa); }
+    return;
+  }
+  if (ds.fxr){
+    var fr = findCard(ds.fxr); closeSheet();
+    if (fr){ snap(); fxClear(); fire({ card:fr.card, ab:ABILITY_MAP[fr.card.key][+ds.fxi], why:"手で処理" }); }
+    return;
+  }
   if (ds.top !== undefined && ds.top !== ""){ var top = state.players[+ds.top].deck[0]; closeSheet(); if (top) openCardSheet(top.uid); return; }
   if (ds.tab !== undefined && ds.tab !== ""){ openCardSheet(ds.cid, +ds.tab); return; }
   if (ds.act === "drawN"){ snap(); drawTo(+ds.pi, +ds.arg, "hand", true); closeSheet(); render(); return; }
@@ -772,8 +1174,9 @@ sheetEl.addEventListener("click", function(e){
   if (ds.fl){ snap(); var f2 = findCard(ds.fl); if (f2) f2.card.up = !f2.card.up; closeSheet(); render(); return; }
   if (ds.mv){
     snap();
+    var fm = findCard(ds.cid), before = fm ? zoneOfCard(fm.card) : null;
     moveCard(ds.cid, sheetPi, ds.mv, parseInt(ds.idx || "0", 10), !!ds.bottom);
-    closeSheet(); render(); return;
+    closeSheet(); render(); fxAfterMove(ds.cid, before); return;
   }
 });
 // メモ欄で Enter → 保存
@@ -804,7 +1207,13 @@ document.querySelector("main").addEventListener("click", function(e){
   snap(); runAction(t.dataset.act, +t.dataset.pi); render();
 });
 document.getElementById("btnPhase").addEventListener("click", function(){ snap(); nextPhase(); render(); });
-document.getElementById("btnUndo").addEventListener("click", undo);
+document.getElementById("btnUndo").addEventListener("click", function(){ picking = null; fxClear(); undo(); });
+document.getElementById("btnFx").addEventListener("click", function(){ snap(); state.fxAuto = !fxOn(); picking = null; fxClear(); render(); });
+document.getElementById("pickCancel").addEventListener("click", function(){ var p = picking; picking = null; render(); if (p) p.cancel(); });
+document.getElementById("fxlog").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-fxlog]"); if (!b) return;
+  if (b.dataset.fxlog === "undo"){ picking = null; fxClear(); undo(); } else fxClear();
+});
 document.getElementById("firstMe").addEventListener("click",  function(){ snap(); state.first = 0; render(); });
 document.getElementById("firstOpp").addEventListener("click", function(){ snap(); state.first = 1; render(); });
 document.querySelector("header").addEventListener("click", function(e){
@@ -835,6 +1244,7 @@ document.addEventListener("pointerdown", function(e){
 
 document.addEventListener("pointermove", function(e){
   if (!drag || drag.pile !== undefined) return;
+  if (picking) return;                         // 選択中はドラッグしない
   var dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
   if (!drag.moved){
     if (Math.abs(dx) + Math.abs(dy) < 10) return;
@@ -857,13 +1267,19 @@ document.addEventListener("pointermove", function(e){
 
 document.addEventListener("pointerup", function(e){
   if (!drag) return;
-  if (drag.pile !== undefined){ var p = drag.pile; endDrag(); openDeckSheet(p); return; }
+  if (drag.pile !== undefined){ var p = drag.pile; endDrag(); if (!picking) openDeckSheet(p); return; }
+  if (picking && !drag.moved){
+    var pc = drag.cid; endDrag();
+    if (picking.set[pc]){ var pk = picking; picking = null; render(); pk.pick(pc); }
+    return;
+  }
   if (drag.moved){
     var tgt = dropTargetAt(e.clientX, e.clientY);
     if (tgt){
       snap();
+      var dm = findCard(drag.cid), dbefore = dm ? zoneOfCard(dm.card) : null, dcid = drag.cid;
       moveCard(drag.cid, +tgt.dataset.pi, tgt.dataset.drop, parseInt(tgt.dataset.idx || "0", 10), false);
-      endDrag(); render(); return;
+      endDrag(); render(); fxAfterMove(dcid, dbefore); return;
     }
   } else {
     var cid = drag.cid;                       // タップ = 内容とメニュー

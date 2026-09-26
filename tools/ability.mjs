@@ -21,6 +21,10 @@ const PARTS_PATH = "data/ability-parts.json";
 const CARDS_PATH = "data/cards.json";
 const OUT_PATH = "data/abilities.json";
 const DOC_PATH = "docs/rules_confirmed.md";
+const SIM_PATH = "simulator.html";
+const DESIGN_PATH = "docs/design.md";
+const FX_BEGIN = "<!-- @@PART_FX_TABLE_BEGIN@@ -->";
+const FX_END = "<!-- @@PART_FX_TABLE_END@@ -->";
 const BEGIN = "<!-- @@ABILITY_INDEX_BEGIN@@ -->";
 const END = "<!-- @@ABILITY_INDEX_END@@ -->";
 
@@ -238,6 +242,19 @@ export function parse(text, parts = loadParts()) {
   };
 }
 
+// ---- シミュレーターでの扱い -------------------------------------------------
+// simulator.html の PART_FX から、部品ごとの扱い（how）と理由（why）を読む。
+// 部品を足したのに扱いを決めていない、という状態を検証で止めるため。
+export function readPartFx(path = SIM_PATH) {
+  const html = readFileSync(path, "utf8");
+  const a = html.indexOf("/* @@PART_FX_BEGIN@@ */"), b = html.indexOf("/* @@PART_FX_END@@ */");
+  if (a < 0 || b < 0) return null;
+  const out = {};
+  for (const m of html.slice(a, b).matchAll(/^\s{2}(\w+):\s*\{\s*how:"([^"]+)",\s*why:"([^"]+)"/gm))
+    out[m[1]] = { how: m[2], why: m[3] };
+  return out;
+}
+
 // ---- まとめて作る ----------------------------------------------------------
 
 export function buildAll(cards = JSON.parse(readFileSync(CARDS_PATH, "utf8")).cards, parts = loadParts()) {
@@ -265,6 +282,14 @@ export function buildAll(cards = JSON.parse(readFileSync(CARDS_PATH, "utf8")).ca
   Object.values(out).flat().forEach(walk);
   for (const id of Object.keys(parts))
     if (!used.has(id)) errors.push(`部品 ${id} はどのカードにも使われていない（印字に根拠のない部品は置かない）`);
+  // どの部品も、シミュレーターでの扱いが1つだけ決まっていること
+  const fx = readPartFx();
+  if (fx) {
+    for (const id of Object.keys(parts))
+      if (!fx[id]) errors.push(`部品 ${id} のシミュレーターでの扱いが決まっていない（simulator.html の PART_FX に足すこと）`);
+    for (const id of Object.keys(fx))
+      if (!parts[id]) errors.push(`simulator.html の PART_FX にある ${id} は部品の辞書にない`);
+  }
   return { abilities: out, errors, used };
 }
 
@@ -343,6 +368,22 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       if (i < 0 || j < 0) { console.error("マーカーが見つからない"); process.exit(1); }
       writeFileSync(DOC_PATH, doc.slice(0, i) + indexMarkdown(abilities, parts) + doc.slice(j + END.length));
       console.log(`wrote ${DOC_PATH}`);
+      // 部品ごとのシミュレーターでの扱いを design.md に書く
+      const fx = readPartFx();
+      const des = readFileSync(DESIGN_PATH, "utf8");
+      const p = des.indexOf(FX_BEGIN), q = des.indexOf(FX_END);
+      if (fx && p >= 0 && q >= 0) {
+        const esc = t => t.replace(/\|/g, "\\|");
+        const order = ["自動", "ボタン", "選択", "選択＋質問", "質問", "表示", "手動"];
+        const rows = Object.entries(parts)
+          .sort((a, b) => order.indexOf(fx[a[0]].how) - order.indexOf(fx[b[0]].how))
+          .map(([id, pt]) => `| ${fx[id].how} | \`${id}\` | ${pt.role} | ${esc(pt.text)} | ${esc(fx[id].why)} |`);
+        const table = [FX_BEGIN, "",
+          "**この表は `node tools/ability.mjs index` が simulator.html の `PART_FX` から生成する。手で書き換えない。**", "",
+          "| 扱い | 部品 | 役割 | 文面 | 理由・根拠 |", "|---|---|---|---|---|", ...rows, "", FX_END].join("\n");
+        writeFileSync(DESIGN_PATH, des.slice(0, p) + table + des.slice(q + FX_END.length));
+        console.log(`wrote ${DESIGN_PATH}`);
+      }
     }
   } else {
     console.error("使い方: node tools/ability.mjs parse|render|build|index ...");
