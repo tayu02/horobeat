@@ -29,8 +29,14 @@ if (i < 0 || j < 0 || j < i) throw new Error("simulator.html に @@ABIL_BEGIN@@ 
 const parts = JSON.parse(readFileSync("data/ability-parts.json", "utf8")).parts;
 const abil = JSON.parse(readFileSync("data/abilities.json", "utf8"));
 const enc = v => JSON.stringify(v).replace(/<\//g, "<\\/");
-out = out.slice(0, i) + `${AB}\n// 生成物。編集しないこと。正本は data/ability-parts.json と data/abilities.json\n` +
-  `var PARTS = ${enc(parts)};\nvar ABILITY_MAP = ${enc(abil)};\n${AE}` + out.slice(j + AE.length);
+// カード画像の台帳も埋め込む。画像そのものは埋め込まず、相対パスで参照する
+// （アーティファクトでは同じパスに別ファイルとして載せる。→ tools/card-images.mjs）
+const im = JSON.parse(readFileSync("data/card-images.json", "utf8"));
+const images = {};
+for (const k of Object.keys(im.images)) images[k] = `${im.dir}/${k}.webp`;
+out = out.slice(0, i) + `${AB}\n// 生成物。編集しないこと。正本は data/ability-parts.json と data/abilities.json と data/card-images.json\n` +
+  `var PARTS = ${enc(parts)};\nvar ABILITY_MAP = ${enc(abil)};\n` +
+  `var CARD_IMAGES = ${enc(images)};\nvar CARD_IMAGE_PENDING = ${enc(im.pending)};\n${AE}` + out.slice(j + AE.length);
 
 writeFileSync("simulator.html", out);
-console.log(`embedded ${data.cards.length} cards and ${Object.keys(abil).length} ability maps into simulator.html`);
+console.log(`embedded ${data.cards.length} cards, ${Object.keys(abil).length} ability maps, ${Object.keys(images).length} image paths into simulator.html`);

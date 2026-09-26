@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import Ajv from "ajv";
 import { existsSync } from "node:fs";
 import { buildAll, sameTemplate } from "./ability.mjs";
+import { checkImages } from "./card-images.mjs";
 
 export function validateCards(path = "data/cards.json") {
   const data = JSON.parse(readFileSync(path, "utf8"));
@@ -133,6 +134,8 @@ export function validateCards(path = "data/cards.json") {
     const saved = existsSync("data/abilities.json") ? readFileSync("data/abilities.json", "utf8") : "";
     if (!built.errors.length && saved !== JSON.stringify(built.abilities, null, 2) + "\n")
       errors.push("data/abilities.json が古い。node tools/ability.mjs build で作り直すこと");
+    // カード画像: どのカードも、画像を載せるか理由を書いて保留するかが決まっていること
+    errors.push(...checkImages(data.cards).errors);
   }
 
   return { data, errors };
