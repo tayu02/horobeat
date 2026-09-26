@@ -7,9 +7,9 @@
     "validate": "node tools/validate-cards.mjs",
     "build:cards": "node tools/build-cards.mjs",
     "build:artifact": "node tools/build-artifact.mjs",
-    "build": "npm run validate && npm run build:cards && npm run build:artifact && npm run ability-index && npm run card-index",
-    "ability-index": "node tools/ability-index.mjs --write",
-    "card-index": "node tools/card-index.mjs --write"
+    "build": "npm run abilities && npm run validate && npm run build:cards && npm run build:artifact && npm run card-index",
+    "card-index": "node tools/card-index.mjs --write",
+    "abilities": "node tools/ability.mjs build && node tools/ability.mjs index"
   },
   "devDependencies": {
     "ajv": "^8.17.1"

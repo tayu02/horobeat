@@ -2,6 +2,8 @@
 // スキーマで表せない整合性（key の一意性、判読が高いのに unknown がある等）もここで見る。
 import { readFileSync } from "node:fs";
 import Ajv from "ajv";
+import { existsSync } from "node:fs";
+import { buildAll } from "./ability.mjs";
 
 export function validateCards(path = "data/cards.json") {
   const data = JSON.parse(readFileSync(path, "utf8"));
@@ -120,6 +122,17 @@ export function validateCards(path = "data/cards.json") {
     for (let j = i + 1; j < tkeys.length; j++)
       if (dist(tkeys[i], tkeys[j]) <= 1)
         errors.push(`フレーバー中の書名が1文字違いで2種類ある: 『${tkeys[i]}』(${titles.get(tkeys[i]).join(", ")}) / 『${tkeys[j]}』(${titles.get(tkeys[j]).join(", ")})`);
+
+  // --- 能力文の部品分解 -------------------------------------------------
+  // 印字された能力文はすべて data/ability-parts.json の部品で組み立て直せること。
+  // 組み立て直した文が印字と1文字でも違えば、分解は採用されない（tools/ability.mjs）。
+  if (path === "data/cards.json") {
+    const built = buildAll(data.cards);
+    errors.push(...built.errors);
+    const saved = existsSync("data/abilities.json") ? readFileSync("data/abilities.json", "utf8") : "";
+    if (!built.errors.length && saved !== JSON.stringify(built.abilities, null, 2) + "\n")
+      errors.push("data/abilities.json が古い。node tools/ability.mjs build で作り直すこと");
+  }
 
   return { data, errors };
 }

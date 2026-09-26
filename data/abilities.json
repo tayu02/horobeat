@@ -1,0 +1,447 @@
+{
+  "HB01-033": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "conditions": [
+        {
+          "part": "own_color_count_on_line",
+          "args": {
+            "color": "赤",
+            "n": 4
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 5000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-065": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "won_battle"
+      },
+      "conditions": [
+        {
+          "part": "power_ratio_vs_front",
+          "args": {
+            "n": 2
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "destroy",
+          "args": {
+            "target": "正面のホロビト"
+          }
+        }
+      ],
+      "note": "note_no_barrier"
+    }
+  ],
+  "HB01-097": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": {
+          "part": "used_nth_waza",
+          "args": {
+            "n": 2
+          }
+        }
+      },
+      "conditions": [
+        {
+          "part": "front_cost_le",
+          "args": {
+            "n": 8
+          }
+        }
+      ],
+      "effects": [
+        "return_top_to_hand"
+      ]
+    }
+  ],
+  "HB01-063": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "緑"
+        }
+      },
+      "sub": {
+        "trigger": {
+          "subject": "this_holobito",
+          "event": "won_battle"
+        },
+        "conditions": [
+          {
+            "part": "in_lines",
+            "args": {
+              "from": 1,
+              "to": 2
+            }
+          }
+        ],
+        "effects": [
+          {
+            "part": "opponent_discard",
+            "args": {
+              "n": 1
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "HB01-031": [
+    {
+      "trigger": {
+        "subject": "this_holobito_battle",
+        "event": "ended"
+      },
+      "effects": [
+        {
+          "part": "select_own",
+          "args": {
+            "color": "赤",
+            "what": "エナ",
+            "n": 1,
+            "unit": "枚"
+          },
+          "then": "。"
+        },
+        {
+          "part": "make_unused",
+          "args": {
+            "target": "それ"
+          }
+        },
+        {
+          "part": "recover",
+          "args": {
+            "target": "このホロビト"
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-034": [
+    {
+      "conditions": [
+        {
+          "part": "on_line",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "cost_bigger",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-049": [
+    {
+      "conditions": [
+        {
+          "part": "lines_under_total_ge",
+          "args": {
+            "from": 1,
+            "to": 2,
+            "n": 3
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 3000
+          }
+        },
+        {
+          "part": "gain_keyword",
+          "args": {
+            "keyword": "ダブルダメージ"
+          }
+        }
+      ],
+      "note": "note_double_damage_held"
+    }
+  ],
+  "UNKNOWN-utsushimi": [
+    {
+      "effects": [
+        "only_if_other_waza_used"
+      ]
+    },
+    {
+      "conditions": [
+        "won_this_battle"
+      ],
+      "effects": [
+        {
+          "part": "damage_to_opponent_plus",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HD01-017": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "effects": [
+        {
+          "part": "indestructible",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "note": {
+        "part": "note_indestructible",
+        "sep": "\n"
+      }
+    }
+  ],
+  "HD01-001": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HD02-001": [
+    {
+      "conditions": [
+        {
+          "part": "on_line",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "cost_bigger",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HD02-002": [
+    {
+      "keyword": {
+        "part": "barrier",
+        "args": {
+          "n": 1
+        }
+      }
+    }
+  ],
+  "HD02-017": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "conditions": [
+        {
+          "part": "cards_under_ge",
+          "args": {
+            "n": 2
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "n": 3000
+          }
+        }
+      ]
+    }
+  ],
+  "HD01-005": [
+    {
+      "conditions": [
+        {
+          "part": "in_lines",
+          "args": {
+            "subject": "このホロビト",
+            "from": 2,
+            "to": 5
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 2500
+          }
+        }
+      ]
+    }
+  ],
+  "HD02-005": [
+    {
+      "keyword": {
+        "part": "barrier",
+        "args": {
+          "n": 1
+        }
+      }
+    }
+  ],
+  "HD01-006": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "select_own",
+          "args": {
+            "what": "ホロビト",
+            "n": 1,
+            "unit": "体"
+          }
+        },
+        "recover"
+      ]
+    }
+  ],
+  "HD02-006": [
+    {
+      "keyword": "double_damage"
+    }
+  ],
+  "HD01-007": [
+    {
+      "effects": [
+        {
+          "part": "indestructible",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "note": {
+        "part": "note_indestructible",
+        "sep": "\n"
+      }
+    }
+  ],
+  "HD02-009": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "overbeaten"
+      },
+      "conditions": [
+        {
+          "part": "is_down",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HD01-009": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "won_battle"
+      },
+      "conditions": [
+        {
+          "part": "in_lines",
+          "args": {
+            "from": 2,
+            "to": 5
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HD01-010": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "conditions": [
+        "no_cards_under"
+      ],
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ]
+}
