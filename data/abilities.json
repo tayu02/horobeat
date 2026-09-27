@@ -513,5 +513,24 @@
         ]
       }
     }
+  ],
+  "HD01-014": [
+    {
+      "trigger": {
+        "subject": "this_holobito_battle",
+        "event": "ended"
+      },
+      "effects": [
+        {
+          "part": "select_own",
+          "args": {
+            "what": "ホロビト",
+            "n": 1,
+            "unit": "体"
+          }
+        },
+        "recover"
+      ]
+    }
   ]
 }

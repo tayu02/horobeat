@@ -184,6 +184,16 @@ async function run(label, viewport, touch){
   s=await S();
   ok(!(await p.evaluate(()=>!!picking)) && s.players[0].deck.length===10,'緑のエナ2枚 → エナ詠みを満たさず、選ばせもしない');
 
+  // 13d. バトルが終わったとき → 自分のホロビトを1体選び、回復する（HD01-014）
+  // 「自分のホロビト」を選ぶ範囲と「回復する」の定義は未確定なので、どちらも手で処理するよう案内する
+  await setup({line:[['HD01-014'],[{k:'HD01-001',turned:true}]]},{});
+  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await wait(450);
+  ok(await p.evaluate(()=>(document.querySelector('#sheet .fxbtn')||{}).textContent||'').then(t=>t.includes('バトルが終わったとき')),'HD01-014: メニューに「バトルが終わったとき」の効果のボタン');
+  await clickSheet('.fxbtn'); await wait(150);
+  s=await S();
+  ok(!(await p.evaluate(()=>!!picking)) && s.players[0].line[1][0].turned===true,'HD01-014: 候補を光らせず、盤面も勝手に変えない（ダウンしたホロビトは横向きのまま）');
+  ok((await log()).includes('手で処理') && (await log()).includes('回復する」は定義が未確定'),'HD01-014: 選ぶ範囲と「回復する」は手で処理するよう案内');
+
   // 14. 手動に切り替えると何もしない
   await setup({hand:['HD01-001']},{});
   await p.click('#btnFx'); await wait(50);
