@@ -88,6 +88,10 @@
       "role": "効果条件",
       "text": "このバトルに勝った"
     },
+    "boost_used_on_this": {
+      "role": "効果条件",
+      "text": "このホロビトにブーストを使っている"
+    },
     "did_so": {
       "role": "効果条件",
       "text": "そうした"
@@ -100,6 +104,10 @@
       "role": "効果",
       "text": "[{target}の]パワーを+{n}する",
       "ren": "[{target}の]パワーを+{n}し"
+    },
+    "power_plus_passive": {
+      "role": "効果",
+      "text": "パワーは+{n}される"
     },
     "destroy": {
       "role": "効果",
@@ -162,6 +170,10 @@
     "note_double_damage_held": {
       "role": "補足",
       "text": "（ダブルダメージを持つホロビトがバトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"
+    },
+    "note_not_by_waza": {
+      "role": "補足",
+      "text": "（ワザでは発動しない）"
     },
     "double_damage": {
       "role": "キーワード",

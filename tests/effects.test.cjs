@@ -194,6 +194,18 @@ async function run(label, viewport, touch){
   ok(!(await p.evaluate(()=>!!picking)) && s.players[0].line[1][0].turned===true,'HD01-014: 候補を光らせず、盤面も勝手に変えない（ダウンしたホロビトは横向きのまま）');
   ok((await log()).includes('手で処理') && (await log()).includes('回復する」は定義が未確定'),'HD01-014: 選ぶ範囲と「回復する」は手で処理するよう案内');
 
+  // 13e. ブーストを使っているなら +2000（HD02-012）: シミュレーターが追いかけない状態なので盤面に印を出さない
+  await setup({line:[['HD02-012']]},{});
+  badge=await p.evaluate(()=>document.querySelector('#side-0 .fxb')?.textContent||'');
+  ok(badge==='','HD02-012: 「ブーストを使っているなら」の +2000 は盤面に印を出さない（? も出さない）');
+  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await wait(450);
+  const rows=await p.evaluate(()=>[...document.querySelectorAll('#sheet .fxst')].map(e=>e.className+':'+e.textContent).join(' | '));
+  ok(rows.includes('fxst u') && rows.includes('+2000') && rows.includes('手で確認'),'HD02-012: メニューでは「判定しない（手で確認）」と +2000 を示す');
+  ok(await p.evaluate(()=>(document.querySelector('#sheet .fxbtn')||{}).textContent||'').then(t=>t.includes('バトルに勝ったとき')),'HD02-012: 「バトルに勝ったとき」の効果のボタンがある');
+  await clickSheet('.fxbtn'); await wait(150);
+  s=await S();
+  ok(s.players[0].deck.length===9 && s.players[0].hand.length===1,'HD02-012: バトルに勝ったとき → 1枚引く');
+
   // 14. 手動に切り替えると何もしない
   await setup({hand:['HD01-001']},{});
   await p.click('#btnFx'); await wait(50);

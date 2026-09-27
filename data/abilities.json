@@ -532,5 +532,35 @@
         "recover"
       ]
     }
+  ],
+  "HD02-012": [
+    {
+      "conditions": [
+        "boost_used_on_this"
+      ],
+      "effects": [
+        {
+          "part": "power_plus_passive",
+          "args": {
+            "n": 2000
+          }
+        }
+      ],
+      "note": "note_not_by_waza"
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "won_battle"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
   ]
 }

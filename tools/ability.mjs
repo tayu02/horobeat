@@ -407,7 +407,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const p = des.indexOf(FX_BEGIN), q = des.indexOf(FX_END);
       if (fx && p >= 0 && q >= 0) {
         const esc = t => t.replace(/\|/g, "\\|");
-        const order = ["自動", "ボタン", "選択", "選択＋質問", "質問", "表示", "手動"];
+        const order = ["自動", "ボタン", "選択", "選択＋質問", "質問", "判定しない", "表示", "手動"];
         const rows = Object.entries(parts)
           .sort((a, b) => order.indexOf(fx[a[0]].how) - order.indexOf(fx[b[0]].how))
           .map(([id, pt]) => `| ${fx[id].how} | \`${id}\` | ${pt.role} | ${esc(pt.text)} | ${esc(fx[id].why)} |`);
