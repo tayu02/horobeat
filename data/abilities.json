@@ -562,5 +562,25 @@
         }
       ]
     }
+  ],
+  "HD01-012": [
+    {
+      "conditions": [
+        "boost_used_by_this"
+      ],
+      "effects": [
+        {
+          "part": "power_plus_passive",
+          "args": {
+            "target": "このホロビト",
+            "n": 3000
+          }
+        }
+      ],
+      "note": {
+        "part": "note_boost_once",
+        "sep": "\n"
+      }
+    }
   ]
 }

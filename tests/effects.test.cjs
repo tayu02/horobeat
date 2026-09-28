@@ -206,6 +206,16 @@ async function run(label, viewport, touch){
   s=await S();
   ok(s.players[0].deck.length===9 && s.players[0].hand.length===1,'HD02-012: バトルに勝ったとき → 1枚引く');
 
+  // 13f. ホロビト「が」ブーストを使っているなら +3000（HD01-012）: HD02-012 と同じく追いかけない状態
+  await setup({line:[['HD01-012']]},{});
+  badge=await p.evaluate(()=>document.querySelector('#side-0 .fxb')?.textContent||'');
+  ok(badge==='','HD01-012: 「ブーストを使っているなら」の +3000 は盤面に印を出さない（? も出さない）');
+  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await wait(450);
+  const rows2=await p.evaluate(()=>[...document.querySelectorAll('#sheet .fxst')].map(e=>e.className+':'+e.textContent).join(' | '));
+  ok(rows2.includes('fxst u') && rows2.includes('+3000') && rows2.includes('手で確認'),'HD01-012: メニューでは「判定しない（手で確認）」と +3000 を示す');
+  ok(await p.evaluate(()=>!document.querySelector('#sheet .fxbtn')),'HD01-012: 発動のきっかけを持たないので効果のボタンは出ない');
+  ok(await p.evaluate(()=>document.getElementById('sheet').textContent.includes('1度しか発動しない')),'HD01-012: 補足「（2回以上ブーストしていても…）」がメニューに出る');
+
   // 14. 手動に切り替えると何もしない
   await setup({hand:['HD01-001']},{});
   await p.click('#btnFx'); await wait(50);

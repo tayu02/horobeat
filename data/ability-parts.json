@@ -92,6 +92,10 @@
       "role": "効果条件",
       "text": "このホロビトにブーストを使っている"
     },
+    "boost_used_by_this": {
+      "role": "効果条件",
+      "text": "このホロビトがブーストを使っている"
+    },
     "did_so": {
       "role": "効果条件",
       "text": "そうした"
@@ -107,7 +111,7 @@
     },
     "power_plus_passive": {
       "role": "効果",
-      "text": "パワーは+{n}される"
+      "text": "[{target}の]パワーは+{n}される"
     },
     "destroy": {
       "role": "効果",
@@ -174,6 +178,10 @@
     "note_not_by_waza": {
       "role": "補足",
       "text": "（ワザでは発動しない）"
+    },
+    "note_boost_once": {
+      "role": "補足",
+      "text": "（2回以上ブーストしていても、この効果は1度しか発動しない）"
     },
     "double_damage": {
       "role": "キーワード",
