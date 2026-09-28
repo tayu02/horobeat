@@ -216,6 +216,13 @@ async function run(label, viewport, touch){
   ok(await p.evaluate(()=>!document.querySelector('#sheet .fxbtn')),'HD01-012: 発動のきっかけを持たないので効果のボタンは出ない');
   ok(await p.evaluate(()=>document.getElementById('sheet').textContent.includes('1度しか発動しない')),'HD01-012: 補足「（2回以上ブーストしていても…）」がメニューに出る');
 
+  // 13g. ラインに出ているなら、コストは1大きくなる（HD02-014。しなずいさまと同じ能力文）
+  await setup({line:[['HD02-014']]},{});
+  badge=await p.evaluate(()=>document.querySelector('#side-0 .fxb')?.textContent||'');
+  ok(badge.includes('コスト+1'),'HD02-014: ラインに出ている間は「コスト+1」の印が付く（'+badge+'）');
+  await setup({hand:['HD02-014']},{});
+  ok(await p.evaluate(()=>!document.querySelector('#side-0 .fxb')),'HD02-014: 手札にあるときは印が付かない');
+
   // 14. 手動に切り替えると何もしない
   await setup({hand:['HD01-001']},{});
   await p.click('#btnFx'); await wait(50);

@@ -113,8 +113,12 @@ async function run(label, viewport, touch){
   ok(await p.evaluate(()=>!document.querySelector('#side-0 .lineslot[data-idx="0"] .stackn')),'空のラインにはバッジなし');
 
   // --- エナのまとめ操作 ---
+  // エナの枚数は決め打ちしない。上の unknown 表示の確認で、エナに入っていた「合術 うつし身の撃」を
+  // 手札へ抜くことがあり（シャッフル次第）、そのときは 1 ではなく 0 から始まる（2026-09-28 に実際に落ちた）
+  const ena0=(await S()).players[0].ena.length;
   await p.evaluate(()=>{ for(let i=0;i<5;i++) drawTo(0,1,'ena',true); render(); });
-  ok((await S()).players[0].ena.length===6,'エナ6枚');
+  const ena1=(await S()).players[0].ena.length;
+  ok(ena1===ena0+5 && ena1>=5,'エナに5枚置ける（'+ena0+'→'+ena1+'枚）');
   await p.click('#side-0 .zlabel[data-zsheet="ena"]');
   await wait(430);
   await p.click('#sheet button[data-ena="tap"][data-arg="4"]');
@@ -122,7 +126,7 @@ async function run(label, viewport, touch){
   ok(s.players[0].ena.filter(c=>c.turned).length===4&&s.players[0].ena.slice(0,4).every(c=>c.turned),'左から4枚が横向きになる');
   await p.click('#side-0 .zlabel[data-zsheet="ena"]'); await wait(430);
   const disabled5=await p.evaluate(()=>document.querySelector('#sheet button[data-ena="tap"][data-arg="3"]').disabled);
-  ok(disabled5,'縦が2枚しかないとき3枚ボタンは押せない');
+  ok(disabled5,'縦が3枚未満のとき3枚ボタンは押せない');
   await p.click('#sheet button[data-ena="untapAll"]');
   ok((await S()).players[0].ena.every(c=>!c.turned),'全て縦向きに戻る');
 

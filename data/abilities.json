@@ -582,5 +582,25 @@
         "sep": "\n"
       }
     }
+  ],
+  "HD02-014": [
+    {
+      "conditions": [
+        {
+          "part": "on_line",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "cost_bigger",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
   ]
 }
