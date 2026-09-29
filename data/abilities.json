@@ -88,29 +88,31 @@
           "color": "緑"
         }
       },
-      "sub": {
-        "trigger": {
-          "subject": "this_holobito",
-          "event": "won_battle"
-        },
-        "conditions": [
-          {
-            "part": "in_lines",
-            "args": {
-              "from": 1,
-              "to": 2
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_holobito",
+            "event": "won_battle"
+          },
+          "conditions": [
+            {
+              "part": "in_lines",
+              "args": {
+                "from": 1,
+                "to": 2
+              }
             }
-          }
-        ],
-        "effects": [
-          {
-            "part": "opponent_discard",
-            "args": {
-              "n": 1
+          ],
+          "effects": [
+            {
+              "part": "opponent_discard",
+              "args": {
+                "n": 1
+              }
             }
-          }
-        ]
-      }
+          ]
+        }
+      ]
     }
   ],
   "HB01-031": [
@@ -463,31 +465,33 @@
           "color": "緑"
         }
       },
-      "sub": {
-        "trigger": {
-          "subject": "this_holobito",
-          "event": "entered"
-        },
-        "effects": [
-          {
-            "part": "may_reveal_from_hand",
-            "args": {
-              "n": 7,
-              "m": 1
-            },
-            "then": "。"
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_holobito",
+            "event": "entered"
           },
-          {
-            "part": "draw",
-            "args": {
-              "n": 1
+          "effects": [
+            {
+              "part": "may_reveal_from_hand",
+              "args": {
+                "n": 7,
+                "m": 1
+              },
+              "then": "。"
             },
-            "if": [
-              "did_so"
-            ]
-          }
-        ]
-      }
+            {
+              "part": "draw",
+              "args": {
+                "n": 1
+              },
+              "if": [
+                "did_so"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "HD01-011": [
@@ -499,19 +503,21 @@
           "color": "赤"
         }
       },
-      "sub": {
-        "conditions": [
-          "not_down"
-        ],
-        "effects": [
-          {
-            "part": "power_plus",
-            "args": {
-              "n": 3000
+      "sub": [
+        {
+          "conditions": [
+            "not_down"
+          ],
+          "effects": [
+            {
+              "part": "power_plus",
+              "args": {
+                "n": 3000
+              }
             }
-          }
-        ]
-      }
+          ]
+        }
+      ]
     }
   ],
   "HD01-014": [
@@ -599,6 +605,44 @@
           "args": {
             "n": 1
           }
+        }
+      ]
+    }
+  ],
+  "HD01-013": [
+    {
+      "keyword": {
+        "part": "kyomei",
+        "args": {
+          "tribe": "ライガ"
+        }
+      },
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_waza",
+            "particle": "を",
+            "event": "used"
+          },
+          "effects": [
+            {
+              "part": "draw",
+              "args": {
+                "n": 1
+              }
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "part": "power_plus",
+              "args": {
+                "target": "このワザ",
+                "n": 1000
+              }
+            }
+          ]
         }
       ]
     }

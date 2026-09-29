@@ -2,9 +2,10 @@
 //
 // 文の形:
 //   [発火条件1]が[発火条件2]とき、[効果条件]なら、…[効果]。[補足]
+//   （「が」の代わりに「を」で続く形もある。例: 「このワザを使ったとき、」。trigger.particle に入る）
 //   効果が「。」で終わったあと、次の文の頭に [効果条件]なら、を置ける
 //   （例: 「…見せてもよい。そうしたなら、カードを1枚引く。」）。これは効果の if に入る
-//   [キーワード]（[説明]）[\n・続く文]
+//   [キーワード]（[説明]）[\n・続く文]…（「・」の文は1つ以上並べられる。sub は配列）
 // のどちらか。各 [ ] は省略されうる（効果は1つ以上）。
 //
 // **守っていること:** 分解の結果は、組み立て直すと印字と1文字も違わない
@@ -62,13 +63,13 @@ export function render(ab, parts = loadParts()) {
   if (ab.keyword) {
     const { p, args } = P(ab.keyword);
     let s = `${fill(p.text, args)}（${fill(p.reminder, args)}）`;
-    if (ab.sub) s += "\n・" + render(ab.sub, parts);
+    for (const x of ab.sub || []) s += "\n・" + render(x, parts);
     return s;
   }
   let s = "";
   if (ab.trigger) {
     const a = P(ab.trigger.subject), b = P(ab.trigger.event);
-    s += `${fill(a.p.text, a.args)}が${fill(b.p.text, b.args)}とき、`;
+    s += `${fill(a.p.text, a.args)}${ab.trigger.particle || "が"}${fill(b.p.text, b.args)}とき、`;
   }
   for (const c of ab.conditions || []) {
     const { p, args } = P(c);
@@ -182,11 +183,12 @@ export function parse(text, parts = loadParts()) {
   function* sentence(pos) {
     yield* conditions(pos, [], 0, null);
     for (const [sid, sp] of byRole("発火条件1"))
-      for (const [eid, ep] of byRole("発火条件2")) {
-        const r = tryAt(text, pos, [{ tpl: sp.text }, { lit: "が" }, { tpl: ep.text }, { lit: "とき、" }]);
+      for (const [eid, ep] of byRole("発火条件2"))
+      for (const particle of ["が", "を"]) {
+        const r = tryAt(text, pos, [{ tpl: sp.text }, { lit: particle }, { tpl: ep.text }, { lit: "とき、" }]);
         if (!r) continue;
         note(r.end, "効果条件 または 効果");
-        const trig = { subject: mkref(sid, r.args[0]), event: mkref(eid, r.args[2]) };
+        const trig = { subject: mkref(sid, r.args[0]), ...(particle === "が" ? {} : { particle }), event: mkref(eid, r.args[2]) };
         yield* conditions(r.end, [], freeLen(r.args[0]) + freeLen(r.args[2]), trig);
       }
   }
@@ -248,11 +250,17 @@ export function parse(text, parts = loadParts()) {
       const kw = { keyword: mkref(id, { ...a, ...b }) };
       const c = freeLen(a) + freeLen(b);
       if (r.end === text.length) yield { ab: kw, end: r.end, cost: c };
-      if (text.startsWith("\n・", r.end)) {
-        note(r.end + 2, "キーワードに続く文");
-        for (const x of sentence(r.end + 2))
-          if (x.end === text.length) yield { ab: { ...kw, sub: x.ab }, end: x.end, cost: c + x.cost };
-      }
+      if (text.startsWith("\n・", r.end))
+        for (const y of subs(r.end + 2)) yield { ab: { ...kw, sub: y.list }, end: y.end, cost: c + y.cost };
+    }
+  }
+  // 「・」で始まる文の並び。最後の文は印字の終わりまで届くこと
+  function* subs(pos) {
+    note(pos, "キーワードに続く文");
+    for (const x of sentence(pos)) {
+      if (x.end === text.length) yield { list: [x.ab], end: x.end, cost: x.cost };
+      else if (text.startsWith("\n・", x.end))
+        for (const y of subs(x.end + 2)) yield { list: [x.ab, ...y.list], end: y.end, cost: x.cost + y.cost };
     }
   }
 
@@ -309,7 +317,7 @@ export function buildAll(cards = JSON.parse(readFileSync(CARDS_PATH, "utf8")).ca
     if (ab.trigger) { mark(ab.trigger.subject); mark(ab.trigger.event); }
     (ab.conditions || []).forEach(mark);
     (ab.effects || []).forEach(e => { mark(e); (ref(e).if || []).forEach(mark); });
-    walk(ab.sub);
+    (ab.sub || []).forEach(walk);
   };
   Object.values(out).flat().forEach(walk);
   for (const id of Object.keys(parts))
@@ -339,7 +347,7 @@ function usage(abilities) {
     if (ab.trigger) { add(ab.trigger.subject, key); add(ab.trigger.event, key); }
     (ab.conditions || []).forEach(r => add(r, key));
     (ab.effects || []).forEach(r => { add(r, key); (ref(r).if || []).forEach(c => add(c, key)); });
-    walk(ab.sub, key);
+    (ab.sub || []).forEach(x => walk(x, key));
   };
   for (const [key, list] of Object.entries(abilities)) list.forEach(ab => walk(ab, key));
   return u;
@@ -356,7 +364,7 @@ function indexMarkdown(abilities, parts) {
     "**分解は、組み立て直すと印字と1文字も違わないものだけを採用している**（`tools/ability.mjs`）。",
     "役割名は文中の位置に付けた名前で、**ルール上の区別ではない**。",
     "`{n}` は数字、`[ ]` は引数を渡したときだけ現れる部分。", "",
-    "文の形: `[発火条件1]が[発火条件2]とき、[効果条件]なら、[効果]。[補足]` ／ `[キーワード]（[説明]）`", "",
+    "文の形: `[発火条件1]が[発火条件2]とき、[効果条件]なら、[効果]。[補足]`（「が」の代わりに「を」の形もある） ／ `[キーワード]（[説明]）` のあとに `・[文]` が1つ以上続くこともある", "",
   ];
   for (const role of roles) {
     const rows = Object.entries(parts).filter(([, p]) => p.role === role);

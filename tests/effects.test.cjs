@@ -223,6 +223,17 @@ async function run(label, viewport, touch){
   await setup({hand:['HD02-014']},{});
   ok(await p.evaluate(()=>!document.querySelector('#side-0 .fxb')),'HD02-014: 手札にあるときは印が付かない');
 
+  // 13h. 共鳴（HD01-013、ワザ）: キーワードの下に「・」の文が2つ。発動のきっかけを持つ文だけを発動の処理に回す
+  const k13=await p.evaluate(()=>{ const ab=ABILITY_MAP['HD01-013'][0], f=firedAb(ab);
+    return { subs:subsOf(ab).length, fired:f&&f.sub.length, trig:triggerText(triggeredOf(ab)) }; });
+  ok(k13.subs===2 && k13.fired===1,'HD01-013: 「・」の文2つのうち、発動の処理に回るのは「使ったとき」の1つだけ '+JSON.stringify(k13));
+  ok(k13.trig==='このワザを使ったとき','HD01-013: 「このワザを使ったとき」と「を」で表示される（'+k13.trig+'）');
+  await setup({hand:['HD01-013']},{});
+  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].hand[0].uid); await wait(450);
+  const sh13=await p.evaluate(()=>document.getElementById('sheet').textContent);
+  ok(sh13.includes('共鳴：ライガ') && sh13.includes('ワザの効果はシミュレーターでは処理しません'),'HD01-013: 能力文が出て、ワザの効果は処理しないと示す');
+  ok(await p.evaluate(()=>!document.querySelector('#sheet .fxbtn')),'HD01-013: ワザには効果のボタンを出さない');
+
   // 14. 手動に切り替えると何もしない
   await setup({hand:['HD01-001']},{});
   await p.click('#btnFx'); await wait(50);
