@@ -2,7 +2,8 @@
 //
 // 文の形:
 //   [発火条件1]が[発火条件2]とき、[効果条件]なら、…[効果]。[補足]
-//   （「が」の代わりに「を」で続く形もある。例: 「このワザを使ったとき、」。trigger.particle に入る）
+//   （「が」の代わりに「を」「に」で続く形もある。例: 「このワザを使ったとき、」「このバトルに勝ったとき、」。
+//    trigger.particle に入る）
 //   効果が「。」で終わったあと、次の文の頭に [効果条件]なら、を置ける
 //   （例: 「…見せてもよい。そうしたなら、カードを1枚引く。」）。これは効果の if に入る
 //   [キーワード]（[説明]）[\n・続く文]…（「・」の文は1つ以上並べられる。sub は配列）
@@ -184,7 +185,7 @@ export function parse(text, parts = loadParts()) {
     yield* conditions(pos, [], 0, null);
     for (const [sid, sp] of byRole("発火条件1"))
       for (const [eid, ep] of byRole("発火条件2"))
-      for (const particle of ["が", "を"]) {
+      for (const particle of ["が", "を", "に"]) {
         const r = tryAt(text, pos, [{ tpl: sp.text }, { lit: particle }, { tpl: ep.text }, { lit: "とき、" }]);
         if (!r) continue;
         note(r.end, "効果条件 または 効果");
@@ -364,7 +365,7 @@ function indexMarkdown(abilities, parts) {
     "**分解は、組み立て直すと印字と1文字も違わないものだけを採用している**（`tools/ability.mjs`）。",
     "役割名は文中の位置に付けた名前で、**ルール上の区別ではない**。",
     "`{n}` は数字、`[ ]` は引数を渡したときだけ現れる部分。", "",
-    "文の形: `[発火条件1]が[発火条件2]とき、[効果条件]なら、[効果]。[補足]`（「が」の代わりに「を」の形もある） ／ `[キーワード]（[説明]）` のあとに `・[文]` が1つ以上続くこともある", "",
+    "文の形: `[発火条件1]が[発火条件2]とき、[効果条件]なら、[効果]。[補足]`（「が」の代わりに「を」「に」の形もある） ／ `[キーワード]（[説明]）` のあとに `・[文]` が1つ以上続くこともある", "",
   ];
   for (const role of roles) {
     const rows = Object.entries(parts).filter(([, p]) => p.role === role);

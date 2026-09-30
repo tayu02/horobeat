@@ -646,5 +646,48 @@
         }
       ]
     }
+  ],
+  "HD02-013": [
+    {
+      "keyword": {
+        "part": "kyomei",
+        "args": {
+          "tribe": "スザク"
+        }
+      },
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_waza",
+            "particle": "を",
+            "event": "used"
+          },
+          "effects": [
+            {
+              "part": "opponent_discard",
+              "args": {
+                "n": 1
+              }
+            }
+          ]
+        },
+        {
+          "trigger": {
+            "subject": "this_battle",
+            "particle": "に",
+            "event": "won"
+          },
+          "effects": [
+            {
+              "part": "draw",
+              "args": {
+                "who": "自分",
+                "n": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
   ]
 }

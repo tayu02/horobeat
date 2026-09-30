@@ -234,6 +234,20 @@ async function run(label, viewport, touch){
   ok(sh13.includes('共鳴：ライガ') && sh13.includes('ワザの効果はシミュレーターでは処理しません'),'HD01-013: 能力文が出て、ワザの効果は処理しないと示す');
   ok(await p.evaluate(()=>!document.querySelector('#sheet .fxbtn')),'HD01-013: ワザには効果のボタンを出さない');
 
+  // 13i. 共鳴：スザク（HD02-013、ワザ）: 「・」の文が2つとも発動のきっかけを持つ。きっかけごとに分けて処理する
+  const k14=await p.evaluate(()=>{ const ab=ABILITY_MAP['HD02-013'][0], ts=triggersIn(ab);
+    return { n:ts.length, texts:ts.map(triggerText), each:ts.map(t=>firedAb(ab,t).sub.length) }; });
+  ok(k14.n===2 && k14.each.every(n=>n===1),'HD02-013: きっかけが2つあり、それぞれの発動で処理する文は1つだけ '+JSON.stringify(k14));
+  ok(k14.texts[0]==='このワザを使ったとき' && k14.texts[1]==='このバトルに勝ったとき','HD02-013: 「を」「に」の形で表示される '+JSON.stringify(k14.texts));
+  await setup({hand:['HD02-013']},{});
+  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].hand[0].uid); await wait(450);
+  const sh14=await p.evaluate(()=>document.getElementById('sheet').textContent);
+  ok(sh14.includes('共鳴：スザク') && sh14.includes('自分はカードを1枚引く') && sh14.includes('ワザの効果はシミュレーターでは処理しません'),'HD02-013: 能力文が出て、ワザの効果は処理しないと示す');
+  // 引く人が「自分」以外と書かれていたら、自動では引かない
+  const dr=await p.evaluate(()=>{ const P=state.players[0], n0=P.hand.length; let done=false;
+    PART_FX.draw.run({pi:0}, {who:"相手", n:1}, ()=>{ done=true; }); return { same:P.hand.length===n0, done }; });
+  ok(dr.same && dr.done,'引く人が「自分」以外なら自動で引かず、手で処理するよう案内する');
+
   // 14. 手動に切り替えると何もしない
   await setup({hand:['HD01-001']},{});
   await p.click('#btnFx'); await wait(50);
