@@ -82,6 +82,18 @@ async function run(label, viewport, touch){
   badge=await p.evaluate(()=>[...document.querySelectorAll('#side-0 .fxb span')].map(x=>x.textContent).join(','));
   ok(badge.includes('+5000?'),'HB01-033: 束の一番上だけなら3体・下も含めると4体 → 未確定の「?」');
 
+  // 7b. 色の指定がない「自分のホロビトが4体以上」（HD01-015）: 色を問わず数える
+  await setup({line:[['HD01-015'],['HB01-001'],['HD02-001'],['HD02-002']]},{});
+  badge=await p.evaluate(()=>[...document.querySelectorAll('#side-0 .fxb span')].map(x=>x.textContent+':'+x.className).join(','));
+  ok(badge.includes('+4000:on'),'HD01-015: 赤2体と緑2体で4体 → 色を問わず数えて +4000 が有効（'+badge+'）');
+  await setup({line:[['HD01-015'],['HB01-001'],['HD02-001']]},{});
+  // 盤面全体ではなく HD01-015 の枠だけを見る（しなずいさま自身の「コスト+1」の印は別に付く）
+  badge=await p.evaluate(()=>[...document.querySelectorAll('#side-0 .lineslot[data-idx="0"] .fxb span')].map(x=>x.textContent).join(','));
+  ok(badge==='','HD01-015: 3体では +4000 の印が付かない（'+badge+'）');
+  await setup({line:[['HD01-015'],['HB01-001'],['HD02-001'],[{k:null}]]},{});
+  badge=await p.evaluate(()=>[...document.querySelectorAll('#side-0 .fxb span')].map(x=>x.textContent).join(','));
+  ok(badge.includes('+4000?'),'HD01-015: 4体目が未確定のカード（ホロビトか分からない）なら未確定の「?」（'+badge+'）');
+
   // 8. エナ詠み③: 緑のエナの枚数
   await setup({line:[['HB01-063']], ena:['HD02-001','HD02-002']},{});
   badge=await p.evaluate(()=>document.querySelector('#side-0 .fxb')?.textContent||'');

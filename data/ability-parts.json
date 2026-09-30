@@ -88,9 +88,9 @@
       "role": "効果条件",
       "text": "[{subject}が]ラインに出ている"
     },
-    "own_color_count_on_line": {
+    "own_count_on_line": {
       "role": "効果条件",
-      "text": "自分の{color}のホロビトが{n}体以上ラインに出ている"
+      "text": "自分の[{color}の]ホロビトが{n}体以上ラインに出ている"
     },
     "power_ratio_vs_front": {
       "role": "効果条件",

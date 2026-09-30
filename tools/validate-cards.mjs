@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import Ajv from "ajv";
 import { existsSync } from "node:fs";
-import { buildAll, sameTemplate } from "./ability.mjs";
+import { buildAll, sameTemplate, sameShape } from "./ability.mjs";
 import { checkImages } from "./card-images.mjs";
 
 export function validateCards(path = "data/cards.json") {
@@ -103,8 +103,10 @@ export function validateCards(path = "data/cards.json") {
   for (let i = 0; i < uniq.length; i++)
     for (let j = i + 1; j < uniq.length; j++) {
       const d = dist(uniq[i], uniq[j]);
-      // 同じ部品に違う値が入っているだけなら正当（例: エナ詠みの「緑」と「赤」）
-      if (d > 0 && d <= 3 && !sameTemplate(uniq[i], uniq[j]))
+      // 同じ部品に違う値が入っているだけなら正当（例: エナ詠みの「緑」と「赤」）。
+      // 文全体でも、部品の組み立てが同じで、違いが数字か省略できる語の有無だけなら正当
+      // （例: HB01-033「自分の赤のホロビトが…+5000」と HD01-015「自分のホロビトが…+4000」）
+      if (d > 0 && d <= 3 && !sameTemplate(uniq[i], uniq[j]) && !sameShape(uniq[i], uniq[j]))
         errors.push(`能力文が ${d} 文字だけ違う。転記ミスでないか確認すること:\n` +
           `      ${uniq[i]}\n        … ${byLine.get(uniq[i]).join(", ")}\n` +
           `      ${uniq[j]}\n        … ${byLine.get(uniq[j]).join(", ")}`);

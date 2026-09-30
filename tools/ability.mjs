@@ -133,6 +133,33 @@ export function sameTemplate(a, b, parts = loadParts()) {
   return false;
 }
 
+// 2つの印字文が「同じ部品の組み立てで、違いは数字か、書いても書かなくてもよい語の有無だけ」か。
+// 転記ゆれの検出で、正当な違い（例: 「自分の赤のホロビトが…」と「自分のホロビトが…」）を除くのに使う。
+// 同じ引数に違う文字列が入っている場合は、転記ミスの可能性があるので false を返す。
+export function sameShape(a, b, parts = loadParts()) {
+  const pa = parse(a, parts), pb = parse(b, parts);
+  if (!pa.ok || !pb.ok) return false;
+  // 能力を、文中に現れる順の [骨組みの記号, 引数] の列にする
+  const seq = (ab, out = []) => {
+    const r = (tag, x) => { if (x) { const q = ref(x); out.push([`${tag}:${q.part}:${q.then || ""}:${q.sep || ""}`, q.args || {}]);
+      (q.if || []).forEach(c => r("if", c)); } };
+    r("kw", ab.keyword);
+    if (ab.trigger) { r("subj", ab.trigger.subject); out.push(["particle:" + (ab.trigger.particle || "が"), {}]); r("ev", ab.trigger.event); }
+    (ab.conditions || []).forEach(c => r("cond", c));
+    (ab.effects || []).forEach(e => r("eff", e));
+    r("note", ab.note);
+    (ab.sub || []).forEach(x => { out.push(["sub", {}]); seq(x, out); });
+    return out;
+  };
+  const sa = seq(pa.ability), sb = seq(pb.ability);
+  if (sa.length !== sb.length || sa.some((x, i) => x[0] !== sb[i][0])) return false;
+  return sa.every(([, x], i) => {
+    const y = sb[i][1];
+    return [...new Set([...Object.keys(x), ...Object.keys(y)])].every(k =>
+      !(k in x) || !(k in y) || x[k] === y[k] || (typeof x[k] === "number" && typeof y[k] === "number"));
+  });
+}
+
 // 同じ名前の引数が2回出たら、同じ値でなければ一致とみなさない
 // （例: 「{n}バリア（…ダメージは{n}減る）」で数字が食い違う文は分解しない）
 function collect(names, groups) {

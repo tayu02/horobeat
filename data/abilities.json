@@ -6,7 +6,7 @@
     {
       "conditions": [
         {
-          "part": "own_color_count_on_line",
+          "part": "own_count_on_line",
           "args": {
             "color": "赤",
             "n": 4
@@ -686,6 +686,27 @@
               }
             }
           ]
+        }
+      ]
+    }
+  ],
+  "HD01-015": [
+    {
+      "conditions": [
+        {
+          "part": "own_count_on_line",
+          "args": {
+            "n": 4
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 4000
+          }
         }
       ]
     }
