@@ -260,6 +260,14 @@ async function run(label, viewport, touch){
     PART_FX.draw.run({pi:0}, {who:"相手", n:1}, ()=>{ done=true; }); return { same:P.hand.length===n0, done }; });
   ok(dr.same && dr.done,'引く人が「自分」以外なら自動で引かず、手で処理するよう案内する');
 
+  // 13j. バトルに勝ったとき → 1枚引く（HD02-015。HD02-012 の2つ目と同じ文）
+  await setup({line:[['HD02-015']]},{});
+  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await wait(450);
+  ok(await p.evaluate(()=>(document.querySelector('#sheet .fxbtn')||{}).textContent||'').then(t=>t.includes('バトルに勝ったとき')),'HD02-015: 「バトルに勝ったとき」の効果のボタンがある');
+  await clickSheet('.fxbtn'); await wait(150);
+  s=await S();
+  ok(s.players[0].deck.length===9 && s.players[0].hand.length===1,'HD02-015: バトルに勝ったとき → 1枚引く');
+
   // 14. 手動に切り替えると何もしない
   await setup({hand:['HD01-001']},{});
   await p.click('#btnFx'); await wait(50);

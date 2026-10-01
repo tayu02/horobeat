@@ -710,5 +710,21 @@
         }
       ]
     }
+  ],
+  "HD02-015": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "won_battle"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
   ]
 }
