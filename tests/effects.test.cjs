@@ -268,6 +268,26 @@ async function run(label, viewport, touch){
   s=await S();
   ok(s.players[0].deck.length===9 && s.players[0].hand.length===1,'HD02-015: バトルに勝ったとき → 1枚引く');
 
+  // 13k. ダウンしたとき → 2枚引く（HD02-016）。ラインの一番上のホロビトを縦から横にしたときだけ
+  await setup({line:[['HD02-016']]},{});
+  s=await S(); await tapCard(s.players[0].line[0][0].uid); await clickSheet('button[data-tg]'); await wait(150);
+  s=await S();
+  ok(s.players[0].line[0][0].turned && s.players[0].deck.length===8 && s.players[0].hand.length===2,'HD02-016: 横向き（ダウン）にすると 2枚引く');
+  ok((await log()).includes('ダウンした'),'HD02-016: 記録に「ダウンした」と出る');
+  await tapCard(s.players[0].line[0][0].uid); await clickSheet('button[data-tg]'); await wait(150);
+  s=await S();
+  ok(!s.players[0].line[0][0].turned && s.players[0].deck.length===8,'HD02-016: 縦向きに戻しても引かない');
+  // 束の下のカードの効果は未確定（§10）なので発動させない
+  await setup({line:[['HD02-016','HD01-001']]},{});
+  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await clickSheet('button[data-tg]'); await wait(150);
+  s=await S();
+  ok(s.players[0].line[0][0].turned && s.players[0].deck.length===10,'HD02-016: 束の下にあるときは横向きにしても発動しない');
+  // 手動のときは発動しない
+  await setup({line:[['HD02-016']]},{});
+  await p.evaluate(()=>{ state.fxAuto=false; render(); });
+  s=await S(); await tapCard(s.players[0].line[0][0].uid); await clickSheet('button[data-tg]'); await wait(150);
+  ok((await S()).players[0].deck.length===10,'HD02-016: 効果が手動のときは横向きにしても引かない');
+
   // 14. 手動に切り替えると何もしない
   await setup({hand:['HD01-001']},{});
   await p.click('#btnFx'); await wait(50);

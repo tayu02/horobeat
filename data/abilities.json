@@ -726,5 +726,29 @@
         }
       ]
     }
+  ],
+  "HD01-016": [
+    {
+      "keyword": "double_damage"
+    }
+  ],
+  "HD02-016": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "downed"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 2
+          }
+        }
+      ]
+    }
   ]
 }
