@@ -703,11 +703,16 @@ var PART_FX = {
           ["一番上だけ墓地へ", "束ごと墓地へ", "何もしない（手で処理する）"], function(i){
             if (i === 0) put([x.front]); else if (i === 1) put(st.slice()); else { fxLog("破壊は手で処理してください"); next(); } }, stop);
       }, stop); } },
-  return_top_to_hand:      { how:"選択", why:"「正面」を選ばせる。「その一番上のカード」は印字どおり束の一番上",
+  return_top_to_hand:      { how:"選択＋質問", why:"「正面」を選ばせる。「その一番上のカード」は印字どおり束の一番上。誰の手札かは印字されていないので選ばせる（→ A-24）",
     run:function(x, a, next, stop){
       needFront(x, function(){
-        var c = x.front; moveCard(c.uid, c.owner, "hand"); c.up = true; c.turned = false;
-        fxLog(nm(c) + " を" + SIDE_NAME[c.owner] + "の手札に戻した"); next(); }, stop); } },
+        var c = x.front;
+        fxChoose("「" + nm(c) + "」を手札に戻します。誰の手札に戻すかは印字されていません（→ A-24）。",
+          [SIDE_NAME[c.owner] + "（このカードの持ち主）の手札に戻す", "手で処理する"], function(i){
+            if (i === 1){ fxLog("「" + nm(c) + "」を手札に戻す処理は手で行ってください"); return next(); }
+            moveCard(c.uid, c.owner, "hand"); c.up = true; c.turned = false;
+            fxLog(nm(c) + " を" + SIDE_NAME[c.owner] + "の手札に戻した"); next(); }, stop);
+      }, stop); } },
   cost_bigger:             { how:"表示", why:"コストの計算はしない。条件を満たしている間、印を付ける", badge:function(a){ return "コスト+" + a.n; } },
   select_own:              { how:"選択", why:"エナならエナゾーンから選ばせる。ホロビトを選ぶ範囲は未確定なので手で",
     run:function(x, a, next, stop){
@@ -923,13 +928,14 @@ function fire(t, done){
   resolveAb(t.ctx || ctxOf(t.card), t.ab, function(){ render(); if (done) done(); });
 }
 // 同時に複数発動するときの順番は未確定なので、プレイヤーに選ばせる
-function runQueue(q){
-  if (!q.length){ render(); return; }
-  if (q.length === 1) return fire(q.shift(), function(){ render(); });
+function runQueue(q, done){
+  var end = function(){ render(); if (done) done(); };
+  if (!q.length) return end();
+  if (q.length === 1) return fire(q.shift(), end);
   fxChoose("同時に " + q.length + " つの効果が発動します。処理する順番は未確定なので、先に処理するものを選んでください。",
     q.map(function(t){ return nm(t.card) + "：" + t.why; }),
-    function(i){ var t = q.splice(i, 1)[0]; fire(t, function(){ runQueue(q); }); },
-    function(){ fxLog("処理を中断した"); render(); });
+    function(i){ var t = q.splice(i, 1)[0]; fire(t, function(){ runQueue(q, done); }); },
+    function(){ fxLog("処理を中断した"); end(); });
 }
 function triggersOf(card, event, why){
   var out = [], list = ABILITY_MAP[card.key] || [];
@@ -941,19 +947,28 @@ function triggersOf(card, event, why){
   return out;
 }
 // 移動のあとに呼ぶ。before は移動前の位置
+// ラインの外から束の上に置いたとき（オーバービート）は、下になったホロビトのダウン状態を解除する
+// （確定: 入門⑫「ダウン状態のホロビトがオーバービートされると、ダウン状態が解除される」）。
+// 効果ではなくルールなので「効果: 手動」のときも行う。解除は、下になる側の
+// 「オーバービートされるとき、ダウンしているなら」（HD02-009）を処理し終えてから行う
 function fxAfterMove(uid, before){
-  if (!fxOn()) return;
   var f = findCard(uid); if (!f) return;
-  var c = f.card, loc = locOf(c), q = [];
-  if (loc && loc.zone === "line" && before && before.zone !== "line" && c.up && isHolo(c)){
-    q = q.concat(triggersOf(c, "entered", "ラインに出た"));
-    if (loc.pos > 0){
-      var under = loc.stack[loc.pos - 1];
-      if (under.up && isHolo(under)) q = q.concat(triggersOf(under, "overbeaten", "オーバービートされた"));
+  var c = f.card, loc = locOf(c), q = [], under = null;
+  var fromOut = loc && loc.zone === "line" && before && before.zone !== "line" && c.up && isHolo(c);
+  if (fromOut && loc.pos > 0){ var u = loc.stack[loc.pos - 1]; if (u.up && isHolo(u)) under = u; }
+  var release = function(){
+    if (under && under.turned){
+      under.turned = false;
+      fxLog(nm(under) + " はオーバービートされたため、ダウン状態を解除した（入門⑫）");
     }
+    render();
+  };
+  if (fxOn() && fromOut){
+    q = q.concat(triggersOf(c, "entered", "ラインに出た"));
+    if (under) q = q.concat(triggersOf(under, "overbeaten", "オーバービートされた"));
   }
-  if (!q.length) return;
-  snap(); fxClear(); runQueue(q);
+  if (!q.length){ if (under && under.turned) fxClear(); return release(); }
+  snap(); fxClear(); runQueue(q, release);
 }
 // 向きを変えたあとに呼ぶ。ラインの束の一番上のホロビトが縦から横（ダウン。§9-1）になったとき。
 // 束の下のカードの効果の扱いは未確定（§10）なので発動させない

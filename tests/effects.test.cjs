@@ -53,9 +53,21 @@ async function run(label, viewport, touch){
   // 4. オーバービートされるとき、ダウンしているなら（下になる側）
   await setup({hand:['HB01-001','HB01-001'], line:[[{k:'HD02-009',turned:true}],[{k:'HD02-009',turned:false}]]},{});
   s=await S(); await moveTo(s.players[0].hand[0].uid,'line',0);
-  s=await S(); ok(s.players[0].deck.length===9,'HD02-009: ダウン中にオーバービートされる → 1枚引く');
+  s=await S(); ok(s.players[0].deck.length===9,'HD02-009: ダウン中にオーバービートされる → 1枚引く（引く前にダウンを解除しない）');
+  ok(!s.players[0].line[0][0].turned && (await log()).includes('ダウン状態を解除した'),'オーバービートされた側のダウン状態が、効果のあとで解除される（入門⑫）');
   await moveTo(s.players[0].hand.find(c=>c.key==='HB01-001').uid,'line',1);
   s=await S(); ok(s.players[0].deck.length===9,'HD02-009: ダウンしていなければ引かない');
+
+  // 4b. オーバービートでダウン状態を解除する（ルールなので「効果: 手動」でも行う）
+  await setup({hand:['HB01-033'], line:[[{k:'HB01-001',turned:true}]]},{});
+  await p.evaluate(()=>{ state.fxAuto=false; render(); });
+  s=await S(); await moveTo(s.players[0].hand[0].uid,'line',0);
+  s=await S(); ok(!s.players[0].line[0][0].turned && s.players[0].line[0].length===2,'効果が手動でも、ダウンしているホロビトの上に重ねるとダウン状態が解除される');
+  ok(await p.evaluate(()=>!document.querySelector('#side-0 .lineslot[data-idx="0"] .card.turned')),'束に横向きのカードが残らない');
+  // ライン内での並べ替えはオーバービートではないので解除しない
+  await setup({line:[[{k:'HB01-001',turned:true}],['HB01-033']]},{});
+  s=await S(); await moveTo(s.players[0].line[1][0].uid,'line',0);
+  s=await S(); ok(s.players[0].line[0][0].turned,'ラインの中で動かして重ねた場合は解除しない（ラインに出したのではない）');
 
   // 5. 同時に2つ → 順番を選ばせる
   await setup({hand:['HD01-001'], line:[[{k:'HD02-009',turned:true}]]},{});
@@ -127,8 +139,11 @@ async function run(label, viewport, touch){
   const q=await p.evaluate(()=>document.querySelector('#sheet .fxq')?.textContent||'');
   ok(q.includes('印字のコストは 2') && q.includes('8以下'),'印字のコストを示して「8以下として扱うか」を聞く');
   await clickSheet('button[data-fxa="0"]'); await wait(100);
+  const rq=await p.evaluate(()=>document.querySelector('#sheet .fxq')?.textContent||'');
+  ok(rq.includes('誰の手札に戻すかは印字されていません'),'「手札に戻す」は誰の手札かを決めずに聞く');
+  await clickSheet('button[data-fxa="0"]'); await wait(100);
   s=await S();
-  ok(s.players[1].line[0].length===1 && s.players[1].hand.some(c=>c.key==='HD01-001'),'はい → 正面の一番上（HD01-001）が相手の手札に戻る。下のカードは残る');
+  ok(s.players[1].line[0].length===1 && s.players[1].hand.some(c=>c.key==='HD01-001'),'持ち主の手札を選ぶ → 正面の一番上（HD01-001）が相手の手札に戻る。下のカードは残る');
 
   // 11. バトルに勝ったとき → パワー比を聞く → 正面を選ぶ → 束なら扱いを聞く → 墓地
   await setup({line:[['HB01-065']]},{line:[['HD01-001']]});
@@ -331,6 +346,7 @@ async function run(label, viewport, touch){
   ok((await log()).includes('2つ目のワザを使った'),'HB01-097: 2枚目のワザを使うと「2つ目のワザを使ったとき」が自動で発動する');
   s=await S(); await tapCard(s.players[1].line[0][0].uid); await wait(100);
   ok((await fxq()).includes('8以下'),'HB01-097: 続けて正面を選び、コストの条件を聞く');
+  await clickSheet('button[data-fxa="0"]'); await wait(100);
   await clickSheet('button[data-fxa="0"]'); await wait(150);
   s=await S();
   ok(s.players[1].hand.some(c=>c.key==='HD01-001'),'HB01-097: 正面の一番上が手札に戻る');
