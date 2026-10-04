@@ -271,7 +271,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <span class="badge dark">先手</span>
     <button class="mini" id="firstMe">自分</button>
     <button class="mini" id="firstOpp">相手</button>
-    <div class="warn">効果だけは自動処理します（確定している部分だけ。未確定の部分は聞きます）。フェイズ・コスト・バトル・勝敗は自動処理しません。</div>
+    <div class="warn">効果だけは自動処理します（確定している部分だけ。未確定の部分は聞きます）。エンドフェイズのエナドローとエナの戻しも自動です。コスト・バトル・勝敗は自動処理しません。</div>
   </div>
 </header>
 
@@ -293,7 +293,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
       <li>間違えたら上部の<b>「戻す」</b>で1手ずつ取り消せます。</li>
     </ol>
     <button data-act="setupAll" data-pi="2" class="primary big">両者の準備をする（①③⑤⑥）</button>
-    <p class="note">ルールの判定はしません（カードの効果と、ワザを使う操作だけは自動で進めます）。フェイズ送りは表示が変わるだけです。カードの移動は手で行ってください。</p>
+    <p class="note">ルールの判定はしません（カードの効果と、ワザを使う操作だけは自動で進めます）。フェイズ送りでエンドフェイズに入ると、エナドローと使用済みのエナの戻しを行います。それ以外のカードの移動は手で行ってください。引き直し（④）は準備中に一度だけです。</p>
   </div>
 
   <details class="doc">
@@ -302,7 +302,8 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <p><b>まとめて操作</b>：山札の見出しをタップ＝N枚引く・混ぜる。エナゾーンの見出しをタップ＝未使用をN枚横向き／全て縦向き。<b>押すのは人間</b>で、フェイズには連動しません。</p>
     <p><b>「横向き」について</b>：卓上の「カードを横に倒す」という物理操作だけを持っています。エナでは「使用済み」、ホロビト・ハートでは「ダウン状態」と呼ばれますが（出典: 2026-08 公式ティザー）、この2つが同じ状態かは未確定のため、区別せず<b>向きだけ</b>を保持しています。</p>
     <p><b>カードデータ</b>：<code>data/cards.json</code> の印字内容をそのまま表示します。読めない項目は <code>unknown</code> と出ます。<b>効果</b>は、ヘッダーが「効果: 自動」のとき、確定している部分だけ自動で処理し、未確定の部分は聞くか手で処理してもらいます。手札の<b>ワザ</b>は、メニューの「このワザを使う」で、使うホロビトを選び、エナを払って使えます。</p>
-    <p><b>実装していないもの</b>：バトルの勝敗、パワー比較、ホロビトを出すときのコストの支払い、エナドロー、ハートへのダメージ、フェイズの強制。未確定の部分を含むものは推測で埋めていません。エナドローやハートのダウン・破壊のように確定しているものも、まだ自動にはしていません（手で操作してください）。1ラインの枚数も制限していません（オーバービート）。</p>
+    <p><b>ルールどおりに自動で行うもの</b>：エンドフェイズのエナドロー（未使用のエナの数だけ）と、使用済みのエナを未使用に戻すこと。引き直しは準備中に一度だけ。オーバービートされたホロビトのダウン状態の解除。</p>
+    <p><b>実装していないもの</b>：バトルの勝敗、パワー比較、ホロビトを出すときのコストの支払い、ハートへのダメージ、次の先手の決定、フェイズの強制。未確定の部分を含むものは推測で埋めていません。ハートのダウン・破壊のように確定しているものも、まだ自動にはしていません（手で操作してください）。1ラインの枚数も制限していません（オーバービート）。</p>
     <p>※ 元情報は「開発中の画像」であり、製品版と異なる場合があります。</p>
   </details>
 
@@ -537,7 +538,11 @@ var ACTIONS = {
   shuffle:  function(pi){ shuffleDeck(pi); },
   draw6:    function(pi){ drawTo(pi, 6, "hand", true); },
   draw1:    function(pi){ drawTo(pi, 1, "hand", true); },
-  redraw:   function(pi){ handBackToDeck(pi); shuffleDeck(pi); drawTo(pi, 6, "hand", true); },
+  // 引き直しは準備手順の④で、一度だけ。手札を全て戻す（確定: ティザー④・入門④）
+  redraw:   function(pi){
+    var P = state.players[pi], why = redrawBlocked(pi);
+    if (why){ fxClear(); fxLog(SIDE_NAME[pi] + "は引き直せません：" + why); return; }
+    handBackToDeck(pi); shuffleDeck(pi); drawTo(pi, 6, "hand", true); P.redrawn = true; },
   heart5:   function(pi){ drawTo(pi, 5, "heart", false); },
   ena1:     function(pi){ drawTo(pi, 1, "ena", true); },
   setupAll: function(pi){ ACTIONS.shuffle(pi); ACTIONS.draw6(pi); ACTIONS.heart5(pi); ACTIONS.ena1(pi); },
@@ -548,10 +553,33 @@ function runAction(name, pi, arg){
   if (pi === 2){ if (name === "reset") ACTIONS.reset(); else { ACTIONS[name](0, arg); ACTIONS[name](1, arg); } }
   else ACTIONS[name](pi, arg);
 }
+function redrawBlocked(pi){
+  var P = state.players[pi];
+  if (P.redrawn) return "引き直しは一度だけです（入門④）";
+  if (state.phase >= 0) return "引き直しは準備手順の④でだけ行えます（ティザー④）";
+  if (!P.hand.length) return "手札がありません（先に③で6枚引きます）";
+  return "";
+}
 function nextPhase(){
   if (state.phase < 0){ state.phase = 0; return; }
   state.phase++;
   if (state.phase >= PHASES.length){ state.phase = 0; state.round++; }
+  if (PHASES[state.phase] === "エンドフェイズ") endPhase();
+}
+// エンドフェイズ（確定: ティザー⑤⑥⑦）:「余ったエナの数だけエナドロー！ 使用済みのエナを未使用に戻して、次のラウンドへ！」
+// 余ったエナ＝未使用（縦向き）のエナ。先に引き、そのあと未使用に戻す。両プレイヤーとも行う
+function endPhase(){
+  fxClear();
+  state.players.forEach(function(P, pi){
+    var n = P.ena.filter(function(c){ return !c.turned; }).length, before = P.hand.length;
+    drawTo(pi, n, "hand", true);
+    var k = P.hand.length - before;
+    var back = P.ena.filter(function(c){ return c.turned; }).length;
+    P.ena.forEach(function(c){ c.turned = false; });
+    fxLog(SIDE_NAME[pi] + "：エナドローで " + k + " 枚引いた（未使用のエナ " + n + " 枚）" +
+      (k < n ? "。山札が足りない（山札が尽きたときの扱いは未確定）" : "") +
+      "／使用済みのエナ " + back + " 枚を未使用に戻した");
+  });
 }
 
 /* ---------------- 表示用の補助 ---------------- */
@@ -1273,6 +1301,9 @@ function render(){
   document.getElementById("roundLbl").textContent = "ラウンド " + state.round;
   document.getElementById("phaseLbl").textContent = state.phase < 0 ? "準備" : PHASES[state.phase];
   document.getElementById("btnUndo").disabled = !undoStack.length;
+  document.querySelectorAll('.setrow button[data-act="redraw"]').forEach(function(b){
+    var pi = +b.dataset.pi; b.disabled = !!redrawBlocked(pi);
+    b.textContent = state.players[pi].redrawn ? "④引き直し済み" : "④引き直し"; });
   document.getElementById("firstMe").className  = "mini" + (state.first === 0 ? " on" : "");
   document.getElementById("firstOpp").className = "mini" + (state.first === 1 ? " on" : "");
   document.getElementById("side-1").innerHTML = sideHTML(1);
@@ -1376,13 +1407,14 @@ function openCardSheet(uid, pi){
 function openDeckSheet(pi){
   var P = state.players[pi];
   var h = '<h3>' + SIDE_NAME[pi] + ' の山札<small>' + P.deck.length + '枚</small></h3>';
-  h += '<div class="sect">手札に引く（枚数は自分で決める。エナドロー等）</div><div class="sgrid c5">';
+  h += '<div class="sect">手札に引く（枚数は自分で決める。エナドローはエンドフェイズで自動）</div><div class="sgrid c5">';
   for (var n = 1; n <= 10; n++) h += '<button data-act="drawN" data-arg="' + n + '" data-pi="' + pi + '"' + (n > P.deck.length ? " disabled" : "") + '>' + n + '枚</button>';
   h += '</div><div class="sgrid c2">';
   h += '<button data-act="shuffle" data-pi="' + pi + '">シャッフル</button>';
   h += '<button data-act="ena1"   data-pi="' + pi + '">上から1枚を表でエナへ</button>';
   h += '<button data-act="heart5" data-pi="' + pi + '">上から5枚を裏でハートへ</button>';
-  h += '<button data-act="redraw" data-pi="' + pi + '">引き直す（手札を戻して6枚）</button></div>';
+  h += '<button data-act="redraw" data-pi="' + pi + '"' + (redrawBlocked(pi) ? " disabled" : "") + '>' +
+       (P.redrawn ? "引き直し済み（一度だけ）" : "引き直す（手札を戻して6枚）") + '</button></div>';
   h += '<div class="sgrid c2">';
   if (P.deck.length) h += '<button data-top="' + pi + '">一番上のカードを操作…</button>';
   h += '<button data-close="1">閉じる</button></div>';

@@ -56,8 +56,12 @@ async function run(label, viewport, touch){
   await p.evaluate(()=>document.querySelectorAll('details.doc').forEach(d=>d.open=false));
   s=await S();
   ok(s.players[0].hand.length===6&&s.players[0].heart.length===5&&s.players[0].ena.length===1,'準備手順が動く');
-  // 既知カードの表示（手札のどこかに既知が来るよう、山札から既知を1枚手札へ）
-  await p.evaluate(()=>{ const d=state.players[0].deck; const i=d.findIndex(c=>c.key==='HB01-097'); if(i>=0){ const c=d.splice(i,1)[0]; c.up=true; state.players[0].hand.push(c);} render(); });
+  // 既知カードの表示（手札のどこかに既知が来るよう、既知を1枚手札へ）
+  // シャッフル次第で2枚ともハート／エナに入ることがある。山札だけを探すと見つからずに止まるので、全ゾーンから探す
+  // （2026-10-04 に実際に止まった。2枚ともハートに入れて再現し、直したことを確かめた）
+  await p.evaluate(()=>{ const P=state.players[0]; if(!P.hand.some(c=>c.key==='HB01-097')){
+    for(const z of ['deck','heart','ena','grave','waza']){ const i=P[z].findIndex(c=>c.key==='HB01-097'); if(i>=0){ const c=P[z].splice(i,1)[0]; c.up=true; c.turned=false; P.hand.push(c); break; } } }
+    render(); });
   const known=await p.evaluate(()=>{ const uid=state.players[0].hand.find(c=>c.key==='HB01-097').uid; const el=document.querySelector('#side-0 .z-hand .card[data-cid="'+uid+'"]'); if(!el) return null;
     return {name:el.querySelector('.cname').textContent, cost:el.querySelector('.ccost').textContent, pow:el.querySelector('.cpow').textContent, color:el.dataset.color}; });
   ok(known&&known.name==='正義合身 義郎坊'&&known.cost==='6'&&known.pow==='6000'&&known.color==='青','既知カードに名前・コスト・パワー・色が出る '+JSON.stringify(known));
