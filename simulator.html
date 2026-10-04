@@ -231,6 +231,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 .fxb span{background:rgba(201,164,76,.95);color:#1a1212;font-size:9px;font-weight:700;border-radius:3px;line-height:13px;padding:0 3px;text-align:center}
 .fxb span.q{background:#6b6058;color:#fff}
 .fxb span.off{display:none}
+.fxb span.wz{background:#b8483a;color:#fff}
 .card.pickable .ci{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 10px rgba(201,164,76,.9)}
 .card.pickable .ci{animation:pk .9s ease-in-out infinite alternate}
 @keyframes pk{from{box-shadow:0 0 4px rgba(201,164,76,.5)}to{box-shadow:0 0 14px rgba(201,164,76,1)}}
@@ -292,7 +293,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
       <li>間違えたら上部の<b>「戻す」</b>で1手ずつ取り消せます。</li>
     </ol>
     <button data-act="setupAll" data-pi="2" class="primary big">両者の準備をする（①③⑤⑥）</button>
-    <p class="note">ルールの判定は一切しません。フェイズ送りも表示が変わるだけです。全て手で動かしてください。</p>
+    <p class="note">ルールの判定はしません（カードの効果と、ワザを使う操作だけは自動で進めます）。フェイズ送りは表示が変わるだけです。カードの移動は手で行ってください。</p>
   </div>
 
   <details class="doc">
@@ -300,8 +301,8 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <p><b>操作</b>：カードを<b>タップ</b>＝印字内容とメニュー（移動・向き・表裏・メモ）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
     <p><b>まとめて操作</b>：山札の見出しをタップ＝N枚引く・混ぜる。エナゾーンの見出しをタップ＝未使用をN枚横向き／全て縦向き。<b>押すのは人間</b>で、フェイズには連動しません。</p>
     <p><b>「横向き」について</b>：卓上の「カードを横に倒す」という物理操作だけを持っています。エナでは「使用済み」、ホロビト・ハートでは「ダウン状態」と呼ばれますが（出典: 2026-08 公式ティザー）、この2つが同じ状態かは未確定のため、区別せず<b>向きだけ</b>を保持しています。</p>
-    <p><b>カードデータ</b>：<code>data/cards.json</code> の印字内容をそのまま表示します。読めない項目は <code>unknown</code> と出ます。効果の適用は人間が行い、シミュレーターは<b>読ませるだけ</b>です。</p>
-    <p><b>実装していないもの</b>：バトルの勝敗、パワー比較、コストの支払い、エナドローの枚数、ハート破壊の条件、フェイズの強制。いずれも 2026-08 時点で未確定のため、推測で埋めていません。1ラインの枚数も制限していません（オーバービート）。</p>
+    <p><b>カードデータ</b>：<code>data/cards.json</code> の印字内容をそのまま表示します。読めない項目は <code>unknown</code> と出ます。<b>効果</b>は、ヘッダーが「効果: 自動」のとき、確定している部分だけ自動で処理し、未確定の部分は聞くか手で処理してもらいます。手札の<b>ワザ</b>は、メニューの「このワザを使う」で、使うホロビトを選び、エナを払って使えます。</p>
+    <p><b>実装していないもの</b>：バトルの勝敗、パワー比較、ホロビトを出すときのコストの支払い、エナドロー、ハートへのダメージ、フェイズの強制。未確定の部分を含むものは推測で埋めていません。エナドローやハートのダウン・破壊のように確定しているものも、まだ自動にはしていません（手で操作してください）。1ラインの枚数も制限していません（オーバービート）。</p>
     <p>※ 元情報は「開発中の画像」であり、製品版と異なる場合があります。</p>
   </details>
 
@@ -501,6 +502,9 @@ function moveCard(uid, pi, zone, idx, toBottom){
   var f = findCard(uid); if (!f) return;
   var dst = targetList(pi, zone, idx); if (!dst) return;
   f.list.splice(f.idx, 1);
+  // ラインを離れたホロビトの「使ったワザ」の記録と、手札・山札に戻ったワザの「使ったホロビト」の記録は消す
+  if (zone !== "line") delete f.card.wazaUsed;
+  if (zone === "hand" || zone === "deck") delete f.card.usedBy;
   if (zone === "deck" && !toBottom) dst.unshift(f.card); else dst.push(f.card);
 }
 
@@ -619,15 +623,15 @@ var PART_FX = {
   this_holobito:           { how:"自動", why:"カード自身" },
   this_holobito_battle:    { how:"ボタン", why:"バトル処理は作らないため、バトルの出来事はプレイヤーが知らせる" },
   this_battle:             { how:"ボタン", why:"バトル処理は作らないため、バトルの出来事はプレイヤーが知らせる" },
-  this_waza:               { how:"手動", why:"ワザの使用は扱わない（ワザのカードの効果は処理しない）" },
+  this_waza:               { how:"自動", why:"ワザのカード自身" },
   // ---- 発火条件2 ----
   entered:                 { how:"自動", why:"ラインの外からラインへ置いたとき。束の上に置いた場合も含む（§10「ラインに出すとき…上に重ね」）" },
   downed:                  { how:"自動", why:"ラインの束の一番上のホロビトを縦から横（ダウン。§9-1）にしたとき" },
   overbeaten:              { how:"自動", why:"ラインの束の上に別のカードが置かれたとき、置かれた側（§10）" },
   won_battle:              { how:"ボタン", why:"バトル処理は作らない" },
   ended:                   { how:"ボタン", why:"バトル処理は作らない" },
-  used_nth_waza:           { how:"ボタン", why:"ワザの使用は数えない" },
-  used:                    { how:"手動", why:"ワザの使用は扱わない" },
+  used_nth_waza:           { how:"自動", why:"「ワザを使う」操作で、そのホロビトが使ったワザの数（記録）がその数になったとき。シミュレーターの外で使った場合のためにボタンも残す" },
+  used:                    { how:"自動", why:"手札のワザのメニューの「このワザを使う」で使ったとき（ワザは手札から使う。入門⑪）" },
   won:                     { how:"ボタン", why:"バトル処理は作らない" },
   // ---- 効果条件 ----
   no_cards_under:          { how:"自動", why:"束の枚数を数える",
@@ -748,7 +752,12 @@ var PART_FX = {
   indestructible:          { how:"表示", why:"印を付ける。破壊の処理はしない", badge:function(){ return "破壊されない"; } },
   damage_to_opponent_plus: { how:"手動", why:"ワザの使用とダメージは扱わない" },
   // ---- 制限 ----
-  only_if_other_waza_used: { how:"手動", why:"ワザの使用は数えない" },
+  only_if_other_waza_used: { how:"質問", why:"ワザを使うときに聞く。バトルの区切りは記録しないので、記録している枚数を添えて聞く",
+    limit:function(x){
+      var n = 0;
+      state.players[x.pi].line.forEach(function(st){ st.forEach(function(c){ n += wazaUsesOf(c).length; }); });
+      return ASK("自分はこのバトルで他のワザを使っていますか？（記録では、自分のラインのホロビトが使ったワザは " + n +
+        " 枚です。バトルの区切りは記録していないので、前のバトルの分が含まれることがあります）"); } },
   // ---- 補足 ----
   note_no_barrier:         { how:"表示", why:"注記" },
   note_indestructible:     { how:"表示", why:"注記" },
@@ -758,8 +767,11 @@ var PART_FX = {
   // ---- キーワード ----
   double_damage:           { how:"表示", why:"印を付ける。ダメージの計算はしない", badge:function(){ return "ダブルダメージ"; } },
   barrier:                 { how:"表示", why:"印を付ける。ダメージの計算はしない", badge:function(a){ return a.n + "バリア"; } },
-  kyomei:                  { how:"手動", why:"ワザの使用は扱わない。「種族」がカードのどの印字にあたるかも未確定（→ A-22）なので、判定するときは聞く",
-    cond:function(x, a){ return ASK("このワザを使うホロビトの種族は「" + a.tribe + "」ですか？（種族がカードのどの印字にあたるかは未確定です）"); } },
+  kyomei:                  { how:"質問", why:"「種族」がカードのどの印字にあたるかは未確定（→ A-22）なので、使うホロビトのカード名の下の行を添えて聞く",
+    cond:function(x, a){
+      var u = x.user, ud = u && cardDef(u);
+      return ASK((u ? "このワザを使うホロビト「" + nm(u) + "」（カード名の下の行: " + (ud ? ud.family : "unknown") + "）" : "このワザを使うホロビト") +
+        "の種族は「" + a.tribe + "」ですか？（種族がカードのどの印字にあたるかは未確定です。→ A-22）"); } },
   ena_yomi:                { how:"自動", why:"エナゾーンの色つきの枚数を数える",
     cond:function(x, a){
       var cnt = colorCount(state.players[x.pi].ena, a.color);
@@ -841,8 +853,9 @@ function fxBadges(){
     P.line.forEach(function(st){
       var c = st[st.length - 1];
       if (!c || !c.up || !isHolo(c)) return;
-      var list = ABILITY_MAP[c.key]; if (!list) return;
+      var list = ABILITY_MAP[c.key] || [];
       var x = ctxOf(c), b = [];
+      wazaUsesOf(c).forEach(function(u){ b.push({ t:"ワザ" + (u.mod === "unknown" ? "?" : u.mod), cls:"wz" }); });
       list.forEach(function(ab){
         (contEval(x, ab) || []).forEach(function(i){
           if (i.st === "on" || i.st === "q") b.push({ t:i.t + (i.st === "q" ? "?" : ""), cls:i.st }); });
@@ -907,7 +920,7 @@ function resolveAb(x, ab, done){
 }
 function fire(t, done){
   fxLog("【" + nm(t.card) + "】" + t.why);
-  resolveAb(ctxOf(t.card), t.ab, function(){ render(); if (done) done(); });
+  resolveAb(t.ctx || ctxOf(t.card), t.ab, function(){ render(); if (done) done(); });
 }
 // 同時に複数発動するときの順番は未確定なので、プレイヤーに選ばせる
 function runQueue(q){
@@ -954,6 +967,98 @@ function fxAfterTurn(uid, wasTurned){
   snap(); fxClear(); runQueue(q);
 }
 
+// ---- ワザを使う（依頼者の指示 2026-10-04）----
+// 確定していること: ワザは手札から使う（入門⑪）／ホロビトが使う（HD01-013「このワザを使うホロビト」）／
+//   使用にはエナが必要で、コスト分のエナを使用済み（横向き）にする（ティザー⑫・入門⑥）／
+//   左辺の +N はパワーの修整値で、累積する（ティザー⑫）
+// 未確定なので選ばせる: どのホロビトが使うか、使ったワザの置き場所（rules_guess.md B-5）。エナの色の条件は見ない
+function wazaUsesOf(c){ return (c && c.wazaUsed) || []; }
+function abBrief(ab){
+  var s = "";
+  (ab.conditions || []).forEach(function(r){ s += partText(r) + "なら、"; });
+  return s + (ab.effects || []).map(partText).join("、") + "。";
+}
+function evArgs(t){ var a = t.ab.trigger ? t.ab : t.ab.sub[0]; return refOf(a.trigger.event).args || {}; }
+function useWaza(uid){
+  var f = findCard(uid); if (!f) return;
+  var w = f.card, d = cardDef(w), pi = w.owner, P = state.players[pi];
+  if (!d || d.type !== "ワザ") return;
+  snap(); fxClear(); closeSheet();
+  var stop = function(){ fxLog("ワザの使用をやめた"); render(); };
+  fxLog("【" + nm(w) + "】ワザを使う");
+  var cands = [];
+  P.line.forEach(function(st){ var t = st[st.length - 1]; if (t && t.up && isHolo(t)) cands.push(t.uid); });
+  if (!cands.length){ fxLog("ラインに自分のホロビトがいないため使えない（ワザはホロビトが使う）"); render(); return; }
+  startPick(cands, "「" + d.name + "」を使うホロビトを選んでください（どのホロビトが使うかは未確定のため、シミュレーターは決めません）",
+    function(huid){ var user = findCard(huid).card; fxLog(nm(user) + " が使う"); limits(user); }, stop);
+
+  // 「このワザは…ときのみ使える」などの制限
+  function limits(user){
+    var x = ctxOf(w); x.user = user;
+    var rs = [];
+    (ABILITY_MAP[w.key] || []).forEach(function(ab){
+      if (ab.trigger || ab.keyword) return;
+      (ab.effects || []).forEach(function(r){ r = refOf(r); if (PARTS[r.part] && PARTS[r.part].role === "制限") rs.push(r); });
+    });
+    (function next(){
+      if (!rs.length) return pay(user);
+      var r = rs.shift(), fx = PART_FX[r.part];
+      var res = fx && fx.limit ? fx.limit(x, r.args || {}) : ASK("「" + partText(r) + "」を満たしていますか？");
+      if (res === YES) return next();
+      var no = function(){ fxLog("「" + partText(r) + "」を満たさないため使えない"); render(); };
+      if (res === NO) return no();
+      fxChoose(res.ask, ["満たしている（使える）", "満たしていない（使えない）"], function(i){ if (i === 0) next(); else no(); }, stop);
+    })();
+  }
+  function pay(user){
+    var cost = d.cost;
+    if (typeof cost !== "number")
+      return fxChoose("このワザのコストは印字から読めていません（" + cost + "）。エナの支払いは手で行ってください。",
+        ["支払いは手で行って続ける"], function(){ place(user); }, stop);
+    if (cost === 0) return place(user);
+    var free = P.ena.filter(function(c){ return !c.turned; });
+    if (free.length >= cost)
+      return fxChoose("コスト " + cost + "：未使用のエナを " + cost + " 枚、使用済み（横向き）にします（§8）。" +
+        "支払うエナの色に条件があるかは未確定なので、色は見ていません。",
+        ["左から " + cost + " 枚を使用済みにする", "支払いは手で行う"], function(i){
+          if (i === 0){ free.slice(0, cost).forEach(function(c){ c.turned = true; }); fxLog("エナを " + cost + " 枚使用済みにした"); }
+          else fxLog("エナの支払いは手で行う");
+          place(user); }, stop);
+    fxChoose("コスト " + cost + " に対して、未使用のエナが " + free.length + " 枚しかありません（使用にはエナが必要。ティザー⑫）。",
+      ["使うのをやめる", "それでも使う（支払いは手で調整）"], function(i){
+        if (i === 0) return stop();
+        fxLog("エナが足りないまま使った（手で調整）"); place(user); }, stop);
+  }
+  function place(user){
+    fxChoose("使ったワザをどこに置くかは未確定です（ワザゾーンの用途も未確定。→ B-5）。置き場所を選んでください。",
+      ["ワザゾーン", "墓地", "手札に残す（あとで手で動かす）"], function(i){
+        if (i === 0) moveCard(w.uid, pi, "waza"); else if (i === 1) moveCard(w.uid, pi, "grave");
+        w.up = true; w.turned = false;
+        record(user); }, stop);
+  }
+  function record(user){
+    var mod = d.left_edge && d.left_edge !== "unknown" ? d.left_edge.modifier : "unknown";
+    user.wazaUsed = wazaUsesOf(user).concat([{ uid:w.uid, key:w.key, mod:mod }]);
+    w.usedBy = user.uid;
+    var n = user.wazaUsed.length;
+    fxLog(nm(user) + " が「" + d.name + "」を使った（左辺 " + mod + "。このホロビトが使ったワザは記録上 " + n + " 枚目）");
+    // 発動のきっかけを持たない効果は、印字を示して手で扱ってもらう
+    (ABILITY_MAP[w.key] || []).forEach(function(ab){
+      var conts = ab.keyword ? subsOf(ab).filter(function(x){ return !x.trigger; }) : (ab.trigger ? [] : [ab]);
+      conts.forEach(function(c){
+        if ((c.effects || []).some(function(r){ return PARTS[refOf(r).part].role === "制限"; })) return;
+        fxLog((ab.keyword ? partText(ab.keyword) + " で得る" : "") + "「" + abBrief(c) + "」は手で扱ってください" +
+          ((c.effects || []).some(function(r){ return (refOf(r).args || {}).target === "このワザ"; }) ? "（ワザのパワーが何を指すかは未確定。→ A-23）" : ""));
+      });
+    });
+    var x = ctxOf(w); x.user = user;
+    var q = triggersOf(w, "used", "ワザを使った").map(function(t){ t.ctx = x; return t; });
+    triggersOf(user, "used_nth_waza", n + "つ目のワザを使った").forEach(function(t){ if (evArgs(t).n === n) q.push(t); });
+    render();
+    if (q.length) runQueue(q);
+  }
+}
+
 // ---- 画面：記録・選択・質問 ----
 var fxLines = [], picking = null, fxAsk = null;
 function fxLog(s){ fxLines.push(s); if (fxLines.length > 8) fxLines.shift(); fxShowLog(); }
@@ -983,11 +1088,30 @@ function fxChoose(question, labels, cb, cancel){
 }
 function fxSectionHTML(c){
   if (!fxOn()) return "";
-  var d = cardDef(c), list = ABILITY_MAP[c.key];
-  if (!d || !list || !list.length) return "";
+  var d = cardDef(c), list = ABILITY_MAP[c.key] || [];
+  if (!d) return "";
   var h = '<div class="sect">効果の処理</div>';
-  if (d.type === "ワザ") return h + '<div class="fxst off">ワザの効果はシミュレーターでは処理しません（ワザの使用を扱わないため）。</div>';
-  var x = ctxOf(c), loc = x.loc;
+  var loc = locOf(c) || { zone:"?" };
+  if (d.type === "ワザ"){
+    if (loc.zone === "hand")
+      h += '<button class="fxbtn" data-wzuse="' + esc(c.uid) + '">このワザを使う（使うホロビトを選び、コストを払う）</button>';
+    else h += '<div class="fxst off">ワザは手札から使います（入門⑪）。</div>';
+    // 「使ったとき」以外のきっかけ（バトルに勝ったとき など）は手で知らせる
+    list.forEach(function(ab, i){
+      triggersIn(ab).forEach(function(tt, j){
+        if (refOf(tt.trigger.event).part === "used") return;
+        h += '<button class="fxbtn" data-fxr="' + esc(c.uid) + '" data-fxi="' + i + '" data-fxj="' + j + '">' +
+             '「' + esc(triggerText(tt)) + '」の効果を処理する</button>';
+      });
+    });
+    return h;
+  }
+  if (!list.length && !wazaUsesOf(c).length) return "";
+  var x = ctxOf(c);
+  if (wazaUsesOf(c).length){
+    h += '<div class="fxst on">使ったワザ（記録）：' + wazaUsesOf(c).map(function(u){ return esc((CARDS[u.key] || {}).name || u.key) + " " + esc(u.mod); }).join("、") +
+         '。パワーの計算はしません。</div><button class="mini" data-wzclr="' + esc(c.uid) + '">使ったワザの記録を消す</button>';
+  }
   list.forEach(function(ab, i){
     var t = triggeredOf(ab);
     if (ab.keyword && loc.zone === "line" && loc.top){
@@ -1275,8 +1399,10 @@ sheetEl.addEventListener("click", function(e){
   }
   if (ds.fxr){
     var fr = findCard(ds.fxr); closeSheet();
-    if (fr){ snap(); fxClear(); var fab = ABILITY_MAP[fr.card.key][+ds.fxi];
-      fire({ card:fr.card, ab:firedAb(fab, triggersIn(fab)[+(ds.fxj || 0)]), why:"手で処理" }); }
+    if (fr){ snap(); fxClear(); var fab = ABILITY_MAP[fr.card.key][+ds.fxi], fctx = ctxOf(fr.card);
+      // ワザなら、使ったホロビト（記録）を文脈に入れる
+      if (fr.card.usedBy){ var ub = findCard(fr.card.usedBy); if (ub) fctx.user = ub.card; }
+      fire({ card:fr.card, ctx:fctx, ab:firedAb(fab, triggersIn(fab)[+(ds.fxj || 0)]), why:"手で処理" }); }
     return;
   }
   if (ds.top !== undefined && ds.top !== ""){ var top = state.players[+ds.top].deck[0]; closeSheet(); if (top) openCardSheet(top.uid); return; }
@@ -1299,6 +1425,8 @@ sheetEl.addEventListener("click", function(e){
     if (f0) f0.card.note = (inp ? inp.value : "").trim().slice(0, 24);
     closeSheet(); render(); return;
   }
+  if (ds.wzuse){ useWaza(ds.wzuse); return; }
+  if (ds.wzclr){ snap(); var fw = findCard(ds.wzclr); if (fw) delete fw.card.wazaUsed; closeSheet(); render(); return; }
   if (ds.tg){ snap(); var f1 = findCard(ds.tg), was = f1 && f1.card.turned; if (f1) f1.card.turned = !f1.card.turned; closeSheet(); render(); if (f1) fxAfterTurn(ds.tg, was); return; }
   if (ds.fl){ snap(); var f2 = findCard(ds.fl); if (f2) f2.card.up = !f2.card.up; closeSheet(); render(); return; }
   if (ds.mv){

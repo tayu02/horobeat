@@ -243,8 +243,8 @@ async function run(label, viewport, touch){
   await setup({hand:['HD01-013']},{});
   s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].hand[0].uid); await wait(450);
   const sh13=await p.evaluate(()=>document.getElementById('sheet').textContent);
-  ok(sh13.includes('共鳴：ライガ') && sh13.includes('ワザの効果はシミュレーターでは処理しません'),'HD01-013: 能力文が出て、ワザの効果は処理しないと示す');
-  ok(await p.evaluate(()=>!document.querySelector('#sheet .fxbtn')),'HD01-013: ワザには効果のボタンを出さない');
+  ok(sh13.includes('共鳴：ライガ') && sh13.includes('このワザを使う'),'HD01-013: 手札では能力文と「このワザを使う」が出る');
+  ok(await p.evaluate(()=>[...document.querySelectorAll('#sheet .fxbtn')].every(b=>!b.textContent.includes('使ったとき'))),'HD01-013: 「使ったとき」は「このワザを使う」で発動するので、別のボタンは出さない');
 
   // 13i. 共鳴：スザク（HD02-013、ワザ）: 「・」の文が2つとも発動のきっかけを持つ。きっかけごとに分けて処理する
   const k14=await p.evaluate(()=>{ const ab=ABILITY_MAP['HD02-013'][0], ts=triggersIn(ab);
@@ -254,7 +254,7 @@ async function run(label, viewport, touch){
   await setup({hand:['HD02-013']},{});
   s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].hand[0].uid); await wait(450);
   const sh14=await p.evaluate(()=>document.getElementById('sheet').textContent);
-  ok(sh14.includes('共鳴：スザク') && sh14.includes('自分はカードを1枚引く') && sh14.includes('ワザの効果はシミュレーターでは処理しません'),'HD02-013: 能力文が出て、ワザの効果は処理しないと示す');
+  ok(sh14.includes('共鳴：スザク') && sh14.includes('自分はカードを1枚引く') && sh14.includes('このワザを使う'),'HD02-013: 能力文と「このワザを使う」が出る');
   // 引く人が「自分」以外と書かれていたら、自動では引かない
   const dr=await p.evaluate(()=>{ const P=state.players[0], n0=P.hand.length; let done=false;
     PART_FX.draw.run({pi:0}, {who:"相手", n:1}, ()=>{ done=true; }); return { same:P.hand.length===n0, done }; });
@@ -287,6 +287,63 @@ async function run(label, viewport, touch){
   await p.evaluate(()=>{ state.fxAuto=false; render(); });
   s=await S(); await tapCard(s.players[0].line[0][0].uid); await clickSheet('button[data-tg]'); await wait(150);
   ok((await S()).players[0].deck.length===10,'HD02-016: 効果が手動のときは横向きにしても引かない');
+
+  // 13l. ワザを使う（依頼者の指示 2026-10-04）: ホロビトを選ぶ → コストのエナ → 置き場所 → 「使ったとき」が発動
+  const fxq=()=>p.evaluate(()=>document.querySelector('#sheet .fxq')?.textContent||'');
+  const fxopts=()=>p.evaluate(()=>[...document.querySelectorAll('#sheet button[data-fxa]')].map(b=>b.textContent));
+  const useW=async uid=>{ await p.evaluate(u=>openCardSheet(u),uid); await clickSheet('button[data-wzuse]'); await wait(150); };
+  await setup({hand:['HD01-013'], line:[['HB01-001'],['HD01-001']], ena:['HD01-001','HD02-001']},{});
+  s=await S(); await useW(s.players[0].hand[0].uid);
+  const wpicks=await p.evaluate(()=>[...document.querySelectorAll('.card.pickable')].map(e=>e.dataset.cid));
+  ok(wpicks.length===2,'ワザ: 使うホロビトは自分のラインのホロビトから選ぶ（シミュレーターは決めない）');
+  await tapCard(s.players[0].line[0][0].uid);
+  ok((await fxq()).includes('コスト 1') && (await fxq()).includes('色は見ていません'),'ワザ: コスト分のエナを使用済みにするか聞く（色の条件は未確定なので見ない）');
+  await clickSheet('button[data-fxa="0"]'); await wait(100);
+  ok((await fxopts()).join().includes('ワザゾーン') && (await fxq()).includes('未確定'),'ワザ: 使ったワザの置き場所は未確定なので選ばせる');
+  await clickSheet('button[data-fxa="0"]'); await wait(100);
+  ok((await fxq()).includes('ライガ・ファミリー') && (await fxq()).includes('種族は「ライガ」'),'HD01-013: 共鳴は、使うホロビトのカード名の下の行を示して聞く');
+  await clickSheet('button[data-fxa="0"]'); await wait(150);
+  s=await S();
+  ok(s.players[0].ena.filter(c=>c.turned).length===1,'ワザ: エナが1枚使用済み（横向き）になる');
+  ok(s.players[0].waza.some(c=>c.key==='HD01-013') && s.players[0].hand.length===1,'ワザ: ワザゾーンに置かれ、「使ったとき」で1枚引く');
+  ok((await log()).includes('ワザのパワーが何を指すかは未確定'),'HD01-013: 「このワザのパワーを+1000する」は手で扱うよう案内する');
+  const wb=await p.evaluate(()=>[...document.querySelectorAll('#side-0 .lineslot[data-idx="0"] .fxb span')].map(x=>x.textContent).join(','));
+  ok(wb.includes('ワザ+2000'),'ワザ: 使ったホロビトに「ワザ+2000」の印（'+wb+'）');
+  // 共鳴の種族に「いいえ」→ 引かない
+  await setup({hand:['HD01-013'], line:[['HD02-001']], ena:['HD01-001']},{});
+  s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
+  await clickSheet('button[data-fxa="0"]'); await wait(100); await clickSheet('button[data-fxa="1"]'); await wait(100);
+  await clickSheet('button[data-fxa="1"]'); await wait(150);
+  s=await S();
+  ok(s.players[0].grave.some(c=>c.key==='HD01-013') && s.players[0].deck.length===10,'HD01-013: 種族が違うと答えれば引かない（墓地を選んだので墓地へ）');
+  // エナが足りない
+  await setup({hand:['HD02-008'], line:[['HB01-001']], ena:[{k:'HD01-001',turned:true}]},{});
+  s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
+  ok((await fxq()).includes('未使用のエナが 0 枚'),'ワザ: エナが足りないときは知らせ、やめるか選ばせる');
+  await clickSheet('button[data-fxa="0"]'); await wait(100);
+  ok((await S()).players[0].hand.some(c=>c.key==='HD02-008'),'ワザ: やめると手札に残る');
+  // HB01-097: 2つ目のワザを使ったとき → 自動で発動
+  await setup({hand:['HD02-008','PR-013'], line:[['HB01-097']], ena:['HD01-001','HD01-001','HD01-001','HD01-001']},{line:[['HD01-001']]});
+  for(let k=0;k<2;k++){
+    s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
+    await clickSheet('button[data-fxa="0"]'); await wait(100); await clickSheet('button[data-fxa="0"]'); await wait(150);
+  }
+  ok((await log()).includes('2つ目のワザを使った'),'HB01-097: 2枚目のワザを使うと「2つ目のワザを使ったとき」が自動で発動する');
+  s=await S(); await tapCard(s.players[1].line[0][0].uid); await wait(100);
+  ok((await fxq()).includes('8以下'),'HB01-097: 続けて正面を選び、コストの条件を聞く');
+  await clickSheet('button[data-fxa="0"]'); await wait(150);
+  s=await S();
+  ok(s.players[1].hand.some(c=>c.key==='HD01-001'),'HB01-097: 正面の一番上が手札に戻る');
+  // 「このワザは…ときのみ使える」（うつし身の撃）は使う前に聞く
+  await setup({hand:['UNKNOWN-utsushimi'], line:[['HB01-001']], ena:['HD01-001','HD01-001','HD01-001']},{});
+  s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
+  ok((await fxq()).includes('他のワザを使っていますか'),'うつし身の撃: 「他のワザを使っているときのみ」を使う前に聞く');
+  await clickSheet('button[data-fxa="1"]'); await wait(100);
+  ok((await S()).players[0].hand.some(c=>c.key==='UNKNOWN-utsushimi') && (await log()).includes('使えない'),'うつし身の撃: 満たしていなければ使えず、手札に残る');
+  // 手札にないワザには「使う」ボタンを出さない
+  await setup({waza:['HD02-008']},{});
+  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].waza[0].uid); await wait(450);
+  ok(await p.evaluate(()=>!document.querySelector('#sheet button[data-wzuse]')),'ワザ: 手札以外では「使う」ボタンを出さない（ワザは手札から使う）');
 
   // 14. 手動に切り替えると何もしない
   await setup({hand:['HD01-001']},{});
