@@ -39,6 +39,7 @@ const quick = [
   ["カードデータ・能力の部品・画像の台帳", "node", ["tools/validate-cards.mjs"]],
   ["文書の表の崩れ", "node", ["tools/check-docs.mjs"]],
   ["生成物が最新か", "node", ["tools/check-generated.mjs"]],
+  ["全カードの効果を画面で確かめる試験があるか", "node", ["tools/check-play-coverage.mjs"]],
 ];
 const results = [];
 for (const [label, cmd, args] of quick) results.push(await run(label, cmd, args));

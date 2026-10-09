@@ -717,11 +717,20 @@ var PART_FX = {
       var k = P.hand.length - before;
       fxLog(SIDE_NAME[x.pi] + "はカードを" + k + "枚引いた" + (k < a.n ? "（" + a.n + "枚のはずが、山札が足りない）" : ""));
       next(); } },
-  destroy:                 { how:"選択", why:"「正面」を選ばせる。破壊されたホロビトは墓地へ（§9-1）。束の下の扱いは未確定なので聞く",
+  destroy:                 { how:"選択", why:"「正面」を選ばせる。破壊されたホロビトは墓地へ（§9-1）。束の下の扱いは未確定なので聞く。正面が「このホロビトは破壊されない」を持つなら破壊しない",
     run:function(x, a, next, stop){
       if (a.target !== "正面のホロビト") return fxManual(a, "destroy", next);
       needFront(x, function(){
         var loc = locOf(x.front), st = loc.stack;
+        // 正面のホロビトが「このホロビトは破壊されない」を持つなら破壊しない（印字どおり。HD01-017 / HD01-007）
+        var keep = function(){ fxLog(nm(x.front) + " は「このホロビトは破壊されない」を持つため、破壊しない"); next(); };
+        var ind = indestructibleSt(x.front);
+        if (ind === "on") return keep();
+        if (ind === "q" || ind === "u")
+          return fxChoose("「" + nm(x.front) + "」の「破壊されない」の条件を満たしているか判定できません。破壊されないとして扱いますか？",
+            ["破壊されない（破壊しない）", "破壊する"], function(i){ if (i === 0) keep(); else go(); }, stop);
+        go();
+        function go(){
         var put = function(cards){
           cards.forEach(function(c){ moveCard(c.uid, c.owner, "grave"); });
           fxLog(nm(x.front) + " を破壊し、墓地に置いた" + (cards.length > 1 ? "（束の " + cards.length + " 枚）" : ""));
@@ -730,6 +739,7 @@ var PART_FX = {
         fxChoose("正面のホロビトの下に " + (st.length - 1) + " 枚あります。破壊したとき下のカードをどうするかは未確定です。",
           ["一番上だけ墓地へ", "束ごと墓地へ", "何もしない（手で処理する）"], function(i){
             if (i === 0) put([x.front]); else if (i === 1) put(st.slice()); else { fxLog("破壊は手で処理してください"); next(); } }, stop);
+        }
       }, stop); } },
   return_top_to_hand:      { how:"選択＋質問", why:"「正面」を選ばせる。「その一番上のカード」は印字どおり束の一番上。誰の手札かは印字されていないので選ばせる（→ A-24）",
     run:function(x, a, next, stop){
@@ -782,7 +792,7 @@ var PART_FX = {
   power_plus_passive:      { how:"表示", why:"パワーの計算はしない。条件を満たしている間、印を付ける", badge:function(a){ return "+" + a.n; } },
   gain_keyword:            { how:"表示", why:"条件を満たしている間、印を付ける", badge:function(a){ return a.keyword; } },
   power_plus:              { how:"表示", why:"パワーの計算はしない。条件を満たしている間、印を付ける", badge:function(a){ return "+" + a.n; } },
-  indestructible:          { how:"表示", why:"印を付ける。破壊の処理はしない", badge:function(){ return "破壊されない"; } },
+  indestructible:          { how:"表示", why:"印を付ける。破壊する効果（HB01-065 など）の対象になったときは破壊しない", badge:function(){ return "破壊されない"; } },
   damage_to_opponent_plus: { how:"手動", why:"ワザの使用とダメージは扱わない" },
   // ---- 制限 ----
   only_if_other_waza_used: { how:"質問", why:"ワザを使うときに聞く。バトルの区切りは記録しないので、記録している枚数を添えて聞く",
@@ -814,6 +824,17 @@ var PART_FX = {
 };
 /* @@PART_FX_END@@ */
 
+// そのホロビトの「このホロビトは破壊されない」の状態。常時の効果の印と同じ判定（contEval）を使う。
+// on: 破壊されない / q・u: 判定できない / off: 持っていない・条件を満たしていない
+function indestructibleSt(card){
+  var loc = locOf(card);
+  if (!card.up || !loc || loc.zone !== "line" || !loc.top) return "off";
+  var st = "off", rank = { off:0, q:1, u:1, on:2 };
+  (ABILITY_MAP[card.key] || []).forEach(function(ab){
+    (contEval(ctxOf(card), ab) || []).forEach(function(i){ if (i.t === "破壊されない" && rank[i.st] > rank[st]) st = i.st; });
+  });
+  return st;
+}
 function condOf(x, r){
   r = refOf(r);
   var fx = PART_FX[r.part];
