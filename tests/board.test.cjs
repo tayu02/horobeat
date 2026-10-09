@@ -90,7 +90,8 @@ async function run(label, viewport, touch){
   for(let i=0;i<4;i++){ await p.click('#btnPhase'); ph.push(await p.textContent('#phaseLbl')); }
   ok(ph[0].startsWith('召喚')&&ph[2].startsWith('エンド')&&ph[3].startsWith('召喚')&&(await S()).round===2,'フェイズ手動送り→3巡でラウンド+1');
   await p.click('#firstOpp');
-  ok((await S()).first===1 && await p.isVisible('#side-1 .sidehead .badge'),'先手の記録が相手側に表示される');
+  const fb=await p.evaluate(()=>[document.querySelector('#side-1 .sidehead .badge').textContent, document.querySelector('#side-0 .sidehead .badge').textContent]);
+  ok((await S()).first===1 && fb[0]==='先手' && fb[1]==='後手','先手の記録が相手側に表示され、自分は後手と出る '+JSON.stringify(fb));
 
   // Undo
   const before=(await S()).undo;
@@ -109,18 +110,24 @@ async function run(label, viewport, touch){
     return {oppLineBottom:Math.round(o.bottom), meLineTop:Math.round(m.top), gap:Math.round(m.top-o.bottom), between};
   });
   ok(adj.between===0 && adj.gap>=0 && adj.gap<120,'両者のバトルラインが中央で隣接 '+JSON.stringify(adj));
-  // 広い画面は公式の手引書の「盤面見本」どおり（rules_confirmed.md §5）
-  if(!touch){
-    const L=await p.evaluate(()=>{ const r=(pi,c)=>document.querySelector('#side-'+pi+' .'+c).getBoundingClientRect();
-      const o={}; for(const pi of [0,1]) for(const c of ['z-heart','z-line','z-waza','z-ena','z-hand','z-deck','z-grave']){ const b=r(pi,c); o[pi+c]={x:Math.round(b.left),y:Math.round(b.top),r:Math.round(b.right)}; } return o; });
-    ok(L['0z-heart'].r<=L['0z-line'].x && L['0z-deck'].x>=L['0z-line'].r && L['0z-deck'].y<L['0z-grave'].y,'自分: 左にハートゾーン、右に山札（上）と墓地（下）');
-    ok(L['0z-line'].y<L['0z-waza'].y && L['0z-waza'].y<L['0z-ena'].y && L['0z-ena'].y<L['0z-hand'].y,'自分: 中央は上からバトルライン→ワザ→エナ→手札');
-    ok(L['1z-heart'].x>=L['1z-line'].r && L['1z-deck'].r<=L['1z-line'].x && L['1z-grave'].y<L['1z-deck'].y,'相手: 点対称（右にハートゾーン、左に墓地（上）と山札（下））');
-    ok(L['1z-hand'].y<L['1z-ena'].y && L['1z-ena'].y<L['1z-waza'].y && L['1z-waza'].y<L['1z-line'].y,'相手: 中央は上から手札→エナ→ワザ→バトルライン');
-  } else {
-    const order=await p.evaluate(()=>[0,1].map(pi=>[...document.querySelectorAll('#side-'+pi+' .zone')].sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top||a.getBoundingClientRect().left-b.getBoundingClientRect().left).map(z=>z.className.match(/z-(\w+)/)[1]).join('>')));
-    ok(order[0]==='line>waza>ena>heart>deck>grave>hand' && order[1]==='hand>deck>grave>heart>ena>waza>line','狭い画面: 自分は上からライン→ワザ→エナ→ハート→山札・墓地→手札、相手はその逆順 '+JSON.stringify(order));
-  }
+  // PC も iPhone も、公式の手引書の「盤面見本」どおりの1枚の盤（rules_confirmed.md §5）
+  const L=await p.evaluate(()=>{ const r=(pi,c)=>document.querySelector('#side-'+pi+' .'+c).getBoundingClientRect();
+    const o={}; for(const pi of [0,1]) for(const c of ['z-heart','z-line','z-waza','z-ena','z-hand','z-deck','z-grave','sidehead']){ const b=r(pi,c); o[pi+c]={x:Math.round(b.left),y:Math.round(b.top),r:Math.round(b.right),b:Math.round(b.bottom)}; }
+    const f=document.getElementById('facingMark').getBoundingClientRect(); o.lab={x:Math.round(f.left),y:Math.round(f.top),r:Math.round(f.right),b:Math.round(f.bottom)};
+    // ライン番号の帯と、両者のライン枠の列がそろっているか（中心のずれ）
+    const cx=e=>{ const b=e.getBoundingClientRect(); return (b.left+b.right)/2; };
+    const labs=[...document.querySelectorAll('#facingMark .lnlab')], s0=[...document.querySelectorAll('#side-0 .lineslot')], s1=[...document.querySelectorAll('#side-1 .lineslot')];
+    o.align=Math.max(...labs.map((l,i)=>Math.max(Math.abs(cx(l)-cx(s0[i])),Math.abs(cx(l)-cx(s1[i])))));
+    o.labText=labs.map(l=>l.textContent).join(',');
+    return o; });
+  ok(L['0z-heart'].r<=L['0z-line'].x && L['0z-deck'].x>=L['0z-line'].r && L['0z-deck'].y<L['0z-grave'].y,'自分: 左にハートゾーン、右に山札（上）と墓地（下）');
+  ok(L['0z-line'].y<L['0z-waza'].y && L['0z-waza'].y<L['0z-ena'].y && L['0z-ena'].y<L['0z-hand'].y,'自分: 中央は上からバトルライン→ワザ→エナ→手札');
+  ok(L['1z-heart'].x>=L['1z-line'].r && L['1z-deck'].r<=L['1z-line'].x && L['1z-grave'].y<L['1z-deck'].y,'相手: 点対称（右にハートゾーン、左に墓地（上）と山札（下））');
+  ok(L['1z-hand'].y<L['1z-ena'].y && L['1z-ena'].y<L['1z-waza'].y && L['1z-waza'].y<L['1z-line'].y,'相手: 中央は上から手札→エナ→ワザ→バトルライン');
+  ok(L.lab.y>=L['1z-line'].b-1 && L.lab.b<=L['0z-line'].y+1 && L.labText==='第1ライン,第2ライン,第3ライン,第4ライン,第5ライン','ライン番号の帯は1本だけで、両者のバトルラインの間にある');
+  ok(L.align<=2,'ライン番号と両者のライン枠の列がそろっている（ずれ '+L.align+'px）');
+  ok(L['1sidehead'].r<=L.lab.x && L['0sidehead'].x>=L.lab.r,'ライン番号の左に相手（後手/先手）、右に自分の表示');
+  ok(L['1z-hand'].y<L['1z-ena'].y && L['0z-hand'].b>L['0z-ena'].b,'手札は盤の上端（相手）と下端（自分）');
 
   await p.evaluate(()=>{ window.scrollTo(0,0); });
   await p.screenshot({path:H.out('shot-'+label+'.png'),fullPage:true});
