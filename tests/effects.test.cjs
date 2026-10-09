@@ -115,7 +115,7 @@ async function run(label, viewport, touch){
   ok(badge==='エナ詠み③:on','HB01-063: 緑のエナ3枚 → エナ詠み③ 有効');
 
   // 9. バトルが終わったとき（ボタン）→ 赤のエナを選ぶ → 未使用に。回復は手で
-  await setup({line:[['HB01-031']], ena:[{k:'HB01-001',turned:true},{k:'HD02-001',turned:true}]},{});
+  await setup({line:[[{k:'HB01-031',turned:true}]], ena:[{k:'HB01-001',turned:true},{k:'HD02-001',turned:true}]},{});
   s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await wait(450);
   ok(await p.evaluate(()=>!!document.querySelector('#sheet .fxbtn')),'HB01-031 のメニューに「バトルが終わったとき の効果を処理する」ボタン');
   await clickSheet('.fxbtn'); await wait(150);
@@ -126,16 +126,14 @@ async function run(label, viewport, touch){
   await tapCard(pk[0]);
   s=await S();
   ok(s.players[0].ena[0].turned===false && s.players[0].ena[1].turned===true,'選んだ赤のエナが未使用（縦向き）になる。緑はそのまま');
-  ok((await log()).includes('回復する」は定義が未確定'),'「回復する」は処理せず、手で処理するよう案内');
+  s=await S();
+  ok(s.players[0].line[0][0].turned===false && (await log()).includes('回復した'),'「このホロビトを回復する」→ ダウンしていた七尾が縦向きになる（回復＝ダウンしているカードを縦向きに。手引書）');
 
-  // 10. 2つ目のワザを使ったとき → 正面を選ばせる → コストを聞く → 一番上を手札に戻す
+  // 10. 2つ目のワザを使ったとき → 正面（相手の同じ番号のライン。手引書）→ コストを聞く → 一番上を手札に戻す
   await setup({line:[['HB01-097']]},{line:[['HB01-001','HD01-001'],['HB01-033']]});
   s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await wait(450);
   await clickSheet('.fxbtn'); await wait(150);
-  const fronts=await p.evaluate(()=>[...document.querySelectorAll('.card.pickable')].map(e=>e.dataset.cid));
-  s=await S();
-  ok(fronts.length===2 && fronts.includes(s.players[1].line[0][1].uid),'正面の候補は相手の各ラインの一番上（シミュレーターは正面を決めない）');
-  await tapCard(s.players[1].line[0][1].uid); await wait(100);
+  ok(!(await p.evaluate(()=>!!picking)) && (await log()).includes('正面のホロビト: レオまる（相手の第1ライン）'),'正面は相手の同じ番号のラインの一番上を自動で選ぶ（選ばせない）');
   const q=await p.evaluate(()=>document.querySelector('#sheet .fxq')?.textContent||'');
   ok(q.includes('印字のコストは 2') && q.includes('8以下'),'印字のコストを示して「8以下として扱うか」を聞く');
   await clickSheet('button[data-fxa="0"]'); await wait(100);
@@ -151,15 +149,19 @@ async function run(label, viewport, touch){
   await clickSheet('.fxbtn'); await wait(100);
   ok((await p.evaluate(()=>document.querySelector('#sheet .fxq').textContent)).includes('2倍以上'),'HB01-065: パワー比は計算せずに聞く');
   await clickSheet('button[data-fxa="0"]'); await wait(150);
-  s=await S(); await tapCard(s.players[1].line[0][0].uid); await wait(100);
   s=await S();
-  ok(s.players[1].line[0].length===0 && s.players[1].grave.some(c=>c.key==='HD01-001'),'正面を選ぶと破壊され、相手の墓地へ');
+  ok(s.players[1].line[0].length===0 && s.players[1].grave.some(c=>c.key==='HD01-001'),'正面（相手の第1ライン）が破壊され、相手の墓地へ');
+  // 正面（同じ番号のライン）にホロビトがいなければ何もしない
+  await setup({line:[[],['HB01-065']]},{line:[['HD01-001']]});
+  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[1][0].uid); await wait(450);
+  await clickSheet('.fxbtn'); await wait(100); await clickSheet('button[data-fxa="0"]'); await wait(150);
+  s=await S();
+  ok(s.players[1].line[0].length===1 && (await log()).includes('第2ライン）にホロビトがいない'),'正面（相手の第2ライン）が空なら、ほかのラインのホロビトは破壊しない');
 
   // 11b. 正面が束のとき、下のカードの扱いは決めずに聞く
   await setup({line:[['HB01-065']]},{line:[['HB01-001','HD01-001']]});
   s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await wait(450);
   await clickSheet('.fxbtn'); await wait(100); await clickSheet('button[data-fxa="0"]'); await wait(150);
-  s=await S(); await tapCard(s.players[1].line[0][1].uid); await wait(100);
   const opts=await p.evaluate(()=>[...document.querySelectorAll('#sheet button[data-fxa]')].map(b=>b.textContent));
   ok(opts.includes('一番上だけ墓地へ') && opts.includes('束ごと墓地へ') && opts.some(t=>t.includes('手で')),'正面が束 → 下のカードをどうするかを聞く（決めない）');
   await clickSheet('button[data-fxa="0"]'); await wait(100);
@@ -212,14 +214,17 @@ async function run(label, viewport, touch){
   ok(!(await p.evaluate(()=>!!picking)) && s.players[0].deck.length===10,'緑のエナ2枚 → エナ詠みを満たさず、選ばせもしない');
 
   // 13d. バトルが終わったとき → 自分のホロビトを1体選び、回復する（HD01-014）
-  // 「自分のホロビト」を選ぶ範囲と「回復する」の定義は未確定なので、どちらも手で処理するよう案内する
-  await setup({line:[['HD01-014'],[{k:'HD01-001',turned:true}]]},{});
+  // 候補はラインの一番上のホロビト（束の下を選べるかは未確定）。回復＝ダウンしているカードを縦向きに（手引書）
+  await setup({line:[['HD01-014'],[{k:'HD01-001',turned:true}],[{k:'HD02-001',turned:true},'HB01-001']]},{});
   s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await wait(450);
   ok(await p.evaluate(()=>(document.querySelector('#sheet .fxbtn')||{}).textContent||'').then(t=>t.includes('バトルが終わったとき')),'HD01-014: メニューに「バトルが終わったとき」の効果のボタン');
   await clickSheet('.fxbtn'); await wait(150);
+  const rp=await p.evaluate(()=>[...document.querySelectorAll('.card.pickable')].map(e=>e.dataset.cid));
   s=await S();
-  ok(!(await p.evaluate(()=>!!picking)) && s.players[0].line[1][0].turned===true,'HD01-014: 候補を光らせず、盤面も勝手に変えない（ダウンしたホロビトは横向きのまま）');
-  ok((await log()).includes('手で処理') && (await log()).includes('回復する」は定義が未確定'),'HD01-014: 選ぶ範囲と「回復する」は手で処理するよう案内');
+  ok(rp.length===3 && !rp.includes(s.players[0].line[2][0].uid),'HD01-014: 候補は自分のラインの一番上のホロビト3体（束の下は候補にしない）');
+  await tapCard(s.players[0].line[1][0].uid);
+  s=await S();
+  ok(s.players[0].line[1][0].turned===false && (await log()).includes('回復した'),'HD01-014: 選んだダウンしているホロビトが縦向きになる');
 
   // 13e. ブーストを使っているなら +2000（HD02-012）: シミュレーターが追いかけない状態なので盤面に印を出さない
   await setup({line:[['HD02-012']]},{});
@@ -310,27 +315,28 @@ async function run(label, viewport, touch){
   await setup({hand:['HD01-013'], line:[['HB01-001'],['HD01-001']], ena:['HD01-001','HD02-001']},{});
   s=await S(); await useW(s.players[0].hand[0].uid);
   const wpicks=await p.evaluate(()=>[...document.querySelectorAll('.card.pickable')].map(e=>e.dataset.cid));
-  ok(wpicks.length===2,'ワザ: 使うホロビトは自分のラインのホロビトから選ぶ（シミュレーターは決めない）');
+  ok(wpicks.length===2,'ワザ: 使うバトル中のホロビトは自分のラインのホロビトから選ぶ（バトルを扱わないため）');
   await tapCard(s.players[0].line[0][0].uid);
-  ok((await fxq()).includes('コスト 1') && (await fxq()).includes('色は見ていません'),'ワザ: コスト分のエナを使用済みにするか聞く（色の条件は未確定なので見ない）');
+  ok((await fxq()).includes('コスト 1（赤）') && (await fxq()).includes('色と数'),'ワザ: 同じ色（赤）のエナでコストを払うか聞く（手引書②「必要なエナの色と数」）');
   await clickSheet('button[data-fxa="0"]'); await wait(100);
-  ok((await fxopts()).join().includes('ワザゾーン') && (await fxq()).includes('未確定'),'ワザ: 使ったワザの置き場所は未確定なので選ばせる');
-  await clickSheet('button[data-fxa="0"]'); await wait(100);
-  ok((await fxq()).includes('ライガ・ファミリー') && (await fxq()).includes('種族は「ライガ」'),'HD01-013: 共鳴は、使うホロビトのカード名の下の行を示して聞く');
+  ok((await fxq()).includes('ライガ・ファミリー') && (await fxq()).includes('「ライガ」'),'HD01-013: 共鳴は、使ったホロビトの種族（カード名の下の行）を示して聞く');
   await clickSheet('button[data-fxa="0"]'); await wait(150);
   s=await S();
-  ok(s.players[0].ena.filter(c=>c.turned).length===1,'ワザ: エナが1枚使用済み（横向き）になる');
-  ok(s.players[0].waza.some(c=>c.key==='HD01-013') && s.players[0].hand.length===1,'ワザ: ワザゾーンに置かれ、「使ったとき」で1枚引く');
-  ok((await log()).includes('ワザのパワーが何を指すかは未確定'),'HD01-013: 「このワザのパワーを+1000する」は手で扱うよう案内する');
+  ok(s.players[0].ena[0].turned && !s.players[0].ena[1].turned,'ワザ: 赤のエナが1枚使用済みになり、緑のエナは使わない');
+  ok(s.players[0].waza.some(c=>c.key==='HD01-013' && c.turned) && s.players[0].hand.length===1,'ワザ: ワザゾーンに横向きで置かれ（手引書）、「使ったとき」で1枚引く');
+  ok((await log()).includes('左辺の +2000'),'HD01-013: 「このワザのパワーを+1000する」は、ワザのパワー（左辺 +2000）を示して手で扱うよう案内する');
   const wb=await p.evaluate(()=>[...document.querySelectorAll('#side-0 .lineslot[data-idx="0"] .fxb span')].map(x=>x.textContent).join(','));
   ok(wb.includes('ワザ+2000'),'ワザ: 使ったホロビトに「ワザ+2000」の印（'+wb+'）');
   // 共鳴の種族に「いいえ」→ 引かない
   await setup({hand:['HD01-013'], line:[['HD02-001']], ena:['HD01-001']},{});
   s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
-  await clickSheet('button[data-fxa="0"]'); await wait(100); await clickSheet('button[data-fxa="1"]'); await wait(100);
-  await clickSheet('button[data-fxa="1"]'); await wait(150);
+  await clickSheet('button[data-fxa="0"]'); await wait(100); await clickSheet('button[data-fxa="1"]'); await wait(150);
   s=await S();
-  ok(s.players[0].grave.some(c=>c.key==='HD01-013') && s.players[0].deck.length===10,'HD01-013: 種族が違うと答えれば引かない（墓地を選んだので墓地へ）');
+  ok(s.players[0].waza.some(c=>c.key==='HD01-013') && s.players[0].deck.length===10,'HD01-013: 種族「スザク・ブラッド」のホロビトで「満たしていない」と答えれば引かない');
+  // 色が足りない: 緑のワザを赤のエナしかないときに使う → 手で払うよう案内
+  await setup({hand:['HD02-008'], line:[['HB01-001']], ena:['HD01-001','HD01-001']},{});
+  s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
+  ok((await fxq()).includes('緑の未使用のエナは 0 枚') && (await fxq()).includes('未確定'),'ワザ: 同じ色のエナが足りなければ、色の決まりは未確定なので手で払うよう案内する');
   // エナが足りない
   await setup({hand:['HD02-008'], line:[['HB01-001']], ena:[{k:'HD01-001',turned:true}]},{});
   s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
@@ -341,11 +347,10 @@ async function run(label, viewport, touch){
   await setup({hand:['HD02-008','PR-013'], line:[['HB01-097']], ena:['HD01-001','HD01-001','HD01-001','HD01-001']},{line:[['HD01-001']]});
   for(let k=0;k<2;k++){
     s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
-    await clickSheet('button[data-fxa="0"]'); await wait(100); await clickSheet('button[data-fxa="0"]'); await wait(150);
+    await clickSheet('button[data-fxa="0"]'); await wait(150);
   }
   ok((await log()).includes('2つ目のワザを使った'),'HB01-097: 2枚目のワザを使うと「2つ目のワザを使ったとき」が自動で発動する');
-  s=await S(); await tapCard(s.players[1].line[0][0].uid); await wait(100);
-  ok((await fxq()).includes('8以下'),'HB01-097: 続けて正面を選び、コストの条件を聞く');
+  ok((await fxq()).includes('8以下'),'HB01-097: 続けて正面（相手の第1ライン）のコストの条件を聞く');
   await clickSheet('button[data-fxa="0"]'); await wait(100);
   await clickSheet('button[data-fxa="0"]'); await wait(150);
   s=await S();

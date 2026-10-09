@@ -130,16 +130,18 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await setup({hand:['HD01-010'], line:[['HD01-001']]});
   await moveTo(await inZone(0,'hand','HD01-010'),'line',0);
   ok((await S()).players[0].deck.length===10,'HD01-010: 束の上に出す → 引かない');
-  // HD01-006 出たとき、自分のホロビトを1体選び、回復する（選ぶ範囲も「回復する」も未確定 → 手で）
+  // HD01-006 出たとき、自分のホロビトを1体選び、回復する（回復＝ダウンしているカードを縦向きに。手引書）
   await setup({hand:['HD01-006'], line:[[],[{k:'HD01-001',turned:true}]]});
   await moveTo(await inZone(0,'hand','HD01-006'),'line',0);
-  let lg=await log();
-  ok(lg.includes('自分のホロビトを1体選ぶ') && lg.includes('回復する') && lg.includes('手で'),'HD01-006: 選ぶ範囲と「回復する」は未確定なので、手で処理するよう案内する');
-  ok((await S()).players[0].line[1][0].turned,'HD01-006: 「回復する」を推測で行わない（ダウンしたまま）');
+  let pk=await picks(); s=await S();
+  ok(pk.length===2 && pk.includes(s.players[0].line[1][0].uid),'HD01-006: 自分のラインのホロビトが光る（出た七尾自身も含む）');
+  await tap(s.players[0].line[1][0].uid);
+  ok(!(await S()).players[0].line[1][0].turned,'HD01-006: 選んだダウンしているホロビトが縦向きになる（回復）');
+  let lg;
   // HD02-011 エナ詠み③（緑）・出たとき、手札からコスト7以上のホロビトを1体見せてもよい。そうしたなら1枚引く
   await setup({hand:['HD02-011','HB01-065','HD02-001'], ena:['HD02-001','HD02-001','HD02-001']});
   await moveTo(await inZone(0,'hand','HD02-011'),'line',0);
-  let pk=await picks(); s=await S();
+  pk=await picks(); s=await S();
   ok(pk.length===1 && pk[0]===s.players[0].hand.find(c=>c.key==='HB01-065').uid,'HD02-011: 見せる候補はコスト7以上のホロビト（コスト9の HB01-065）だけ');
   await tap(pk[0]);
   s=await S();
@@ -155,6 +157,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   // ===== オーバービートされるとき・ダウンしたとき =====
   // HD02-009 オーバービートされるとき、ダウンしているなら1枚引く（そのあとダウンは解除される）
   await setup({hand:['HB01-001'], line:[[{k:'HD02-009',turned:true}]]});
+  s=await S();
   await moveTo(await inZone(0,'hand','HB01-001'),'line',0);
   s=await S();
   ok(s.players[0].deck.length===9 && !s.players[0].line[0][0].turned,'HD02-009: ダウン中に重ねられる → 1枚引き、そのあとダウンが解除される');
@@ -173,24 +176,22 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await tap(await top(0,0)); await fxbtn('バトルに勝ったとき');
   ok((await q()).includes('2倍以上'),'HB01-065: パワーの比は計算せず聞く');
   await ans(0);
-  pk=await picks();
-  ok(pk.length===1,'HB01-065: 正面の候補（相手のラインの一番上）が光る');
-  await tap(pk[0]);
   s=await S();
-  ok(s.players[1].line[0].length===0 && s.players[1].grave.some(c=>c.key==='HD01-001'),'HB01-065: 正面を選ぶ → 破壊され相手の墓地へ');
+  ok(s.players[1].line[0].length===0 && s.players[1].grave.some(c=>c.key==='HD01-001') && (await log()).includes('相手の第1ライン'),'HB01-065: 正面（相手の同じ番号のライン）が破壊され相手の墓地へ');
+  await setup({line:[[],['HB01-065']]},{line:[['HD01-001']]});
+  await tap(await top(0,1)); await fxbtn('バトルに勝ったとき'); await ans(0);
+  ok((await S()).players[1].line[0].length===1,'HB01-065: 第2ラインにいて、相手の第2ラインが空なら何もしない（第1ラインは正面ではない）');
   await setup({line:[['HB01-065']]},{line:[['HD01-001']]});
   await tap(await top(0,0)); await fxbtn('バトルに勝ったとき'); await ans(1);
   ok((await S()).players[1].line[0].length===1,'HB01-065: 2倍以上でないと答える → 破壊しない');
   // 正面が「このホロビトは破壊されない」を持つとき
   await setup({line:[['HB01-065']]},{line:[['HD01-017']]});
   await tap(await top(0,0)); await fxbtn('バトルに勝ったとき'); await ans(0);
-  await tap((await picks())[0]);
   s=await S();
   ok(s.players[1].line[0].length===1 && s.players[1].grave.length===0,'HB01-065 → HD01-017: 「このホロビトは破壊されない」を持つ正面は破壊しない');
   ok((await log()).includes('破壊されない'),'HB01-065 → HD01-017: 破壊しない理由が記録に出る');
   await setup({line:[['HB01-065']]},{line:[['HD01-007']]});
   await tap(await top(0,0)); await fxbtn('バトルに勝ったとき'); await ans(0);
-  await tap((await picks())[0]);
   ok((await S()).players[1].line[0].length===1,'HB01-065 → HD01-007: 破壊されない');
 
   // HB01-063 エナ詠み③（緑）・バトルに勝ったとき、第1〜2ラインにいるなら、相手は手札を1枚選んで捨てる
@@ -217,13 +218,13 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await tap(pk[0]);
   s=await S();
   ok(!s.players[0].ena[0].turned && s.players[0].ena[1].turned,'HB01-031: 選んだ赤のエナが未使用（縦向き）になる');
-  ok(s.players[0].line[0][0].turned && (await log()).includes('回復する」は定義が未確定'),'HB01-031: 「回復する」は推測で行わず、手で処理するよう案内する');
+  ok(!s.players[0].line[0][0].turned && (await log()).includes('回復した'),'HB01-031: 「このホロビトを回復する」→ ダウンしていた七尾が縦向きになる');
 
-  // HD01-014 バトルが終わったとき、自分のホロビトを1体選び、回復する（手で）
-  await setup({line:[['HD01-014']]});
+  // HD01-014 バトルが終わったとき、自分のホロビトを1体選び、回復する
+  await setup({line:[[{k:'HD01-014',turned:true}]]});
   await tap(await top(0,0)); await fxbtn('バトルが終わったとき');
-  lg=await log();
-  ok(lg.includes('自分のホロビトを1体選ぶ') && lg.includes('回復する'),'HD01-014: 手で処理するよう案内する');
+  await tap((await picks())[0]);
+  ok(!(await S()).players[0].line[0][0].turned,'HD01-014: 自分（ダウン中）を選ぶ → 回復して縦向きになる');
 
   // HD01-009 バトルに勝ったとき、第2〜5ラインにいるなら1枚引く
   await setup({line:[[],['HD01-009']]});
@@ -244,20 +245,19 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   // HD01-013 共鳴：ライガ／使ったとき1枚引く／このワザのパワーを+1000する
   await setup({hand:['HD01-013'], line:[['HB01-001']], ena:[R()]});
   await useWaza(await inZone(0,'hand','HD01-013'), await top(0,0));
-  ok((await q()).includes('コスト 1'),'HD01-013: コスト1の支払いを聞く'); await ans(0);
-  ok((await q()).includes('置き場所'),'HD01-013: 置き場所を聞く'); await ans(0);
-  ok((await q()).includes('ライガ・ファミリー'),'HD01-013: 共鳴は使うホロビトのカード名の下の行を示して聞く'); await ans(0);
+  ok((await q()).includes('コスト 1（赤）'),'HD01-013: コスト1（赤）の支払いを聞く'); await ans(0);
+  ok((await q()).includes('ライガ・ファミリー'),'HD01-013: 共鳴は使ったホロビトの種族（カード名の下の行）を示して聞く'); await ans(0);
   s=await S();
-  ok(s.players[0].hand.length===1 && s.players[0].ena[0].turned && s.players[0].waza.length===1,'HD01-013: エナ1枚を使用済みにし、ワザゾーンに置き、1枚引く');
-  ok((await log()).includes('ワザのパワーが何を指すかは未確定') ,'HD01-013: 「このワザのパワーを+1000する」は手で扱うよう案内する');
+  ok(s.players[0].hand.length===1 && s.players[0].ena[0].turned && s.players[0].waza.length===1 && s.players[0].waza[0].turned,'HD01-013: 赤のエナ1枚を使用済みにし、ワザゾーンに横向きで置き、1枚引く');
+  ok((await log()).includes('左辺の +2000') ,'HD01-013: 「このワザのパワーを+1000する」はワザのパワー（左辺）を示して手で扱うよう案内する');
   ok((await badges(0,0)).includes('ワザ+2000'),'HD01-013: 使ったホロビトに「ワザ+2000」の印');
   await shot('waza');
 
   // HD02-013 共鳴：スザク／使ったとき相手は手札を1枚選んで捨てる／このバトルに勝ったとき自分は1枚引く
   await setup({hand:['HD02-013'], line:[['HD02-001']], ena:['HD02-001']},{hand:['HD02-003']});
   await useWaza(await inZone(0,'hand','HD02-013'), await top(0,0));
-  await ans(0); await ans(0);
-  ok((await q()).includes('スザク・ブラッド'),'HD02-013: 共鳴は使うホロビトの行を示して聞く'); await ans(0);
+  await ans(0);
+  ok((await q()).includes('スザク・ブラッド'),'HD02-013: 共鳴は使ったホロビトの種族を示して聞く'); await ans(0);
   pk=await picks();
   ok(pk.length===1,'HD02-013: 使ったとき → 相手の手札が光る'); await tap(pk[0]); await close();
   await tap(await inZone(0,'waza','HD02-013')); await fxbtn('このバトルに勝ったとき');
@@ -266,12 +266,11 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
   // HB01-097 2つ目のワザを使ったとき、正面のホロビトのコストが8以下なら、その一番上のカードを手札に戻す
   await setup({hand:['HD02-008','PR-013'], line:[['HB01-097']], ena:[R(),R(),R(),R()]},{line:[['HB01-001','HD01-001']]});
-  await useWaza(await inZone(0,'hand','HD02-008'), await top(0,0)); await ans(0); await ans(0);
+  await useWaza(await inZone(0,'hand','HD02-008'), await top(0,0)); await ans(0);
   ok(!(await log()).includes('2つ目'),'HB01-097: 1枚目では発動しない');
-  await useWaza(await inZone(0,'hand','PR-013'), await top(0,0)); await ans(0); await ans(0);
+  await useWaza(await inZone(0,'hand','PR-013'), await top(0,0)); await ans(0);
   ok((await log()).includes('2つ目のワザを使った'),'HB01-097: 2枚目で発動する');
-  await tap((await picks())[0]);
-  ok((await q()).includes('8以下'),'HB01-097: 正面のコストを聞く'); await ans(0);
+  ok((await q()).includes('8以下') && (await log()).includes('相手の第1ライン'),'HB01-097: 正面（相手の第1ライン）のコストを聞く'); await ans(0);
   ok((await q()).includes('誰の手札'),'HB01-097: 誰の手札に戻すかを聞く'); await ans(0);
   s=await S();
   ok(s.players[1].hand.some(c=>c.key==='HD01-001') && s.players[1].line[0].length===1,'HB01-097: 一番上だけが持ち主の手札に戻り、下のカードは残る');
@@ -283,7 +282,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   ok((await q()).includes('他のワザを使っていますか'),'うつし身の撃: 使う前に制限を聞く'); await ans(1);
   ok((await S()).players[0].hand.length===1 && (await log()).includes('使えない'),'うつし身の撃: 満たさない → 使えず手札に残る');
   await useWaza(await inZone(0,'hand','UNKNOWN-utsushimi'), await top(0,0)); await ans(0);
-  ok((await q()).includes('コスト 2'),'うつし身の撃: 満たす → コスト2の支払いへ'); await ans(0); await ans(0);
+  ok((await q()).includes('コスト 2'),'うつし身の撃: 満たす → コスト2の支払いへ（青のエナがないので手で払う）'); await ans(0);
   ok((await log()).includes('このバトルに勝ったなら') && (await log()).includes('手で'),'うつし身の撃: 「勝ったなら…ダメージ+1」は手で扱うよう案内する');
 
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));

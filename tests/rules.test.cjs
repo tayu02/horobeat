@@ -62,6 +62,34 @@ async function run(label, viewport, touch){
   s=await S();
   ok(s.phase===1 && s.players[0].hand.length===0,'バトルフェイズに入るときはエナドローしない');
 
+  // --- 手引書（2026-10-09）: ドローステップ・スライドステップ・ワザゾーンの片付け ---
+  await p.evaluate(()=>{
+    let n=0; const mk=(k,o,ex)=>Object.assign({uid:'D'+(n++),owner:o,key:k,up:true,turned:false,note:''},ex||{});
+    const pl=o=>({heart:[],waza:[],ena:[],hand:[],grave:[],deck:[],line:[[],[],[],[],[]],decklist:{}});
+    const me=pl(0), op=pl(1);
+    for(let i=0;i<5;i++) me.deck.push(mk(null,0,{up:false}));
+    me.line[1].push(mk('HB01-001',0)); me.line[3].push(mk('HD01-001',0), mk('HB01-033',0));
+    me.waza.push(mk('PR-013',0,{turned:true}));
+    state={round:1,phase:1,first:0,fxAuto:true,players:[me,op]}; undoStack=[]; fxClear(); render();
+  });
+  await p.click('#btnPhase'); await wait(50);
+  s=await S();
+  ok(s.players[0].line[0].length===1 && s.players[0].line[0][0].key==='HB01-001' && s.players[0].line[1].length===2 && s.players[0].line[1][1].key==='HB01-033' && !s.players[0].line[2].length,
+    'スライドステップ: 第2・第4ラインのホロビト（束ごと）が第1・第2ラインに詰まる');
+  ok(s.players[0].waza.length===0 && s.players[0].grave.some(c=>c.key==='PR-013'),'エンドフェイズまでに、ワザゾーンの使ったカードは墓地へ（バトルが終わったとき墓地。手引書）');
+  ok((await log()).includes('スライドステップ'),'記録にスライドステップが出る');
+  const d0=s.players[0].deck.length, hd0=s.players[0].hand.length;
+  await p.click('#btnPhase'); await wait(50);
+  s=await S();
+  ok(s.round===2 && s.phase===0 && s.players[0].hand.length===hd0+1 && s.players[0].deck.length===d0-1,'新しいラウンドの召喚フェイズに入ると、ドローステップで1枚引く');
+  ok((await log()).includes('相手：ドローステップで山札が0枚のため引けない') && (await log()).includes('勝利条件②'),'山札が0枚の相手は引けず、負けになることを知らせる（勝利条件②）');
+  // 最初のラウンドはお互いドローなし
+  await p.evaluate(()=>{ runAction('reset',2); runAction('setupAll',2); render(); });
+  const hr1=(await S()).players[0].hand.length;
+  await p.click('#btnPhase'); await wait(50);
+  s=await S();
+  ok(s.round===1 && s.phase===0 && s.players[0].hand.length===hr1,'最初のラウンド（準備のあとの召喚フェイズ）はドローしない');
+
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));
   await b.close();
 }
