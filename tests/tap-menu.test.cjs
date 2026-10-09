@@ -11,10 +11,14 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   const touch=(t,x,y)=>cdp.send('Input.dispatchTouchEvent',{type:t,touchPoints:t==='touchEnd'?[]:[{x,y}]});
   const ctr=async sel=>{
     const l=p.locator(sel).first();
-    await l.scrollIntoViewIfNeeded();
+    // 画面の中央までスクロールする。scrollIntoViewIfNeeded は上部に固定したヘッダーを考えないので、
+    // 要素がヘッダーの裏に隠れたまま「見えている」と判断することがある（2026-10-09 盤面の並びを変えて実際に落ちた）
+    await l.evaluate(e=>e.scrollIntoView({block:'center'})); await new Promise(r=>setTimeout(r,60));
     const r=await l.boundingBox();
     return [r.x+r.width/2, r.y+r.height/2];
   };
+  // スクロールせずに中心の座標を取る（ドラッグの行き先など、1つ目の座標を取ったあとで画面を動かしたくないとき）
+  const pos=async sel=>{ const r=await p.locator(sel).first().boundingBox(); return [r.x+r.width/2, r.y+r.height/2]; };
 
   await p.locator('#guide .big').click();
   await p.evaluate(()=>document.querySelectorAll('details.doc').forEach(d=>d.open=false));
@@ -43,8 +47,10 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   ok(await p.evaluate(()=>state.players[0].line[0][0].turned)===true,'メニューから横向きにできる');
 
   // ドラッグは従来どおり
-  const [cx,cy]=await ctr('#side-0 .lineslot[data-idx="0"] .card');
-  const [gx,gy]=await ctr('#side-0 [data-drop="grave"]');
+  await ctr('#side-0 [data-drop="ena"]');   // ライン（上）と墓地（下）の両方が画面に入る位置まで動かす
+  const [cx,cy]=await pos('#side-0 .lineslot[data-idx="0"] .card');
+  const [gx,gy]=await pos('#side-0 [data-drop="grave"]');
+  ok(cy>260 && gy<1500-20,'ドラッグの元と行き先が両方とも画面内（ヘッダーの下）にある '+JSON.stringify([cy,gy]));
   await touch('touchStart',cx,cy);
   await touch('touchMove',cx,cy-18);
   await touch('touchMove',cx,cy-45);

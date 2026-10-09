@@ -109,6 +109,18 @@ async function run(label, viewport, touch){
     return {oppLineBottom:Math.round(o.bottom), meLineTop:Math.round(m.top), gap:Math.round(m.top-o.bottom), between};
   });
   ok(adj.between===0 && adj.gap>=0 && adj.gap<120,'両者のバトルラインが中央で隣接 '+JSON.stringify(adj));
+  // 広い画面は公式の手引書の「盤面見本」どおり（rules_confirmed.md §5）
+  if(!touch){
+    const L=await p.evaluate(()=>{ const r=(pi,c)=>document.querySelector('#side-'+pi+' .'+c).getBoundingClientRect();
+      const o={}; for(const pi of [0,1]) for(const c of ['z-heart','z-line','z-waza','z-ena','z-hand','z-deck','z-grave']){ const b=r(pi,c); o[pi+c]={x:Math.round(b.left),y:Math.round(b.top),r:Math.round(b.right)}; } return o; });
+    ok(L['0z-heart'].r<=L['0z-line'].x && L['0z-deck'].x>=L['0z-line'].r && L['0z-deck'].y<L['0z-grave'].y,'自分: 左にハートゾーン、右に山札（上）と墓地（下）');
+    ok(L['0z-line'].y<L['0z-waza'].y && L['0z-waza'].y<L['0z-ena'].y && L['0z-ena'].y<L['0z-hand'].y,'自分: 中央は上からバトルライン→ワザ→エナ→手札');
+    ok(L['1z-heart'].x>=L['1z-line'].r && L['1z-deck'].r<=L['1z-line'].x && L['1z-grave'].y<L['1z-deck'].y,'相手: 点対称（右にハートゾーン、左に墓地（上）と山札（下））');
+    ok(L['1z-hand'].y<L['1z-ena'].y && L['1z-ena'].y<L['1z-waza'].y && L['1z-waza'].y<L['1z-line'].y,'相手: 中央は上から手札→エナ→ワザ→バトルライン');
+  } else {
+    const order=await p.evaluate(()=>[0,1].map(pi=>[...document.querySelectorAll('#side-'+pi+' .zone')].sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top||a.getBoundingClientRect().left-b.getBoundingClientRect().left).map(z=>z.className.match(/z-(\w+)/)[1]).join('>')));
+    ok(order[0]==='line>waza>ena>heart>deck>grave>hand' && order[1]==='hand>deck>grave>heart>ena>waza>line','狭い画面: 自分は上からライン→ワザ→エナ→ハート→山札・墓地→手札、相手はその逆順 '+JSON.stringify(order));
+  }
 
   await p.evaluate(()=>{ window.scrollTo(0,0); });
   await p.screenshot({path:H.out('shot-'+label+'.png'),fullPage:true});

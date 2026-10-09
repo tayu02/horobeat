@@ -212,12 +212,18 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
   .cname{font-size:8.5px}
   .cpow{font-size:11px}
   .ccost{width:17px;height:17px;font-size:10px}
-  .side{display:grid;grid-template-columns:352px 1fr 190px;gap:7px;align-items:start}
+  /* 公式の手引書の「盤面見本」どおりに並べる（rules_confirmed.md §5）:
+     自分（下）… 左にハートゾーン（縦）、中央にバトルライン→ワザゾーン→エナゾーン→手札、右に山札（上）と墓地（下）
+     相手（上）… 点対称（右にハートゾーン、左に墓地（上）と山札（下）、中央は手札→エナ→ワザ→バトルライン） */
+  .side{display:grid;grid-template-columns:118px minmax(0,1fr) 118px;gap:7px;align-items:stretch}
   .sidehead{grid-area:head}
+  .pilerow{display:contents}
   .z-hand{grid-area:hand} .z-heart{grid-area:heart} .z-ena{grid-area:ena}
-  .z-waza{grid-area:waza} .z-line{grid-area:line} .z-pile{grid-area:pile}
-  .side[data-pi="0"]{grid-template-areas:"line line line" "waza waza waza" "heart ena pile" "hand hand hand" "head head head"}
-  .side[data-pi="1"]{grid-template-areas:"head head head" "hand hand hand" "heart ena pile" "waza waza waza" "line line line"}
+  .z-waza{grid-area:waza} .z-line{grid-area:line} .z-deck{grid-area:deck} .z-grave{grid-area:grave}
+  .side[data-pi="0"]{grid-template-areas:"heart line deck" "heart waza grave" "heart ena grave" ". hand ." "head head head"}
+  .side[data-pi="1"]{grid-template-areas:"head head head" ". hand ." "grave ena heart" "grave waza heart" "deck line heart"}
+  .z-heart .strip{flex-direction:column;flex-wrap:nowrap;align-items:center;overflow:visible}
+  .z-heart .strip .card+.card{margin-top:-34px}
   .jumpbar{display:none}
   .deckcols{flex-direction:row}
   .deckcol{flex:1}
@@ -1317,12 +1323,12 @@ function lineHTML(pi){
 function pileHTML(pi){
   var P = state.players[pi];
   return '<div class="pilerow z-pile">' +
-      '<div class="zone" data-drop="deck" data-pi="' + pi + '">' +
+      '<div class="zone z-deck" data-drop="deck" data-pi="' + pi + '">' +
         '<div class="zlabel tappable" data-zsheet="deck" data-pi="' + pi + '">山札 <span class="zcount">(' + P.deck.length + ')</span></div>' +
         '<div class="strip">' + (P.deck.length
           ? '<div class="pile" data-pile="' + pi + '">' + P.deck.length + '<span style="font-size:9px;font-weight:400">枚</span></div>'
           : '<div class="pile empty0" data-pile="' + pi + '">0枚</div>') + '</div></div>' +
-      '<div class="zone" data-drop="grave" data-pi="' + pi + '">' +
+      '<div class="zone z-grave" data-drop="grave" data-pi="' + pi + '">' +
         '<div class="zlabel">墓地 <span class="zcount">(' + P.grave.length + ')</span></div>' +
         '<div class="strip">' + stripHTML(P.grave) + '</div></div>' +
     '</div>';
@@ -1336,7 +1342,9 @@ function sideHTML(pi){
   var waza  = zoneHTML(pi, "waza",  "z-waza");
   var line  = lineHTML(pi);
   var pile  = pileHTML(pi);
-  return pi === 1 ? head + hand + heart + ena + pile + waza + line
+  // 狭い画面（縦に積む）では、自分は「バトルライン→ワザ→エナ→ハート→山札・墓地→手札」、相手はその逆順
+  // （広い画面では CSS の grid-template-areas で盤面見本どおりに並べる）
+  return pi === 1 ? head + hand + pile + heart + ena + waza + line
                   : head + line + waza + ena + heart + pile + hand;
 }
 function deckPanelHTML(){
