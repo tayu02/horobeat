@@ -138,9 +138,31 @@ export function validateCards(path = "data/cards.json") {
       errors.push("data/abilities.json が古い。node tools/ability.mjs build で作り直すこと");
     // カード画像: どのカードも、画像を載せるか理由を書いて保留するかが決まっていること
     errors.push(...checkImages(data.cards).errors);
+    errors.push(...checkStarters(data.cards));
   }
 
   return { data, errors };
+}
+
+// スタートデッキ（data/starter-decks.json）: 登録済みのカードだけで、ちょうど50枚、同名4枚まで（確定: §3）
+export function checkStarters(cards, path = "data/starter-decks.json") {
+  const errors = [];
+  if (!existsSync(path)) return errors;
+  const { decks } = JSON.parse(readFileSync(path, "utf8"));
+  const byKey = new Map(cards.map(c => [c.key, c]));
+  for (const d of decks) {
+    let sum = 0; const byName = {};
+    for (const { key, count } of d.cards) {
+      const c = byKey.get(key);
+      if (!c) { errors.push(`${d.id}: ${key} は data/cards.json にない`); continue; }
+      if (!(Number.isInteger(count) && count > 0)) errors.push(`${d.id}: ${key} の枚数が正の整数でない`);
+      sum += count; byName[c.name] = (byName[c.name] || 0) + count;
+    }
+    if (sum !== 50) errors.push(`${d.id}: 合計が ${sum} 枚（50枚であること）`);
+    for (const [n, k] of Object.entries(byName)) if (k > 4) errors.push(`${d.id}: 「${n}」が ${k} 枚（同名4枚まで）`);
+    if (new Set(d.cards.map(x => x.key)).size !== d.cards.length) errors.push(`${d.id}: 同じカード番号が2行ある`);
+  }
+  return errors;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

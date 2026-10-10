@@ -197,6 +197,12 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 .dkn{width:1.6em;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
 .dkshare{background:#3a2f1a;color:var(--gold);border:1px solid #5a4a2a;border-radius:3px;font-size:9px;padding:0 3px;white-space:nowrap}
 .dksum{font-size:11px;color:var(--sub);margin:6px 0 4px}
+/* スタートデッキを選ぶタブ */
+.dktabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 4px}
+.dktabs button{flex:1 1 auto}
+.dknow{font-size:11px;color:var(--sub);margin:0 0 6px}
+.starterrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0}
+.starterrow .who{font-size:12px;font-weight:700;min-width:2.5em}
 
 /* ---- シート ---- */
 #sheetwrap{position:fixed;inset:0;z-index:100;display:none}
@@ -343,7 +349,8 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
   <div class="guide" id="guide">
     <h2>はじめかた</h2>
     <ol>
-      <li>（任意）下の<b>「デッキ編集」</b>で、公開済みのカードをデッキに入れます。入れなかった枠は<b>未確定カード</b>（灰色）で埋まります。</li>
+      <li>（任意）<b>スタートデッキ</b>で遊ぶなら、ここで選びます（公式の収録カード一覧どおりの50枚）。自分で組むなら下の<b>「デッキ編集」</b>で、公開済みのカードを入れます。入れなかった枠は<b>未確定カード</b>（灰色）で埋まります。
+        <div class="starterrow" id="guideStarters"></div></li>
       <li><b>「両者の準備をする」</b>を押します。山札を混ぜて、手札6枚・ハート5枚（裏向き）・エナ1枚（表向き）を両者に配ります。</li>
       <li>カードを<b>タップ</b>すると、印字内容とメニューが開きます。任意のゾーンへ動かせます。</li>
       <li>メニューの下の方で、<b>縦向き⇄横向き</b>、<b>表裏</b>、<b>メモ</b>も付けられます。</li>
@@ -433,6 +440,7 @@ var PARTS = {"this_holobito":{"role":"発火条件1","text":"このホロビト"
 var ABILITY_MAP = {"HB01-033":[{"keyword":"double_damage"},{"conditions":[{"part":"own_count_on_line","args":{"color":"赤","n":4}}],"effects":[{"part":"power_plus","args":{"target":"このホロビト","n":5000}}]}],"HB01-065":[{"keyword":"double_damage"},{"trigger":{"subject":"this_holobito","event":"won_battle"},"conditions":[{"part":"power_ratio_vs_front","args":{"n":2}}],"effects":[{"part":"destroy","args":{"target":"正面のホロビト"}}],"note":"note_no_barrier"}],"HB01-097":[{"keyword":"double_damage"},{"trigger":{"subject":"this_holobito","event":{"part":"used_nth_waza","args":{"n":2}}},"conditions":[{"part":"front_cost_le","args":{"n":8}}],"effects":["return_top_to_hand"]}],"HB01-063":[{"keyword":{"part":"ena_yomi","args":{"n":3,"color":"緑"}},"sub":[{"trigger":{"subject":"this_holobito","event":"won_battle"},"conditions":[{"part":"in_lines","args":{"from":1,"to":2}}],"effects":[{"part":"opponent_discard","args":{"n":1}}]}]}],"HB01-031":[{"trigger":{"subject":"this_holobito_battle","event":"ended"},"effects":[{"part":"select_own","args":{"color":"赤","what":"エナ","n":1,"unit":"枚"},"then":"。"},{"part":"make_unused","args":{"target":"それ"}},{"part":"recover","args":{"target":"このホロビト"}}]}],"HB01-034":[{"conditions":[{"part":"on_line","args":{"subject":"このホロビト"}}],"effects":[{"part":"cost_bigger","args":{"n":1}}]}],"HB01-049":[{"conditions":[{"part":"lines_under_total_ge","args":{"from":1,"to":2,"n":3}}],"effects":[{"part":"power_plus","args":{"target":"このホロビト","n":3000}},{"part":"gain_keyword","args":{"keyword":"ダブルダメージ"}}],"note":"note_double_damage_held"}],"UNKNOWN-utsushimi":[{"effects":["only_if_other_waza_used"]},{"conditions":["won_this_battle"],"effects":[{"part":"damage_to_opponent_plus","args":{"n":1}}]}],"HD01-017":[{"keyword":"double_damage"},{"effects":[{"part":"indestructible","args":{"subject":"このホロビト"}}],"note":{"part":"note_indestructible","sep":"\n"}}],"HD01-001":[{"trigger":{"subject":"this_holobito","event":"entered"},"effects":[{"part":"draw","args":{"n":1}}]}],"HD02-001":[{"conditions":[{"part":"on_line","args":{"subject":"このホロビト"}}],"effects":[{"part":"cost_bigger","args":{"n":1}}]}],"HD02-002":[{"keyword":{"part":"barrier","args":{"n":1}}}],"HD02-017":[{"keyword":"double_damage"},{"conditions":[{"part":"cards_under_ge","args":{"n":2}}],"effects":[{"part":"power_plus","args":{"n":3000}}]}],"HD01-005":[{"conditions":[{"part":"in_lines","args":{"subject":"このホロビト","from":2,"to":5}}],"effects":[{"part":"power_plus","args":{"target":"このホロビト","n":2500}}]}],"HD02-005":[{"keyword":{"part":"barrier","args":{"n":1}}}],"HD01-006":[{"trigger":{"subject":"this_holobito","event":"entered"},"effects":[{"part":"select_own","args":{"what":"ホロビト","n":1,"unit":"体"}},"recover"]}],"HD02-006":[{"keyword":"double_damage"}],"HD01-007":[{"effects":[{"part":"indestructible","args":{"subject":"このホロビト"}}],"note":{"part":"note_indestructible","sep":"\n"}}],"HD02-009":[{"trigger":{"subject":"this_holobito","event":"overbeaten"},"conditions":[{"part":"is_down","args":{"subject":"このホロビト"}}],"effects":[{"part":"draw","args":{"n":1}}]}],"HD01-009":[{"trigger":{"subject":"this_holobito","event":"won_battle"},"conditions":[{"part":"in_lines","args":{"from":2,"to":5}}],"effects":[{"part":"draw","args":{"n":1}}]}],"HD01-010":[{"trigger":{"subject":"this_holobito","event":"entered"},"conditions":["no_cards_under"],"effects":[{"part":"draw","args":{"n":1}}]}],"HD02-010":[{"keyword":{"part":"barrier","args":{"n":1}}}],"HD02-011":[{"keyword":{"part":"ena_yomi","args":{"n":3,"color":"緑"}},"sub":[{"trigger":{"subject":"this_holobito","event":"entered"},"effects":[{"part":"may_reveal_from_hand","args":{"n":7,"m":1},"then":"。"},{"part":"draw","args":{"n":1},"if":["did_so"]}]}]}],"HD01-011":[{"keyword":{"part":"ena_yomi","args":{"n":3,"color":"赤"}},"sub":[{"conditions":["not_down"],"effects":[{"part":"power_plus","args":{"n":3000}}]}]}],"HD01-014":[{"trigger":{"subject":"this_holobito_battle","event":"ended"},"effects":[{"part":"select_own","args":{"what":"ホロビト","n":1,"unit":"体"}},"recover"]}],"HD02-012":[{"conditions":["boost_used_on_this"],"effects":[{"part":"power_plus_passive","args":{"n":2000}}],"note":"note_not_by_waza"},{"trigger":{"subject":"this_holobito","event":"won_battle"},"effects":[{"part":"draw","args":{"n":1}}]}],"HD01-012":[{"conditions":["boost_used_by_this"],"effects":[{"part":"power_plus_passive","args":{"target":"このホロビト","n":3000}}],"note":{"part":"note_boost_once","sep":"\n"}}],"HD02-014":[{"conditions":[{"part":"on_line","args":{"subject":"このホロビト"}}],"effects":[{"part":"cost_bigger","args":{"n":1}}]}],"HD01-013":[{"keyword":{"part":"kyomei","args":{"tribe":"ライガ"}},"sub":[{"trigger":{"subject":"this_waza","particle":"を","event":"used"},"effects":[{"part":"draw","args":{"n":1}}]},{"effects":[{"part":"power_plus","args":{"target":"このワザ","n":1000}}]}]}],"HD02-013":[{"keyword":{"part":"kyomei","args":{"tribe":"スザク"}},"sub":[{"trigger":{"subject":"this_waza","particle":"を","event":"used"},"effects":[{"part":"opponent_discard","args":{"n":1}}]},{"trigger":{"subject":"this_battle","particle":"に","event":"won"},"effects":[{"part":"draw","args":{"who":"自分","n":1}}]}]}],"HD01-015":[{"conditions":[{"part":"own_count_on_line","args":{"n":4}}],"effects":[{"part":"power_plus","args":{"target":"このホロビト","n":4000}}]}],"HD02-015":[{"trigger":{"subject":"this_holobito","event":"won_battle"},"effects":[{"part":"draw","args":{"n":1}}]}],"HD01-016":[{"keyword":"double_damage"}],"HD02-016":[{"keyword":"double_damage"},{"trigger":{"subject":"this_holobito","event":"downed"},"effects":[{"part":"draw","args":{"n":2}}]}]};
 var CARD_IMAGES = {"HB01-001":"images/cards/HB01-001.webp","HB01-031":"images/cards/HB01-031.webp","HB01-033":"images/cards/HB01-033.webp","HB01-061":"images/cards/HB01-061.webp","HB01-063":"images/cards/HB01-063.webp","HB01-065":"images/cards/HB01-065.webp","HB01-097":"images/cards/HB01-097.webp","HD01-001":"images/cards/HD01-001.webp","HD01-003":"images/cards/HD01-003.webp","HD01-004":"images/cards/HD01-004.webp","HD01-005":"images/cards/HD01-005.webp","HD01-006":"images/cards/HD01-006.webp","HD01-007":"images/cards/HD01-007.webp","HD01-009":"images/cards/HD01-009.webp","HD01-010":"images/cards/HD01-010.webp","HD01-011":"images/cards/HD01-011.webp","HD01-012":"images/cards/HD01-012.webp","HD01-013":"images/cards/HD01-013.webp","HD01-014":"images/cards/HD01-014.webp","HD01-015":"images/cards/HD01-015.webp","HD01-016":"images/cards/HD01-016.webp","HD01-017":"images/cards/HD01-017.webp","HD02-001":"images/cards/HD02-001.webp","HD02-002":"images/cards/HD02-002.webp","HD02-003":"images/cards/HD02-003.webp","HD02-004":"images/cards/HD02-004.webp","HD02-005":"images/cards/HD02-005.webp","HD02-006":"images/cards/HD02-006.webp","HD02-007":"images/cards/HD02-007.webp","HD02-008":"images/cards/HD02-008.webp","HD02-009":"images/cards/HD02-009.webp","HD02-010":"images/cards/HD02-010.webp","HD02-011":"images/cards/HD02-011.webp","HD02-012":"images/cards/HD02-012.webp","HD02-013":"images/cards/HD02-013.webp","HD02-014":"images/cards/HD02-014.webp","HD02-015":"images/cards/HD02-015.webp","HD02-016":"images/cards/HD02-016.webp","HD02-017":"images/cards/HD02-017.webp","PR-001":"images/cards/PR-001.webp","PR-013":"images/cards/PR-013.webp"};
 var CARD_IMAGE_PENDING = {"HB01-034":"イベント会場の写真しかないため保留（依頼者の判断、2026-09-26）。本物のカード画像が出たら入れ替える","HB01-049":"イベント会場の写真しかないため保留（依頼者の判断、2026-09-26）。本物のカード画像が出たら入れ替える","UNKNOWN-utsushimi":"イベント会場の写真しかないため保留（依頼者の判断、2026-09-26）。本物のカード画像が出たら入れ替える"};
+var STARTERS = [{"id":"HB-SD01","name":"スタートデッキ レオジン","color":"赤","cards":[{"key":"HD01-017","count":3},{"key":"HD01-001","count":3},{"key":"HD01-003","count":4},{"key":"HB01-001","count":3},{"key":"HD01-009","count":3},{"key":"HD01-004","count":4},{"key":"HD01-006","count":3},{"key":"HD01-005","count":3},{"key":"HD01-007","count":4},{"key":"HD01-010","count":3},{"key":"HD01-011","count":3},{"key":"HD01-014","count":2},{"key":"HD01-015","count":2},{"key":"HD01-012","count":3},{"key":"HD01-016","count":1},{"key":"HD01-013","count":3},{"key":"PR-013","count":3}]},{"id":"HB-SD02","name":"スタートデッキ 不死火翔","color":"緑","cards":[{"key":"HD02-017","count":3},{"key":"HD02-001","count":3},{"key":"HD02-002","count":4},{"key":"HD02-003","count":3},{"key":"HD02-009","count":3},{"key":"HD02-004","count":4},{"key":"HD02-010","count":3},{"key":"HD02-007","count":3},{"key":"HD02-005","count":3},{"key":"HD02-014","count":1},{"key":"HD02-012","count":3},{"key":"HD02-011","count":3},{"key":"HD02-006","count":4},{"key":"HD02-015","count":2},{"key":"HD02-016","count":2},{"key":"HD02-013","count":3},{"key":"HD02-008","count":3}]}];
 /* @@ABIL_END@@ */
 
 var CARDS = {};
@@ -1402,6 +1410,45 @@ function sideHTML(pi){
   return pi === 1 ? head + hand + pile + heart + ena + waza + line
                   : head + line + waza + ena + heart + pile + hand;
 }
+// ---- スタートデッキ（公式の収録カード一覧。正本は data/starter-decks.json）----
+function starterById(id){ for (var i = 0; i < STARTERS.length; i++) if (STARTERS[i].id === id) return STARTERS[i]; return null; }
+function starterLabel(S){ return S.name.replace(/^スタートデッキ /, "") + "（" + S.color + "）"; }
+// いまのデッキがどのスタートデッキとそのまま同じか（違えば null）
+function starterOf(dl){
+  var keys = Object.keys(dl).filter(function(k){ return (dl[k] | 0) > 0; });
+  for (var i = 0; i < STARTERS.length; i++){
+    var S = STARTERS[i];
+    if (S.cards.length === keys.length && S.cards.every(function(c){ return (dl[c.key] | 0) === c.count; })) return S;
+  }
+  return null;
+}
+function sideIsEmpty(pi){
+  var P = state.players[pi];
+  return !P.hand.length && !P.heart.length && !P.ena.length && !P.waza.length && !P.grave.length &&
+         P.line.every(function(l){ return !l.length; });
+}
+// その陣地のデッキをスタートデッキ（id が空なら空のデッキ）にして組み直す
+function loadStarter(pi, id){
+  var dl = {}, S = id ? starterById(id) : null;
+  if (id && !S) return;
+  if (S) S.cards.forEach(function(c){ dl[c.key] = c.count; });
+  state.players[pi].decklist = dl;
+  rebuildPlayer(pi);
+}
+function starterButtonHTML(pi, id, label, on){
+  var what = id ? starterLabel(starterById(id)) + "・50枚" : "空のデッキ";
+  return '<button class="mini' + (on ? " on" : "") + '" data-starter="' + esc(id) + '" data-pi="' + pi + '"' +
+         (sideIsEmpty(pi) ? "" : ' data-confirm="' + SIDE_NAME[pi] + 'の盤面を消して、' + what + 'で組み直します。よろしいですか？"') + '>' + label + '</button>';
+}
+function starterTabsHTML(pi){
+  var dl = state.players[pi].decklist, cur = starterOf(dl), n = 0;
+  Object.keys(dl).forEach(function(k){ n += dl[k] | 0; });
+  return '<div class="dktabs">' +
+    STARTERS.map(function(S){ return starterButtonHTML(pi, S.id, starterLabel(S), cur === S); }).join("") +
+    starterButtonHTML(pi, "", "空から組む", !cur && !n) + '</div>' +
+    '<div class="dknow">いまのデッキ: ' + (cur ? "スタートデッキ " + esc(starterLabel(cur)) + "（" + esc(cur.id) + "）そのまま"
+      : (n ? "自分で組んだデッキ（登録 " + n + " 枚）" : "空（すべて未確定カード）")) + '</div>';
+}
 function deckPanelHTML(){
   var h = "";
   for (var pi = 0; pi < 2; pi++){
@@ -1419,7 +1466,7 @@ function deckPanelHTML(){
              '<span class="dkn">' + n + '</span>' +
              '<button class="mini" data-dk="+" data-pi="' + pi + '" data-key="' + esc(d.key) + '"' + (n >= lim || known >= DECK_SIZE ? " disabled" : "") + '>＋</button></div>';
     }).join("");
-    h += '<div class="deckcol"><h4 class="who ' + (pi === 0 ? "me" : "opp") + '">' + SIDE_NAME[pi] + 'のデッキ</h4>' + rows +
+    h += '<div class="deckcol"><h4 class="who ' + (pi === 0 ? "me" : "opp") + '">' + SIDE_NAME[pi] + 'のデッキ</h4>' + starterTabsHTML(pi) + rows +
          '<div class="dksum">登録 ' + known + ' 枚 ＋ 未確定 ' + Math.max(0, DECK_SIZE - known) + ' 枚 ＝ ' + DECK_SIZE + ' 枚</div>' +
          '<button data-act="rebuild" data-pi="' + pi + '" data-confirm="' + SIDE_NAME[pi] + 'の盤面を消して、このデッキで組み直します。よろしいですか？">このデッキで初期化</button></div>';
   }
@@ -1452,6 +1499,11 @@ function render(){
   document.getElementById("side-1").innerHTML = sideHTML(1);
   document.getElementById("side-0").innerHTML = sideHTML(0);
   document.getElementById("deckcols").innerHTML = deckPanelHTML();
+  document.getElementById("guideStarters").innerHTML = [0, 1].map(function(pi){
+    var cur = starterOf(state.players[pi].decklist);
+    return '<span class="who ' + (pi === 0 ? "me" : "opp") + '">' + SIDE_NAME[pi] + '</span>' +
+      STARTERS.map(function(S){ return starterButtonHTML(pi, S.id, starterLabel(S), cur === S); }).join("");
+  }).join('<span style="flex-basis:100%;height:0"></span>');
   save();
 }
 
@@ -1635,8 +1687,12 @@ sheetEl.addEventListener("keydown", function(e){
 
 /* ---------------- 準備手順・デッキ編集・ヘッダー ---------------- */
 document.querySelector("main").addEventListener("click", function(e){
-  var t = e.target.closest("button[data-act], button[data-dk], .zlabel[data-zsheet]");
+  var t = e.target.closest("button[data-act], button[data-dk], button[data-starter], .zlabel[data-zsheet]");
   if (!t) return;
+  if (t.dataset.starter !== undefined){
+    if (t.dataset.confirm && !window.confirm(t.dataset.confirm)) return;
+    snap(); loadStarter(+t.dataset.pi, t.dataset.starter); render(); return;
+  }
   if (t.dataset.zsheet){
     if (t.dataset.zsheet === "deck") openDeckSheet(+t.dataset.pi);
     else if (t.dataset.zsheet === "ena") openEnaSheet(+t.dataset.pi);
