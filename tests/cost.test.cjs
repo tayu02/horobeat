@@ -137,12 +137,16 @@ async function run(label, viewport, touch){
     ok((await S()).players[0].line[0].length===1 && await turned()===2,'ドラッグ → 支払ってラインに出る');
   }
 
-  // ---- ワザ: 足りなければ使えない ----
+  // ---- ワザ: 足りなければ使えない（バトルのワザの手番で、使う候補に出ない） ----
   await setup({hand:['PR-013'], line:[['HB01-001']], ena:['HD01-001']});
-  await open(await hand('PR-013'));
-  ok(await p.evaluate(()=>{ const b=document.querySelector('#sheet button[data-wzuse]'); return b && b.disabled && b.textContent.includes('使えない'); }),'ワザ: エナが足りなければ「このワザは使えない」で押せない');
-  await p.click('#sheet button[data-close="1"]'); await wait(100);
-  await p.evaluate(u=>useWaza(u),await hand('PR-013')); await wait(100);
+  await p.evaluate(()=>{ state.players[1].line[0].push({uid:'X1',owner:1,key:'HD01-001',up:true,turned:false,note:''});
+    for(let i=0;i<5;i++) state.players[1].heart.push({uid:'XH'+i,owner:1,key:null,up:false,turned:false,note:''});
+    state.phase=2; startBattle(); battleRun(); });
+  await wait(460);
+  ok(!(await q()).includes('電光攻火') && (await p.evaluate(()=>fxLines.join('/'))).includes('使えるワザがない') && (await S()).players[0].hand.length===1,
+    'ワザ: エナが足りなければ、バトルのワザの手番で使う候補に出ない（手札に残る）');
+  await setup({hand:['PR-013'], line:[['HB01-001']], ena:['HD01-001']});
+  await p.evaluate(u=>useWaza(u, state.players[0].line[0][0], function(){}),await hand('PR-013')); await wait(100);
   ok((await S()).players[0].hand.length===1 && !(await p.evaluate(()=>!!picking)) && (await p.evaluate(()=>fxLines.join('/'))).includes('使えない：'),'ワザ: 使う処理を直接呼んでも使えず、手札に残る');
 
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));

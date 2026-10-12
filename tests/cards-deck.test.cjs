@@ -51,11 +51,11 @@ async function run(label, viewport, touch){
   ok(cnt===4,'壊れた構成を読み込んでも同名は4枚に丸められる ('+cnt+')');
   await p.evaluate(()=>{ state.players[1].decklist={}; rebuildPlayer(1); render(); });
 
-  // --- 準備して表示 ---
-  await p.click('button[data-act="setupAll"][data-pi="2"]');
+  // --- 準備して表示（先手を選んで配る → 両者このまま → ハート・エナ → 召喚フェイズ） ---
+  await H.prep(p);
   await p.evaluate(()=>document.querySelectorAll('details.doc').forEach(d=>d.open=false));
   s=await S();
-  ok(s.players[0].hand.length===6&&s.players[0].heart.length===5&&s.players[0].ena.length===1,'準備手順が動く');
+  ok(s.players[0].hand.length===6&&s.players[0].heart.length===5&&s.players[0].ena.length===1&&s.phase===0,'準備手順が動き、召喚フェイズ（先手）に進む');
   // 既知カードの表示（手札のどこかに既知が来るよう、既知を1枚手札へ）
   // シャッフル次第で2枚ともハート／エナに入ることがある。山札だけを探すと見つからずに止まるので、全ゾーンから探す
   // （2026-10-04 に実際に止まった。2枚ともハートに入れて再現し、直したことを確かめた）
@@ -134,16 +134,16 @@ async function run(label, viewport, touch){
   await p.click('#sheet button[data-ena="untapAll"]');
   ok((await S()).players[0].ena.every(c=>!c.turned),'全て縦向きに戻る');
 
-  // --- N枚引く ---
-  await p.click('#side-1 .zlabel[data-zsheet="deck"]'); await wait(430);
-  const h0=(await S()).players[1].hand.length;
+  // --- N枚引く（自分の召喚フェイズなので自分の山札） ---
+  await p.click('#side-0 .zlabel[data-zsheet="deck"]'); await wait(430);
+  const h0=(await S()).players[0].hand.length;
   await p.click('#sheet button[data-act="drawN"][data-arg="3"]');
-  ok((await S()).players[1].hand.length===h0+3,'山札から3枚引ける');
+  ok((await S()).players[0].hand.length===h0+3,'山札から3枚引ける');
 
   // --- Undo がメモ・エナ操作・デッキ編集も戻す ---
   const u0=await p.evaluate(()=>undoStack.length);
   await p.click('#btnUndo');
-  ok((await S()).players[1].hand.length===h0&&await p.evaluate(()=>undoStack.length)===u0-1,'Undoで3枚引くが戻る');
+  ok((await S()).players[0].hand.length===h0&&await p.evaluate(()=>undoStack.length)===u0-1,'Undoで3枚引くが戻る');
 
   // --- 保存と復元 ---
   const before=JSON.stringify(await S());
@@ -168,7 +168,7 @@ async function run(label, viewport, touch){
   ok(errs.length===0,'JSエラーなし '+(errs.length?JSON.stringify(errs):''));
 
   // スクショ用: 既知カードを場に並べる
-  await p.click('button[data-act="setupAll"][data-pi="2"]');
+  await H.prep(p);
   await p.evaluate(()=>{
     const P=state.players[0]; const pick=k=>{const i=P.deck.findIndex(c=>c.key===k); return i>=0?P.deck.splice(i,1)[0]:null;};
     let c; c=pick('HB01-001'); if(c){c.up=true;P.line[0].push(c);} c=pick('HB01-097'); if(c){c.up=true;P.line[0].push(c);}

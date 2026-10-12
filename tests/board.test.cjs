@@ -18,18 +18,12 @@ async function run(label, viewport, touch){
   ok(s.P[0].deck===50&&s.P[1].deck===50, '初期: 各プレイヤーの山札が50枚');
   ok(await p.evaluate(()=>state.players[0].deck[0].uid==="A-01"&&state.players[1].deck[0].uid==="B-01"), 'ID が A-xx / B-xx で分かれている');
 
-  await p.click('button[data-act="setupAll"][data-pi="2"]');
+  await H.prep(p);
   s=await S();
-  ok(JSON.stringify(s.P[0])===JSON.stringify(s.P[1]), '両者まとめて準備で左右対称');
+  ok(JSON.stringify(s.P[0])===JSON.stringify(s.P[1]), '準備で左右対称');
   ok(s.P[0].deck===38&&s.P[0].hand===6&&s.P[0].heart===5&&s.P[0].ena===1, '準備結果: 山札38/手札6/ハート5/エナ1');
   ok(await p.evaluate(()=>state.players[1].heart.every(c=>!c.up)&&state.players[1].ena.every(c=>c.up)), 'ハート裏向き / エナ表向き（相手側も）');
-  ok(s.undo===1, '準備は1手でUndo可能');
-
-  // 片側だけの操作
-  await p.click('button[data-act="draw6"][data-pi="1"]');
-  s=await S();
-  ok(s.P[1].hand===12&&s.P[0].hand===6, '相手だけ6枚追加（自分に影響しない）');
-  await p.click('#btnUndo');
+  ok(s.undo===3, '準備は「配る」「引き直すか（自分）」「引き直すか（相手）」の3手で、1手ずつ戻せる');
 
   // タップ = メニュー、メニューから縦/横
   const sel = '#side-0 .z-ena .card';
@@ -45,6 +39,13 @@ async function run(label, viewport, touch){
   const t2=await p.evaluate(()=>state.players[0].ena[0].turned);
   ok(t1===true&&t2===false, 'メニューから 縦向き⇄横向き');
 
+  // 召喚フェイズ中は「相手の場へ」が出ない（相手の側は操作できない）
+  await p.evaluate(()=>openCardSheet(state.players[0].hand[0].uid));
+  await wait(430);
+  ok(await p.evaluate(()=>!document.querySelector('#sheet button[data-tab]')), '召喚フェイズ中は「相手の場へ」が出ない');
+  await p.click('#sheet button[data-close="1"]');
+  // エンドフェイズ（どちらの番でもない）なら、相手の場へも動かせる（手で処理するため）
+  await p.evaluate(()=>{ state.phase=3; render(); });
   // メニュー: 自分の手札 -> 相手の第3ライン（相手の場へタブ）
   await p.evaluate(()=>openCardSheet(state.players[0].hand[0].uid));
   await wait(430);
@@ -85,13 +86,9 @@ async function run(label, viewport, touch){
     ok(s.P[1].grave===1&&s.P[1].line[2]===1,'ドラッグで墓地へ移動');
   } else console.log('  SKIP ドラッグ（対象が画面外）');
 
-  // フェイズ・先手
-  const ph=[];
-  for(let i=0;i<4;i++){ await p.click('#btnPhase'); ph.push(await p.textContent('#phaseLbl')); }
-  ok(ph[0].startsWith('召喚')&&ph[2].startsWith('エンド')&&ph[3].startsWith('召喚')&&(await S()).round===2,'フェイズ手動送り→3巡でラウンド+1');
-  await p.click('#firstOpp');
+  // 先手の表示
   const fb=await p.evaluate(()=>[document.querySelector('#side-1 .sidehead .badge').textContent, document.querySelector('#side-0 .sidehead .badge').textContent]);
-  ok((await S()).first===1 && fb[0]==='先手' && fb[1]==='後手','先手の記録が相手側に表示され、自分は後手と出る '+JSON.stringify(fb));
+  ok((await S()).first===0 && fb[0]==='後手' && fb[1]==='先手','先手（自分）・後手（相手）が両者の見出しに出る '+JSON.stringify(fb));
 
   // Undo
   const before=(await S()).undo;

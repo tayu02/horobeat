@@ -7,7 +7,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   const ctx=await b.newContext({...devices['iPhone 13'],viewport:{width:390,height:1500},hasTouch:true,isMobile:true});
   const p=await ctx.newPage(); H.watch(p, 'iphone'); const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
   await p.goto(H.URL);
-  await p.locator('#guide .big').click();
+  await H.prep(p);
   const openFor=async id=>{ await p.evaluate(i=>openCardSheet(i),id); await wait(420); };
   const hasTurn=()=>p.evaluate(()=>!!document.querySelector('#sheet button[data-tg]'));
   const turnLabel=()=>p.evaluate(()=>{const b=document.querySelector('#sheet button[data-tg]');return b?b.textContent.trim():null;});

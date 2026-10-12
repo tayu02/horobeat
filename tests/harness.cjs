@@ -43,4 +43,11 @@ async function finish() {
 // 試験の外で例外が起きたら、それも失敗として止める（黙って落ちないように）
 process.on("unhandledRejection", e => { console.log("  FAIL 試験が例外で止まった: " + (e && e.message || e)); fail++; finish(); });
 
-module.exports = { chromium, devices, launch, ok, watch, finish, out, ROOT, URL };
+// 準備を画面のボタンで済ませる: 先手を選んで配り（①②③）、両者「このまま」（④）→ ⑤⑥ → 召喚フェイズ（先手）
+async function prep(p, first) {
+  await p.click(`#flow button[data-prep="deal"][data-first="${first || 0}"]`);
+  await p.click('#flow button[data-prep="mull"][data-pi="0"][data-redraw="0"]');
+  await p.click('#flow button[data-prep="mull"][data-pi="1"][data-redraw="0"]');
+}
+
+module.exports = { chromium, devices, launch, ok, watch, finish, out, prep, ROOT, URL };

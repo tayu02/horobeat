@@ -245,49 +245,75 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
     ok((await hand(0))===1,k+': バトルに勝ったとき → 1枚引く');
   }
 
-  // ===== ワザ =====
+  // ===== ワザ（2026-10-12〜 バトルフェイズの中で使う）=====
+  // 相手の第1ラインにレオまる（2000）を置き、ハートを5枚にして（トドメにならないように）、フェイズ送りでバトルに入る。
+  // ワザの手番で「使う」を選ぶ → コスト → 「使ったとき」→ パワーを比べる、を画面のボタンだけで進める
+  const battle=async()=>{ await p.evaluate(()=>{ state.phase=1; render(); }); await p.click('#btnPhase'); await wait(200); };
+  const choose=async text=>{ await wait(460); await p.locator('#sheet button[data-fxa]',{hasText:text}).first().click(); await wait(150); };
+  const opts=()=>p.evaluate(()=>[...document.querySelectorAll('#sheet button[data-fxa]')].map(b=>b.textContent));
+  const H5=['HD01-001','HD01-001','HD01-001','HD01-001','HD01-001'].map(k=>({k,up:false}));
   // HD01-013 共鳴：ライガ／使ったとき1枚引く／このワザのパワーを+1000する
-  await setup({hand:['HD01-013'], line:[['HB01-001']], ena:[R()]});
-  await useWaza(await inZone(0,'hand','HD01-013'), await top(0,0));
-  ok((await q()).includes('コスト 1（赤）'),'HD01-013: コスト1（赤）の支払いを聞く'); await ans(0);
+  await setup({hand:['HD01-013'], line:[['HB01-001']], ena:[R()], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle();
+  ok((await q()).includes('自分の番') && (await opts()).some(t=>t.includes('「以心電心」を使う')),'HD01-013: バトルのワザの手番で「以心電心を使う」が出る');
+  await choose('以心電心');
   ok((await q()).includes('ライガ・ファミリー'),'HD01-013: 共鳴は使ったホロビトの種族（カード名の下の行）を示して聞く'); await ans(0);
   s=await S();
-  ok(s.players[0].hand.length===1 && s.players[0].ena[0].turned && s.players[0].waza.length===1 && s.players[0].waza[0].turned,'HD01-013: 赤のエナ1枚を使用済みにし、ワザゾーンに横向きで置き、1枚引く');
-  ok((await log()).includes('左辺の +2000') ,'HD01-013: 「このワザのパワーを+1000する」はワザのパワー（左辺）を示して手で扱うよう案内する');
+  ok(s.players[0].hand.length===1 && s.players[0].ena[0].turned && s.players[0].waza.length===1 && s.players[0].waza[0].turned,'HD01-013: 赤のエナ1枚を使用済みにし（同じ色なので自動）、ワザゾーンに横向きで置き、1枚引く');
   ok((await badges(0,0)).includes('ワザ+2000'),'HD01-013: 使ったホロビトに「ワザ+2000」の印');
+  ok((await q()).includes('このワザのパワーを+1000する') && (await q()).includes('ライガ'),'HD01-013: パワーを比べるとき、「このワザのパワーを+1000する」の共鳴の条件を聞く');
   await shot('waza');
+  await ans(0);
+  ok((await log()).includes('7000') && (await log()).includes('自分の勝ち'),'HD01-013: パワーは 4000＋ワザ 2000＋1000 ＝ 7000 で、2000 に勝つ');
+  s=await S();
+  ok(s.players[0].grave.some(c=>c.key==='HD01-013') && !s.players[0].waza.length,'HD01-013: バトルが終わると、使ったワザは墓地へ（手引書）');
 
   // HD02-013 共鳴：スザク／使ったとき相手は手札を1枚選んで捨てる／このバトルに勝ったとき自分は1枚引く
-  await setup({hand:['HD02-013'], line:[['HD02-001']], ena:['HD02-001']},{hand:['HD02-003']});
-  await useWaza(await inZone(0,'hand','HD02-013'), await top(0,0));
-  await ans(0);
+  await setup({hand:['HD02-013'], line:[['HD02-001']], ena:['HD02-001'], heart:H5},{hand:['HD02-003'], line:[['HD01-001']], heart:H5});
+  await battle(); await choose('勝ちにいくぞ');
   ok((await q()).includes('スザク・ブラッド'),'HD02-013: 共鳴は使ったホロビトの種族を示して聞く'); await ans(0);
   pk=await picks();
-  ok(pk.length===1,'HD02-013: 使ったとき → 相手の手札が光る'); await tap(pk[0]); await close();
-  await tap(await inZone(0,'waza','HD02-013')); await fxbtn('このバトルに勝ったとき');
-  ok((await q()).includes('しなずいさま'),'HD02-013: あとから「勝ったとき」を処理するとき、使ったホロビトを覚えている'); await ans(0);
+  ok(pk.length===1,'HD02-013: 使ったとき → 相手の手札が光る'); await tap(pk[0]);
+  ok(await p.isVisible('#sheet button[data-mv="grave"]'),'HD02-013: 選んだ相手のカードのメニューが開き、置き場所を選べる（捨てる先は未確定）');
+  await click('button[data-mv="grave"]');
+  ok((await S()).players[1].grave.some(c=>c.key==='HD02-003'),'HD02-013: 相手のカードを墓地に置ける');
+  ok((await q()).includes('勝ったときの効果') && (await q()).includes('勝ちにいくぞ'),'HD02-013: 勝つと、勝ったときの効果とダメージのどちらを先にするか聞く（順番は未確定）');
+  await choose('勝ったときの効果を先に');
+  ok((await q()).includes('スザク'),'HD02-013: 「このバトルに勝ったとき」も、使ったホロビトの種族を聞く'); await ans(0);
   ok((await hand(0))===1,'HD02-013: このバトルに勝ったとき → 自分は1枚引く');
 
   // HB01-097 2つ目のワザを使ったとき、正面のホロビトのコストが8以下なら、その一番上のカードを手札に戻す
-  await setup({hand:['HD02-008','PR-013'], line:[['HB01-097']], ena:[R(),R(),R(),R()]},{line:[['HB01-001','HD01-001']]});
-  await useWaza(await inZone(0,'hand','HD02-008'), await top(0,0)); await ans(0);
+  await setup({hand:['HD02-008','PR-013'], line:[['HB01-097']], ena:[R(),R(),R(),R()], heart:H5},{line:[['HB01-001','HD01-001']], heart:H5});
+  await battle(); await choose('翠炎よ');
+  ok((await q()).includes('緑の未使用のエナは 0 枚') && (await q()).includes('未確定'),'HB01-097: 緑のワザを赤のエナで払うときは、色の決まりが未確定なので払うエナを選ばせる'); await ans(0);
+  pk=await picks(); await tap(pk[0]); pk=await picks(); await tap(pk[0]);
   ok(!(await log()).includes('2つ目'),'HB01-097: 1枚目では発動しない');
-  await useWaza(await inZone(0,'hand','PR-013'), await top(0,0)); await ans(0);
+  await choose('電光攻火');
   ok((await log()).includes('2つ目のワザを使った'),'HB01-097: 2枚目で発動する');
   ok((await q()).includes('8以下') && (await log()).includes('相手の第1ライン'),'HB01-097: 正面（相手の第1ライン）のコストを聞く'); await ans(0);
-  ok((await q()).includes('誰の手札'),'HB01-097: 誰の手札に戻すかを聞く'); await ans(0);
+  ok((await q()).includes('誰の手札'),'HB01-097: 誰の手札に戻すかを聞く');
+  ok((await badges(0,0)).match(/ワザ\+5000/g).length===2,'HB01-097: 「ワザ+5000」の印が2つ');
+  await ans(0);
   s=await S();
   ok(s.players[1].hand.some(c=>c.key==='HD01-001') && s.players[1].line[0].length===1,'HB01-097: 一番上だけが持ち主の手札に戻り、下のカードは残る');
-  ok((await badges(0,0)).match(/ワザ\+5000/g).length===2,'HB01-097: 「ワザ+5000」の印が2つ');
+  ok((await q()).includes('いなくなりました'),'HB01-097: バトルの相手がいなくなったときの結果は手引書にないので聞く');
+  await choose('バトルなし');
 
-  // 合術 うつし身の撃: このワザは自分がこのバトルで他のワザを使っているときのみ使える
-  await setup({hand:['UNKNOWN-utsushimi'], line:[['HB01-001']], ena:[R(),R()]});
-  await useWaza(await inZone(0,'hand','UNKNOWN-utsushimi'), await top(0,0));
-  ok((await q()).includes('他のワザを使っていますか'),'うつし身の撃: 使う前に制限を聞く'); await ans(1);
-  ok((await S()).players[0].hand.length===1 && (await log()).includes('使えない'),'うつし身の撃: 満たさない → 使えず手札に残る');
-  await useWaza(await inZone(0,'hand','UNKNOWN-utsushimi'), await top(0,0)); await ans(0);
-  ok((await q()).includes('コスト 2'),'うつし身の撃: 満たす → コスト2の支払いへ（青のエナがないので手で払う）'); await ans(0);
-  ok((await log()).includes('このバトルに勝ったなら') && (await log()).includes('手で'),'うつし身の撃: 「勝ったなら…ダメージ+1」は手で扱うよう案内する');
+  // 合術 うつし身の撃: このワザは自分がこのバトルで他のワザを使っているときのみ使える／勝ったならダメージ+1
+  await setup({hand:['UNKNOWN-utsushimi'], line:[['HB01-001']], ena:[R(),R()], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle(); await choose('うつし身');
+  ok((await S()).players[0].hand.length===1 && (await log()).includes('使えない') && (await log()).includes('他のワザを使っている'),'うつし身の撃: このバトルでまだワザを使っていなければ使えず、手札に残る（数えて判定）');
+  await choose('ワザの使用を終えて');
+  await setup({hand:['PR-013','UNKNOWN-utsushimi'], line:[['HB01-001']], ena:[R(),R(),R(),R()], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle(); await choose('電光攻火'); await choose('うつし身');
+  ok((await q()).includes('コスト 2（青）'),'うつし身の撃: 他のワザを使ったあとなら使える → コスト2（青）の支払いへ（青のエナがないので選ぶ）'); await ans(0);
+  pk=await picks(); await tap(pk[0]); pk=await picks(); await tap(pk[0]);
+  ok((await q()).includes('パワーを計算できません') && (await q()).includes('うつし身の撃'),'うつし身の撃: ワザのパワー（左辺）が読めていないので、パワーを計算せず結果を聞く');
+  await choose('自分の勝ち');
+  ok((await q()).includes('+1 しますか'),'うつし身の撃: 勝ったので「ダメージを+1する」の条件は満たす。「このホロビト」が誰かは印字から分からないので、足すか聞く');
+  await choose('+1 する');
+  ok((await log()).includes('受けるダメージ：2') && (await q()).includes('手引書に書かれていません'),'うつし身の撃: ダメージは2。ハートが残っているときの2ダメージは手で処理するよう案内する（→ A-25）');
+  await choose('手で処理した');
 
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));
   await b.close();

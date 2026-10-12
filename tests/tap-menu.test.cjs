@@ -20,15 +20,16 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   // スクロールせずに中心の座標を取る（ドラッグの行き先など、1つ目の座標を取ったあとで画面を動かしたくないとき）
   const pos=async sel=>{ const r=await p.locator(sel).first().boundingBox(); return [r.x+r.width/2, r.y+r.height/2]; };
 
-  await p.locator('#guide .big').click();
+  await H.prep(p);   // 召喚フェイズ（先手＝自分）。自分の側だけ操作できる
   await p.evaluate(()=>document.querySelectorAll('details.doc').forEach(d=>d.open=false));
 
   // タップ = メニュー（横向きにならない）
   let [hx,hy]=await ctr('#side-0 .z-hand .card');
+  const u0=await p.evaluate(()=>undoStack.length);
   await touch('touchStart',hx,hy); await touch('touchEnd',hx,hy); await wait(80);
   ok(await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on')),'タップでメニューが開く');
   ok(await p.evaluate(()=>state.players[0].hand[0].turned)===false,'タップで横向きにならない');
-  ok(await p.evaluate(()=>undoStack.length)===1,'タップだけでは状態を変えない（Undo が増えない）');
+  ok(await p.evaluate(()=>undoStack.length)===u0,'タップだけでは状態を変えない（Undo が増えない）');
 
   // メニューの先頭が「移動先」
   const firstSect=await p.evaluate(()=>document.querySelector('#sheet .sect').textContent.trim());
@@ -69,10 +70,29 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   ok(!await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on')),'横スワイプでメニューが開かない');
 
   // 山札タップ
-  const [dx,dy]=await ctr('#side-1 [data-pile]');
+  let [dx,dy]=await ctr('#side-0 [data-pile]');
   await touch('touchStart',dx,dy); await touch('touchEnd',dx,dy); await wait(100);
   ok(await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on')),'山札タップでメニューが開く');
   await wait(420); await p.click('#sheet button[data-close="1"]');
+  // 自分の召喚フェイズ中は、相手の山札は開かない（相手の側は操作できない）
+  [dx,dy]=await ctr('#side-1 [data-pile]');
+  await touch('touchStart',dx,dy); await touch('touchEnd',dx,dy); await wait(100);
+  ok(!await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on')) && (await p.evaluate(()=>fxLines.join())).includes('操作できません'),
+    '自分の召喚フェイズ中は、相手の山札をタップしても開かず、理由が出る');
+  // 相手の手札のカードは、タップで見るだけ（移動先が出ない）
+  [dx,dy]=await ctr('#side-1 .z-hand .card');
+  await touch('touchStart',dx,dy); await touch('touchEnd',dx,dy); await wait(100);
+  ok(await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on') && !document.querySelector('#sheet button[data-mv]') && document.querySelector('#sheet').textContent.includes('見るだけ')),
+    '相手のカードはタップで見るだけ（移動・向きのボタンが出ない）');
+  await wait(420); await p.click('#sheet button[data-close="1"]');
+  // 相手のカードはドラッグしても動かない
+  [dx,dy]=await ctr('#side-1 .z-hand .card');
+  const h1=await p.evaluate(()=>state.players[1].hand.length);
+  const [ex,ey]=await pos('#side-1 [data-drop="ena"]');
+  await touch('touchStart',dx,dy); await touch('touchMove',dx,dy+18); await touch('touchMove',dx,dy+45);
+  const ghost1=await p.evaluate(()=>!!document.getElementById('ghost'));
+  await touch('touchMove',ex,ey); await touch('touchEnd',ex,ey); await wait(80);
+  ok(!ghost1 && await p.evaluate(()=>state.players[1].hand.length)===h1,'相手のカードはドラッグしても動かない（ゴーストも出ない）');
 
   ok(errs.length===0,'JSエラーなし '+(errs.length?JSON.stringify(errs):''));
   await b.close();

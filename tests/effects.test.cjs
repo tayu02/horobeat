@@ -313,63 +313,38 @@ async function run(label, viewport, touch){
   s=await S(); await tapCard(s.players[0].line[0][0].uid); await clickSheet('button[data-tg]'); await wait(150);
   ok((await S()).players[0].deck.length===10,'HD02-016: 効果が手動のときは横向きにしても引かない');
 
-  // 13l. ワザを使う（依頼者の指示 2026-10-04）: ホロビトを選ぶ → コストのエナ → 置き場所 → 「使ったとき」が発動
+  // 13l. ワザ（2026-10-12〜 バトルフェイズの中で使う）: 先手から交互に1枚ずつ。使わないこともできる。終えるのはプレイヤー
   const fxq=()=>p.evaluate(()=>document.querySelector('#sheet .fxq')?.textContent||'');
   const fxopts=()=>p.evaluate(()=>[...document.querySelectorAll('#sheet button[data-fxa]')].map(b=>b.textContent));
-  const useW=async uid=>{ await p.evaluate(u=>openCardSheet(u),uid); await clickSheet('button[data-wzuse]'); await wait(150); };
-  await setup({hand:['HD01-013'], line:[['HB01-001'],['HD01-001']], ena:['HD01-001','HD02-001']},{});
-  s=await S(); await useW(s.players[0].hand[0].uid);
-  const wpicks=await p.evaluate(()=>[...document.querySelectorAll('.card.pickable')].map(e=>e.dataset.cid));
-  ok(wpicks.length===2,'ワザ: 使うバトル中のホロビトは自分のラインのホロビトから選ぶ（バトルを扱わないため）');
-  await tapCard(s.players[0].line[0][0].uid);
-  ok((await fxq()).includes('コスト 1（赤）') && (await fxq()).includes('色と数'),'ワザ: 同じ色（赤）のエナでコストを払うか聞く（手引書②「必要なエナの色と数」）');
-  await clickSheet('button[data-fxa="0"]'); await wait(100);
-  ok((await fxq()).includes('ライガ・ファミリー') && (await fxq()).includes('「ライガ」'),'HD01-013: 共鳴は、使ったホロビトの種族（カード名の下の行）を示して聞く');
-  await clickSheet('button[data-fxa="0"]'); await wait(150);
+  const pickOpt=async text=>{ await wait(450); await p.locator('#sheet button[data-fxa]',{hasText:text}).first().click(); await wait(150); };
+  const battle=async()=>{ await p.evaluate(()=>{ state.phase=1; render(); }); await p.click('#btnPhase'); await wait(200); };
+  const H5=[1,2,3,4,5].map(()=>({k:null,up:false}));
+  await setup({hand:['PR-013'], line:[['HB01-001']], ena:['HD01-001','HD01-001'], heart:H5},{hand:['HD02-008'], line:[['HD01-001']], ena:['HD02-001','HD02-001'], heart:H5});
+  await battle();
+  ok((await fxq()).includes('いまは自分の番') && (await fxopts()).some(t=>t.includes('使わない（相手の番へ）')),'ワザ: 先手（自分）の番から始まり、「使わない（相手の番へ）」を選べる');
+  await pickOpt('使わない');
+  ok((await fxq()).includes('いまは相手の番') && (await fxopts()).some(t=>t.includes('翠炎よ')),'ワザ: 使わないと相手の番になり、相手の手札のワザが出る');
+  await pickOpt('翠炎よ');
   s=await S();
-  ok(s.players[0].ena[0].turned && !s.players[0].ena[1].turned,'ワザ: 赤のエナが1枚使用済みになり、緑のエナは使わない');
-  ok(s.players[0].waza.some(c=>c.key==='HD01-013' && c.turned) && s.players[0].hand.length===1,'ワザ: ワザゾーンに横向きで置かれ（手引書）、「使ったとき」で1枚引く');
-  ok((await log()).includes('左辺の +2000'),'HD01-013: 「このワザのパワーを+1000する」は、ワザのパワー（左辺 +2000）を示して手で扱うよう案内する');
-  const wb=await p.evaluate(()=>[...document.querySelectorAll('#side-0 .lineslot[data-idx="0"] .fxb span')].map(x=>x.textContent).join(','));
-  ok(wb.includes('ワザ+2000'),'ワザ: 使ったホロビトに「ワザ+2000」の印（'+wb+'）');
-  // 共鳴の種族に「いいえ」→ 引かない
-  await setup({hand:['HD01-013'], line:[['HD02-001']], ena:['HD01-001']},{});
-  s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
-  await clickSheet('button[data-fxa="0"]'); await wait(100); await clickSheet('button[data-fxa="1"]'); await wait(150);
+  ok(s.players[1].ena.every(c=>c.turned) && s.players[1].waza.some(c=>c.key==='HD02-008' && c.turned),'ワザ: 相手が緑のエナ2枚を使用済みにして使い、ワザゾーンに横向きで置く');
+  ok((await fxq()).includes('いまは自分の番'),'ワザ: 使ったら、また相手（自分）の番になる（交互に1枚ずつ）');
+  ok(!(await fxopts()).some(t=>t.includes('使わない')),'ワザ: 相手にもう使えるワザがなければ「使わない」は出ず、「使う」か「終える」だけ');
+  await pickOpt('電光攻火');
+  ok((await log()).includes('自分 9000') && (await log()).includes('相手 7000') && (await log()).includes('自分の勝ち'),'ワザ: 両者とも使えるワザがなくなったらパワーを比べる（4000+5000 対 2000+5000）');
   s=await S();
-  ok(s.players[0].waza.some(c=>c.key==='HD01-013') && s.players[0].deck.length===10,'HD01-013: 種族「スザク・ブラッド」のホロビトで「満たしていない」と答えれば引かない');
-  // 色が足りない: 緑のワザを赤のエナしかないときに使う → 手で払うよう案内
-  await setup({hand:['HD02-008'], line:[['HB01-001']], ena:['HD01-001','HD01-001']},{});
-  s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
-  ok((await fxq()).includes('緑の未使用のエナは 0 枚') && (await fxq()).includes('未確定'),'ワザ: 同じ色のエナが足りなければ、色の決まりは未確定なので手で払うよう案内する');
-  // エナが足りない
-  await setup({hand:['HD02-008'], line:[['HB01-001']], ena:[{k:'HD01-001',turned:true}]},{});
+  ok(s.players[0].grave.some(c=>c.key==='PR-013') && s.players[1].grave.some(c=>c.key==='HD02-008') && !s.players[0].waza.length && !s.players[1].waza.length,'ワザ: バトルが終わると、両者の使ったワザは墓地へ');
+  // 先手が相手なら、相手の番から始まる
+  await setup({hand:['PR-013'], line:[['HB01-001']], ena:['HD01-001','HD01-001'], heart:H5},{hand:['HD02-008'], line:[['HD01-001']], ena:['HD02-001','HD02-001'], heart:H5});
+  await p.evaluate(()=>{ state.first=1; render(); });
+  await battle();
+  ok((await fxq()).includes('いまは相手の番'),'ワザ: 先手が相手なら、相手の番から始まる');
+  await pickOpt('ワザの使用を終えて');
+  ok((await log()).includes('ワザの使用を終えた') && (await S()).players[0].hand.length===1,'ワザ: 「終える」を押せば、使わずにパワーを比べる（手札に残る）');
+  // 手札・ワザゾーンのワザのメニューには「使う」ボタンを出さない（バトルのワザの手番で使う）
+  await setup({hand:['HD02-008'], waza:['HD02-008']},{});
   s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].hand[0].uid); await wait(450);
-  ok(await p.evaluate(()=>{ const b=document.querySelector('#sheet button[data-wzuse]'); return b.disabled && b.textContent.includes('未使用のエナが 0 枚'); }),'ワザ: エナが足りなければ「このワザは使えない（…未使用のエナが 0 枚…）」で押せない');
+  ok(await p.evaluate(()=>!document.querySelector('#sheet button[data-wzuse]') && document.getElementById('sheet').textContent.includes('バトル中')),'ワザ: メニューには「使う」ボタンを出さず、バトル中に使うことを示す');
   await clickSheet('button[data-close="1"]');
-  ok((await S()).players[0].hand.some(c=>c.key==='HD02-008'),'ワザ: 手札に残る');
-  // HB01-097: 2つ目のワザを使ったとき → 自動で発動
-  await setup({hand:['HD02-008','PR-013'], line:[['HB01-097']], ena:['HD01-001','HD01-001','HD01-001','HD01-001']},{line:[['HD01-001']]});
-  for(let k=0;k<2;k++){
-    s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
-    await clickSheet('button[data-fxa="0"]'); await wait(150);
-  }
-  ok((await log()).includes('2つ目のワザを使った'),'HB01-097: 2枚目のワザを使うと「2つ目のワザを使ったとき」が自動で発動する');
-  ok((await fxq()).includes('8以下'),'HB01-097: 続けて正面（相手の第1ライン）のコストの条件を聞く');
-  await clickSheet('button[data-fxa="0"]'); await wait(100);
-  await clickSheet('button[data-fxa="0"]'); await wait(150);
-  s=await S();
-  ok(s.players[1].hand.some(c=>c.key==='HD01-001'),'HB01-097: 正面の一番上が手札に戻る');
-  // 「このワザは…ときのみ使える」（うつし身の撃）は使う前に聞く
-  await setup({hand:['UNKNOWN-utsushimi'], line:[['HB01-001']], ena:['HD01-001','HD01-001','HD01-001']},{});
-  s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
-  ok((await fxq()).includes('他のワザを使っていますか'),'うつし身の撃: 「他のワザを使っているときのみ」を使う前に聞く');
-  await clickSheet('button[data-fxa="1"]'); await wait(100);
-  ok((await S()).players[0].hand.some(c=>c.key==='UNKNOWN-utsushimi') && (await log()).includes('使えない'),'うつし身の撃: 満たしていなければ使えず、手札に残る');
-  // 手札にないワザには「使う」ボタンを出さない
-  await setup({waza:['HD02-008']},{});
-  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].waza[0].uid); await wait(450);
-  ok(await p.evaluate(()=>!document.querySelector('#sheet button[data-wzuse]')),'ワザ: 手札以外では「使う」ボタンを出さない（ワザは手札から使う）');
 
   // 14. 手動に切り替えると何もしない
   await setup({hand:['HD01-001']},{});
