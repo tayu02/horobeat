@@ -27,8 +27,13 @@ async function run(label, viewport, touch){
     },[me,opp]);
   };
   const uidOf=(s,pi,zone,key,li)=>{ const P=s.players[pi]; const arr= zone==='line'? P.line[li] : P[zone]; return arr.find(c=>c.key===key).uid; };
+  // 手札のホロビトをラインに出すとコストの支払いを聞かれる（2026-10-12〜）。この試験は効果を見るものなので、
+  // エナを置かずに「コストを払わずに出す」で出す（支払いそのものは tests/cost.test.cjs で確かめる）
+  const skipCost=async()=>{ await wait(450);
+    if(await p.evaluate(()=>(document.querySelector('#sheet h3')||{}).textContent==='コストの支払い'))
+      { await p.locator('#sheet button',{hasText:/コストを払わずに出す|それでも重ねる/}).first().click(); await wait(100); } };
   const moveTo=async(uid,zone,idx)=>{ await p.evaluate(u=>openCardSheet(u),uid); await wait(450);
-    await clickSheet(`button[data-mv="${zone}"]`+(idx!==undefined?`[data-idx="${idx}"]`:'')); await wait(100); };
+    await clickSheet(`button[data-mv="${zone}"]`+(idx!==undefined?`[data-idx="${idx}"]`:'')); await wait(100); await skipCost(); };
 
   // 1. 出たとき、カードを1枚引く
   await setup({hand:['HD01-001']},{});
@@ -385,6 +390,7 @@ async function run(label, viewport, touch){
     await p.mouse.move(b2.x+b2.width/2,b2.y+b2.height/2); await p.mouse.down();
     await p.mouse.move(b2.x+b2.width/2,b2.y+b2.height/2-30,{steps:4});
     await p.mouse.move(db.x+db.width/2,db.y+db.height/2,{steps:8}); await p.mouse.up(); await wait(100);
+    await skipCost();
     s=await S(); ok(s.players[0].line[0].length===1 && s.players[0].deck.length===9,'ドラッグでラインに出しても 1枚引く');
   }
 

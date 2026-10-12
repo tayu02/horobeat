@@ -155,6 +155,13 @@ main{padding:8px 8px 24px;max-width:1400px;margin:0 auto}
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;word-break:break-all}
 .ctype{font-size:7px;color:#6b5a5a;margin-top:auto}
 .cmod{font-size:7.5px;font-weight:700;color:#6b1a1a;margin-top:auto}
+/* エナが足りず使えないカード（手札） */
+.card.cantuse .ci{opacity:.6}
+.card .cant{position:absolute;left:1px;right:1px;bottom:18%;z-index:2;background:rgba(170,22,22,.95);color:#fff;
+  font-size:9px;font-weight:800;text-align:center;border-radius:3px;line-height:14px;pointer-events:none;letter-spacing:.04em}
+.card .cant.q{background:rgba(90,80,72,.95)}
+.costnote{font-size:11px;color:var(--sub);margin:0 0 6px;line-height:1.5}
+.costnote.no{color:#ff9c9c;font-weight:700}
 .cnote{position:absolute;left:2px;right:2px;bottom:2px;background:rgba(201,164,76,.95);color:#1a1212;
   font-size:7px;font-weight:700;border-radius:3px;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ci .no{font-size:15px;font-weight:800}
@@ -367,7 +374,8 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <p><b>「横向き」について</b>：卓上の「カードを横に倒す」という物理操作だけを持っています。エナでは「使用済み」、ホロビト・ハートでは「ダウン状態」と呼ばれますが（出典: 2026-08 公式ティザー）、この2つが同じ状態かは未確定のため、区別せず<b>向きだけ</b>を保持しています。</p>
     <p><b>カードデータ</b>：<code>data/cards.json</code> の印字内容をそのまま表示します。読めない項目は <code>unknown</code> と出ます。<b>効果</b>は、ヘッダーが「効果: 自動」のとき、確定している部分だけ自動で処理し、未確定の部分は聞くか手で処理してもらいます。手札の<b>ワザ</b>は、メニューの「このワザを使う」で、使うホロビトを選び、エナを払って使えます。</p>
     <p><b>ルールどおりに自動で行うもの</b>（出典: 公式の手引書・ティザー・入門）：ドローステップ（2ラウンド目から1枚。山札が0枚なら敗北を知らせる）。エンドフェイズの、ワザゾーンの片付け・スライドステップ・エナドロー・エナリフレッシュ。引き直しは準備中に一度だけ。オーバービートされたホロビトのダウン状態の解除。「正面」は相手の同じ番号のライン。使ったワザはワザゾーンに横向き。</p>
-    <p><b>実装していないもの</b>：バトルの勝敗、パワー比較、ホロビトを出すときのコストの支払い、ハートへのダメージ、次の先手の決定、トリガー、ブーストを使う操作、フェイズの強制。未確定の部分を含むものは推測で埋めていません。ハートのダウン・破壊のように確定しているものも、まだ自動にはしていません（手で操作してください）。1ラインの枚数も制限していません（オーバービート）。</p>
+    <p><b>コストの支払い</b>：手札のホロビトをラインに出すと、必要な枚数（新しいラインはコスト分、オーバービートは下のホロビトのコストを引いた分）の未使用のエナを使用済み（横向き）にして出します。足りないときは<b>「使えない」</b>と出ます。手札でエナが足りないカードには「使えない」の帯が付きます。トリガーなどで「コストは支払わない」ときは、払わずに出すこともできます。</p>
+    <p><b>実装していないもの</b>：バトルの勝敗、パワー比較、ハートへのダメージ、次の先手の決定、トリガー、ブーストを使う操作、フェイズの強制。未確定の部分を含むものは推測で埋めていません。ハートのダウン・破壊のように確定しているものも、まだ自動にはしていません（手で操作してください）。1ラインの枚数も制限していません（オーバービート）。</p>
     <p>※ 元情報は「開発中の画像」であり、製品版と異なる場合があります。</p>
   </details>
 
@@ -1119,7 +1127,8 @@ function triggersOf(card, event, why){
 // （確定: 入門⑫「ダウン状態のホロビトがオーバービートされると、ダウン状態が解除される」）。
 // 効果ではなくルールなので「効果: 手動」のときも行う。解除は、下になる側の
 // 「オーバービートされるとき、ダウンしているなら」（HD02-009）を処理し終えてから行う
-function fxAfterMove(uid, before){
+// keep: 直前の記録（コストの支払いなど）を消さずに続ける
+function fxAfterMove(uid, before, keep){
   var f = findCard(uid); if (!f) return;
   var c = f.card, loc = locOf(c), q = [], under = null;
   var fromOut = loc && loc.zone === "line" && before && before.zone !== "line" && c.up && isHolo(c);
@@ -1135,8 +1144,8 @@ function fxAfterMove(uid, before){
     q = q.concat(triggersOf(c, "entered", "ラインに出た"));
     if (under) q = q.concat(triggersOf(under, "overbeaten", "オーバービートされた"));
   }
-  if (!q.length){ if (under && under.turned) fxClear(); return release(); }
-  snap(); fxClear(); runQueue(q, release);
+  if (!q.length){ if (under && under.turned && !keep) fxClear(); return release(); }
+  snap(); if (!keep) fxClear(); runQueue(q, release);
 }
 // 向きを変えたあとに呼ぶ。ラインの束の一番上のホロビトが縦から横（ダウン。§9-1）になったとき。
 // 束の下のカードの効果の扱いは未確定（§10）なので発動させない
@@ -1148,6 +1157,118 @@ function fxAfterTurn(uid, wasTurned){
   var q = triggersOf(c, "downed", "ダウンした");
   if (!q.length) return;
   snap(); fxClear(); runQueue(q);
+}
+
+// ---- ホロビトを出すときのコストの支払い（依頼者の指示 2026-10-12）----
+// 確定（手引書 メインステップ）: 「必要なエナを支払い（使用済みにし）、ホロビトをラインに出します」
+//   新しいラインに出す: ホロビトのコスト分のエナを支払う
+//   オーバービートで出す: すでに出ている**コストが小さい**ホロビトの上に重ね、支払うエナは下のホロビトのコスト分だけ少なくなる
+//   コストは「必要なエナの色と数」（手引書②）。何枚がその色である必要があるかは未確定（rules_guess.md B-3）
+// 足りなければ「使えない」と出す。トリガーや効果で「コストは支払わない」で出すときのために、払わずに出すこともできる
+function untappedEna(pi){ return state.players[pi].ena.filter(function(c){ return !c.turned; }); }
+// 「コストは1大きくなる」の印が付いているか（何のコストかは未確定。→ B-8）
+function costUpOf(card){
+  var n = 0;
+  (ABILITY_MAP[card.key] || []).forEach(function(ab){
+    (contEval(ctxOf(card), ab) || []).forEach(function(i){
+      var m = /^コスト\+(\d+)$/.exec(i.t); if (m && (i.st === "on" || i.st === "q")) n += +m[1]; });
+  });
+  return n;
+}
+// ラインに出すときに必要なエナの枚数。idx のラインに出す場合。印字のコストで計算する
+// { ok:false, why } … 出せない（重ねられない）／ { need, mode, under, unsure } … unsure は下に「コストは1大きくなる」があるとき
+function playCost(card, pi, idx){
+  var d = cardDef(card);
+  if (!d || typeof d.cost !== "number") return { unknown:true, why:"このカードのコストが印字から読めていません（" + (d ? d.cost : "未確定カード") + "）" };
+  var st = state.players[pi].line[idx], top = st[st.length - 1];
+  if (!top) return { need:d.cost, mode:"new" };
+  var ud = top.up ? cardDef(top) : null;
+  if (!ud || ud.type !== "ホロビト" || typeof ud.cost !== "number")
+    return { unknown:true, why:"下のカード（" + nm(top) + "）のコストが分からないため、オーバービートで支払う枚数を計算できません" };
+  if (ud.cost >= d.cost)
+    return { ok:false, why:"オーバービートできるのは、コストが小さいホロビトの上だけです（手引書）。下の「" + ud.name + "」はコスト " + ud.cost + "、このカードはコスト " + d.cost + " です" };
+  return { need:d.cost - ud.cost, mode:"over", under:top, unsure:costUpOf(top) };
+}
+// 手札のカードを、いまのエナで使えるか。no: 使えない / q: 未確定の効果しだい / ok / null: 判定しない
+function affordState(card){
+  var d = cardDef(card); if (!d || typeof d.cost !== "number" || !card.up) return null;
+  var pi = card.owner, have = untappedEna(pi).length;
+  if (d.type === "ワザ") return have >= d.cost ? { st:"ok", need:d.cost, have:have } :
+    { st:"no", need:d.cost, have:have, why:"コスト " + d.cost + " に対して、未使用のエナが " + have + " 枚" };
+  if (d.type !== "ホロビト") return null;
+  var best = null, unsure = false;
+  for (var i = 0; i < LINE_COUNT; i++){
+    var pc = playCost(card, pi, i);
+    if (pc.unknown){ unsure = true; continue; }
+    if (pc.ok === false) continue;
+    if (pc.unsure) unsure = true;
+    if (best === null || pc.need < best) best = pc.need;
+  }
+  if (best === null && !unsure) return { st:"no", have:have, why:"出せるラインがありません（空いたラインがなく、コストが小さいホロビトもいません）" };
+  if (best !== null && have >= best) return { st:"ok", need:best, have:have };
+  return { st: unsure ? "q" : "no", need:best, have:have,
+    why: "いちばん安い出し方でコスト " + best + " に対して、未使用のエナが " + have + " 枚" + (unsure ? "（コストの増減は未確定なので、使えない場合があります）" : "") };
+}
+function affordTag(card){
+  var a = affordState(card);
+  if (!a || a.st === "ok") return "";
+  return '<div class="cant' + (a.st === "q" ? " q" : "") + '">' + (a.st === "q" ? "使えない?" : "使えない") + '</div>';
+}
+// 手札から自分のラインに出す。支払いを聞いてから動かす
+function isPlayFromHand(card, before, zone, pi){
+  return before && before.zone === "hand" && zone === "line" && pi === card.owner && card.up && isHolo(card);
+}
+function playFromHand(uid, pi, idx){
+  var f = findCard(uid); if (!f) return;
+  var c = f.card, d = cardDef(c), before = zoneOfCard(c), P = state.players[pi];
+  var T = "コストの支払い";
+  var where = "第" + (idx + 1) + "ライン";
+  var FREE = "コストを払わずに出す（トリガー・効果で出すとき）";
+  var go = function(msg){
+    snap(); fxClear(); if (msg) fxLog(msg);
+    moveCard(uid, pi, "line", idx, false); render(); fxAfterMove(uid, before, true);
+  };
+  var free = function(){ go("「" + nm(c) + "」をコストを払わずに" + where + "に出した"); };
+  var cancel = function(){ fxClear(); fxLog("「" + nm(c) + "」を出すのをやめた"); render(); };
+  var pc = playCost(c, pi, idx);
+  if (pc.unknown)
+    return fxChoose(pc.why + "。エナの支払いは手で行ってください。", ["支払いは手で行って出す", "やめる"],
+      function(i){ if (i === 0) go("「" + nm(c) + "」を" + where + "に出した（支払いは手で）"); else cancel(); }, cancel, T);
+  if (pc.ok === false)
+    return fxChoose("使えない：" + pc.why + "。", ["やめる", "それでも重ねる（手で処理する）"],
+      function(i){ if (i === 1) go("「" + nm(c) + "」を" + where + "に重ねた（コストの条件を満たさないが手で処理）"); else cancel(); }, cancel, T);
+  var need = pc.need, have = untappedEna(pi);
+  var how = pc.mode === "new" ? "新しいラインに出す：コスト " + need
+          : "オーバービート：コスト " + d.cost + " − 下の「" + nm(pc.under) + "」のコスト " + (d.cost - need) + " ＝ " + need;
+  var upNote = pc.unsure ? "（下のホロビトに「コストは" + pc.unsure + "大きくなる」の印があります。何のコストかは未確定なので、印字のコストで計算しています）" : "";
+  if (need <= 0) return go("「" + nm(c) + "」を" + where + "に出した（" + how + "）");
+  if (have.length < need)
+    return fxChoose("使えない：" + how + " に対して、未使用のエナが " + have.length + " 枚しかありません。" + upNote,
+      ["やめる", FREE], function(i){ if (i === 1) free(); else cancel(); }, cancel, T);
+  var paid = function(list){
+    var log = "「" + nm(c) + "」を" + where + "に出した（" + how + "。エナ " + list.map(nm).join("・") + " を使用済みにした）";
+    snap(); fxClear(); list.forEach(function(e){ e.turned = true; }); fxLog(log);
+    moveCard(uid, pi, "line", idx, false); render(); fxAfterMove(uid, before, true);
+  };
+  var col = d.color_mark, same = have.filter(function(e){ var x = cardDef(e); return x && x.color_mark === col; });
+  if (col !== "unknown" && same.length >= need)
+    return fxChoose(how + "（" + col + "）。" + col + "の未使用のエナを " + need + " 枚、使用済み（横向き）にして出します。" + upNote,
+      ["支払って出す", FREE, "やめる"], function(i){
+        if (i === 0) paid(same.slice(0, need)); else if (i === 1) free(); else cancel(); }, cancel, T);
+  // 同じ色だけでは足りない: 何枚がその色である必要があるかは未確定なので、払うエナを選ばせる
+  fxChoose(how + "（" + col + "）。必要なエナの色と数（手引書②）のうち、何枚が" + col + "である必要があるかは未確定です（→ B-3）。" +
+    col + "の未使用のエナは " + same.length + " 枚です。支払うエナを選んでください。" + upNote,
+    ["支払うエナを選ぶ", FREE, "やめる"], function(i){
+      if (i === 1) return free();
+      if (i === 2) return cancel();
+      var chosen = [];
+      (function pickOne(){
+        if (chosen.length === need) return paid(chosen);
+        var rest = untappedEna(pi).filter(function(e){ return chosen.indexOf(e) < 0; });
+        startPick(rest.map(function(e){ return e.uid; }), "支払うエナを選んでください（" + (chosen.length + 1) + " / " + need + " 枚目）",
+          function(u){ chosen.push(findCard(u).card); pickOne(); }, cancel);
+      })();
+    }, cancel, T);
 }
 
 // ---- ワザを使う（依頼者の指示 2026-10-04）----
@@ -1201,10 +1322,10 @@ function useWaza(uid){
     if (cost === 0) return place(user);
     var free = P.ena.filter(function(c){ return !c.turned; });
     if (free.length < cost)
-      return fxChoose("コスト " + cost + " に対して、未使用のエナが " + free.length + " 枚しかありません（使用にはエナが必要。ティザー⑫）。",
-        ["使うのをやめる", "それでも使う（支払いは手で調整）"], function(i){
+      return fxChoose("使えない：コスト " + cost + " に対して、未使用のエナが " + free.length + " 枚しかありません（使用にはエナが必要。ティザー⑫）。",
+        ["使うのをやめる", "コストを払わずに使う（効果などで使うとき）"], function(i){
           if (i === 0) return stop();
-          fxLog("エナが足りないまま使った（手で調整）"); place(user); }, stop);
+          fxLog("コストを払わずに使った"); place(user); }, stop, "コストの支払い");
     // コストは「必要なエナの色と数」（手引書②）。同じ色のエナだけで払えば、何枚がその色である必要があるか
     // （未確定）に関係なく条件を満たすので、それができるときだけ自動で払う
     var col = d.color_mark, same = free.filter(function(c){ var e = cardDef(c); return e && e.color_mark === col; });
@@ -1269,9 +1390,9 @@ function startPick(uids, prompt, onPick, onCancel, declineLabel){
   var el = document.querySelector("#side-0 .card.pickable, #side-1 .card.pickable");
   if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
 }
-function fxChoose(question, labels, cb, cancel){
+function fxChoose(question, labels, cb, cancel, title){
   fxAsk = { cb:cb, cancel:cancel };
-  var h = '<h3>効果の処理</h3><div class="fxq">' + esc(question) + '</div><div class="sgrid c1">';
+  var h = '<h3>' + esc(title || "効果の処理") + '</h3><div class="fxq">' + esc(question) + '</div><div class="sgrid c1">';
   labels.forEach(function(l, i){ h += '<button data-fxa="' + i + '">' + esc(l) + '</button>'; });
   h += '<button data-fxa="-1">中断する</button></div>';
   render(); openSheet(h);
@@ -1325,9 +1446,9 @@ function fxSectionHTML(c){
 }
 
 /* ---------------- 描画 ---------------- */
-function cardHTML(c){
+function cardHTML(c, tag){
   var d = cardDef(c);
-  var cls = "card" + (c.turned ? " turned" : "") + (picking && picking.set[c.uid] ? " pickable" : "");
+  var cls = "card" + (c.turned ? " turned" : "") + (picking && picking.set[c.uid] ? " pickable" : "") + (tag ? " cantuse" : "");
   var color = d ? d.color_mark : "";
   var inner;
   if (!c.up){
@@ -1348,16 +1469,16 @@ function cardHTML(c){
               (c.note ? '<div class="cnote">' + esc(c.note) + '</div>' : "") +
             '</div>';
   }
-  return '<div class="' + cls + '" data-cid="' + esc(c.uid) + '" data-owner="' + c.owner + '" data-color="' + esc(color) + '">' + inner + '</div>';
+  return '<div class="' + cls + '" data-cid="' + esc(c.uid) + '" data-owner="' + c.owner + '" data-color="' + esc(color) + '">' + inner + (tag || "") + '</div>';
 }
 // 常時の効果の印。カードの印字を隠さないよう、ラインの枠の中で束の下に出す
 function fxRowHTML(c){
   if (!c || !FXB[c.uid]) return "";
   return '<div class="fxb">' + FXB[c.uid].map(function(b){ return '<span class="' + b.cls + '">' + esc(b.t) + '</span>'; }).join("") + '</div>';
 }
-function stripHTML(arr){
+function stripHTML(arr, tagFn){
   if (!arr.length) return '<div class="empty">（なし）</div>';
-  var h = ""; for (var i = 0; i < arr.length; i++) h += cardHTML(arr[i]); return h;
+  var h = ""; for (var i = 0; i < arr.length; i++) h += cardHTML(arr[i], tagFn ? tagFn(arr[i]) : ""); return h;
 }
 function zoneHTML(pi, zone, cls, extraClass, tappable){
   var arr = state.players[pi][zone];
@@ -1365,7 +1486,8 @@ function zoneHTML(pi, zone, cls, extraClass, tappable){
            '<div class="zlabel' + (tappable ? ' tappable" data-zsheet="' + zone + '" data-pi="' + pi : "") + '">' +
              // 狭い列では「ハート／ゾーン」のように語の切れ目で折り返す
              ZONE_NAME[zone].replace(/^(.+)(ゾーン)$/, '<span><span class="nw">$1</span><span class="nw">$2</span></span>') + ' <span class="zcount">(' + arr.length + ')</span></div>' +
-           '<div class="strip' + (extraClass || "") + '">' + stripHTML(arr) + '</div>' +
+           // 手札は、エナが足りず使えないカードに「使えない」の帯を付ける
+           '<div class="strip' + (extraClass || "") + '">' + stripHTML(arr, zone === "hand" ? affordTag : null) + '</div>' +
          '</div>';
 }
 function lineHTML(pi){
@@ -1556,7 +1678,16 @@ function imageHTML(c){
   return why ? '<div class="cimgnone">画像なし：' + esc(why) + '</div>' : "";
 }
 function destHTML(uid, pi){
-  var b = '<div class="sect">移動先</div><div class="sgrid c2" style="margin-bottom:6px">';
+  var b = '<div class="sect">移動先</div>';
+  var f = findCard(uid), c = f && f.card, loc = c && zoneOfCard(c), d = c && cardDef(c);
+  if (c && loc && loc.zone === "hand" && d && (d.type === "ホロビト" || d.type === "ワザ")){
+    var a = affordState(c);
+    if (a && a.st === "no") b += '<div class="costnote no">使えない：' + esc(a.why) + '</div>';
+    else if (a && a.st === "q") b += '<div class="costnote no">使えない場合があります：' + esc(a.why) + '</div>';
+    if (d.type === "ホロビト")
+      b += '<div class="costnote">ラインに出すと、コストの支払い（未使用のエナを使用済みにする）を聞きます。未使用のエナ ' + untappedEna(c.owner).length + ' 枚。</div>';
+  }
+  b += '<div class="sgrid c2" style="margin-bottom:6px">';
   b += '<button data-tab="0" data-cid="' + uid + '" class="' + (pi===0?"on":"") + '">自分の場へ</button>';
   b += '<button data-tab="1" data-cid="' + uid + '" class="' + (pi===1?"on":"") + '">相手の場へ</button></div>';
   b += '<div class="sgrid">';
@@ -1672,8 +1803,10 @@ sheetEl.addEventListener("click", function(e){
   if (ds.tg){ snap(); var f1 = findCard(ds.tg), was = f1 && f1.card.turned; if (f1) f1.card.turned = !f1.card.turned; closeSheet(); render(); if (f1) fxAfterTurn(ds.tg, was); return; }
   if (ds.fl){ snap(); var f2 = findCard(ds.fl); if (f2) f2.card.up = !f2.card.up; closeSheet(); render(); return; }
   if (ds.mv){
-    snap();
     var fm = findCard(ds.cid), before = fm ? zoneOfCard(fm.card) : null;
+    // 手札のホロビトを自分のラインに出す → コストの支払いを聞く
+    if (fm && isPlayFromHand(fm.card, before, ds.mv, sheetPi)){ closeSheet(); playFromHand(ds.cid, sheetPi, parseInt(ds.idx || "0", 10)); return; }
+    snap();
     moveCard(ds.cid, sheetPi, ds.mv, parseInt(ds.idx || "0", 10), !!ds.bottom);
     closeSheet(); render(); fxAfterMove(ds.cid, before); return;
   }
@@ -1780,8 +1913,11 @@ document.addEventListener("pointerup", function(e){
   if (drag.moved){
     var tgt = dropTargetAt(e.clientX, e.clientY);
     if (tgt){
-      snap();
       var dm = findCard(drag.cid), dbefore = dm ? zoneOfCard(dm.card) : null, dcid = drag.cid;
+      if (dm && isPlayFromHand(dm.card, dbefore, tgt.dataset.drop, +tgt.dataset.pi)){
+        endDrag(); render(); playFromHand(dcid, +tgt.dataset.pi, parseInt(tgt.dataset.idx || "0", 10)); return;
+      }
+      snap();
       moveCard(drag.cid, +tgt.dataset.pi, tgt.dataset.drop, parseInt(tgt.dataset.idx || "0", 10), false);
       endDrag(); render(); fxAfterMove(dcid, dbefore); return;
     }
