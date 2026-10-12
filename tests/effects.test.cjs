@@ -27,13 +27,13 @@ async function run(label, viewport, touch){
     },[me,opp]);
   };
   const uidOf=(s,pi,zone,key,li)=>{ const P=s.players[pi]; const arr= zone==='line'? P.line[li] : P[zone]; return arr.find(c=>c.key===key).uid; };
-  // 手札のホロビトをラインに出すとコストの支払いを聞かれる（2026-10-12〜）。この試験は効果を見るものなので、
-  // エナを置かずに「コストを払わずに出す」で出す（支払いそのものは tests/cost.test.cjs で確かめる）
-  const skipCost=async()=>{ await wait(450);
-    if(await p.evaluate(()=>(document.querySelector('#sheet h3')||{}).textContent==='コストの支払い'))
-      { await p.locator('#sheet button',{hasText:/コストを払わずに出す|それでも重ねる/}).first().click(); await wait(100); } };
-  const moveTo=async(uid,zone,idx)=>{ await p.evaluate(u=>openCardSheet(u),uid); await wait(450);
-    await clickSheet(`button[data-mv="${zone}"]`+(idx!==undefined?`[data-idx="${idx}"]`:'')); await wait(100); await skipCost(); };
+  // 手札のホロビトをラインに出すにはエナでコストを払う（2026-10-12〜。足りなければ出せない）。
+  // この試験は効果を見るものなので、手札のカードはいったん墓地に置いてから、墓地→ラインで動かす
+  // （墓地から動かすときは支払いを聞かない。「ラインの外から出た」ことは同じ。支払いは tests/cost.test.cjs で確かめる）
+  const viaGrave=async(uid,zone)=>{ if(zone!=='line') return;
+    await p.evaluate(u=>{ for(const P of state.players){ const i=P.hand.findIndex(c=>c.uid===u); if(i>=0){ P.grave.push(P.hand.splice(i,1)[0]); render(); } } },uid); };
+  const moveTo=async(uid,zone,idx)=>{ await viaGrave(uid,zone); await p.evaluate(u=>openCardSheet(u),uid); await wait(450);
+    await clickSheet(`button[data-mv="${zone}"]`+(idx!==undefined?`[data-idx="${idx}"]`:'')); await wait(100); };
 
   // 1. 出たとき、カードを1枚引く
   await setup({hand:['HD01-001']},{});
@@ -344,10 +344,10 @@ async function run(label, viewport, touch){
   ok((await fxq()).includes('緑の未使用のエナは 0 枚') && (await fxq()).includes('未確定'),'ワザ: 同じ色のエナが足りなければ、色の決まりは未確定なので手で払うよう案内する');
   // エナが足りない
   await setup({hand:['HD02-008'], line:[['HB01-001']], ena:[{k:'HD01-001',turned:true}]},{});
-  s=await S(); await useW(s.players[0].hand[0].uid); await tapCard(s.players[0].line[0][0].uid);
-  ok((await fxq()).includes('未使用のエナが 0 枚'),'ワザ: エナが足りないときは知らせ、やめるか選ばせる');
-  await clickSheet('button[data-fxa="0"]'); await wait(100);
-  ok((await S()).players[0].hand.some(c=>c.key==='HD02-008'),'ワザ: やめると手札に残る');
+  s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].hand[0].uid); await wait(450);
+  ok(await p.evaluate(()=>{ const b=document.querySelector('#sheet button[data-wzuse]'); return b.disabled && b.textContent.includes('未使用のエナが 0 枚'); }),'ワザ: エナが足りなければ「このワザは使えない（…未使用のエナが 0 枚…）」で押せない');
+  await clickSheet('button[data-close="1"]');
+  ok((await S()).players[0].hand.some(c=>c.key==='HD02-008'),'ワザ: 手札に残る');
   // HB01-097: 2つ目のワザを使ったとき → 自動で発動
   await setup({hand:['HD02-008','PR-013'], line:[['HB01-097']], ena:['HD01-001','HD01-001','HD01-001','HD01-001']},{line:[['HD01-001']]});
   for(let k=0;k<2;k++){
@@ -379,8 +379,8 @@ async function run(label, viewport, touch){
   s=await S(); ok(s.players[0].deck.length===10,'手動のときは出しても引かない');
   ok(await p.evaluate(()=>!document.querySelector('.fxb')),'手動のときは印も出ない');
 
-  // 15. ドラッグで出しても発動する
-  await setup({hand:['HD01-001']},{});
+  // 15. ドラッグで出しても発動する（エナ2枚で支払って出す）
+  await setup({hand:['HD01-001'], ena:['HD01-001','HD01-001']},{});
   if(!touch){
     s=await S();
     const src=p.locator(`.card[data-cid="${s.players[0].hand[0].uid}"]`); await src.scrollIntoViewIfNeeded();
@@ -390,8 +390,8 @@ async function run(label, viewport, touch){
     await p.mouse.move(b2.x+b2.width/2,b2.y+b2.height/2); await p.mouse.down();
     await p.mouse.move(b2.x+b2.width/2,b2.y+b2.height/2-30,{steps:4});
     await p.mouse.move(db.x+db.width/2,db.y+db.height/2,{steps:8}); await p.mouse.up(); await wait(100);
-    await skipCost();
-    s=await S(); ok(s.players[0].line[0].length===1 && s.players[0].deck.length===9,'ドラッグでラインに出しても 1枚引く');
+    await wait(460); await p.locator('#sheet button',{hasText:'支払って出す'}).click(); await wait(150);
+    s=await S(); ok(s.players[0].line[0].length===1 && s.players[0].deck.length===9,'ドラッグでラインに出しても（支払って）1枚引く');
   }
 
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));

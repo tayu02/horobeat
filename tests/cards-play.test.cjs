@@ -46,9 +46,11 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   const fxbtn=async text=>{ await wait(460); await p.locator('#sheet button.fxbtn',{hasText:text}).first().click(); await wait(120); };
   const ans=async i=>click(`button[data-fxa="${i}"]`);
   const close=async()=>{ if(await p.isVisible('#sheet button[data-close="1"]')) await click('button[data-close="1"]'); };
-  // 手札のホロビトをラインに出すとコストの支払いを聞かれる。効果を見る試験なので、払わずに出す（支払いは cost.test.cjs）
-  const moveTo=async(uid,zone,idx)=>{ await tap(uid); await click(`button[data-mv="${zone}"]`+(idx!==undefined?`[data-idx="${idx}"]`:'')); await wait(120);
-    if(await p.evaluate(()=>(document.querySelector('#sheet h3')||{}).textContent==='コストの支払い')){ await wait(460); await p.locator('#sheet button',{hasText:/コストを払わずに出す|それでも重ねる/}).first().click(); await wait(120); } };
+  // 手札のホロビトをラインに出すにはエナでコストを払う（足りなければ出せない）。効果を見る試験なので、
+  // 手札のカードはいったん墓地に置き、墓地→ラインで動かす（支払いを聞かない。支払いは cost.test.cjs）
+  const moveTo=async(uid,zone,idx)=>{
+    if(zone==='line') await p.evaluate(u=>{ for(const P of state.players){ const i=P.hand.findIndex(c=>c.uid===u); if(i>=0){ P.grave.push(P.hand.splice(i,1)[0]); render(); } } },uid);
+    await tap(uid); await click(`button[data-mv="${zone}"]`+(idx!==undefined?`[data-idx="${idx}"]`:'')); await wait(120); };
   const useWaza=async(wuid,huid)=>{ await tap(wuid); await click('button[data-wzuse]'); await wait(150); await tap(huid); };
   const R=c=>'HD01-001';  // 赤のホロビト（レオまる）
   const shots=[];
