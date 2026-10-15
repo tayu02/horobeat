@@ -93,9 +93,12 @@ main{padding:8px 8px 24px;max-width:1400px;margin:0 auto}
 #side-1 .z-grave{grid-area:grave1}   #side-0 .z-grave{grid-area:grave0}
 #side-0 .zone{border-color:rgba(192,39,45,.5)}
 #side-1 .zone{border-color:rgba(47,90,168,.6)}
-/* ハートゾーンは縦に重ねる */
+/* ハートゾーンは縦に重ねる。あとのカードほど上に重なり、持ち主に近い端に来る（自分は下端、相手は上端）。
+   ダメージは重なりの一番上（持ち主にいちばん近い1枚）から入る（ルール動画「上から順番にダメージが入る」。rules_confirmed.md §9-1） */
 .z-heart .strip{flex-direction:column;flex-wrap:nowrap;align-items:center;overflow:visible}
 .z-heart .strip .card+.card{margin-top:calc(var(--ch) * -0.6)}
+#side-1 .z-heart .strip{flex-direction:column-reverse}
+#side-1 .z-heart .strip .card+.card{margin-top:0;margin-bottom:calc(var(--ch) * -0.6)}
 /* 左右の列の狭いゾーン: 見出しを折り返す */
 .z-heart .zlabel,.z-deck .zlabel,.z-grave .zlabel{flex-wrap:wrap;line-height:1.25;gap:0 4px}
 .zlabel .nw{white-space:nowrap}
@@ -386,12 +389,12 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <p><b>操作</b>：カードを<b>タップ</b>＝印字内容とメニュー（移動・向き・表裏・メモ）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
     <p><b>進行</b>（公式の手引書のラウンドの進行どおり）：準備 → 召喚フェイズ（先手）→ 召喚フェイズ（後手）→ バトルフェイズ → エンドフェイズ → 次のラウンド。準備は、先手を選んで配り、両者が引き直すかを決めると自動で終わります。上部の欄に、いまのフェイズと誰の番かが出ます。</p>
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ）。<b>エナが足りないときは使えません</b>。</p>
-    <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。パワー（印字＋効果の+N＋使ったワザのパワー）を比べ、負けたホロビトとハート（列の一番上の1枚）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。</p>
+    <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、負けたホロビトとハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。</p>
     <p><b>エンドフェイズ</b>：スライドステップ・エナドロー・エナリフレッシュを自動で行います。</p>
     <p><b>効果</b>：ヘッダーが「効果: 自動」のとき、確定している部分だけ自動で処理し、未確定の部分は聞くか手で処理してもらいます。</p>
     <p><b>「横向き」について</b>：エナでは「使用済み」、ホロビト・ハートでは「ダウン状態」と呼ばれますが（出典: 2026-08 公式ティザー）、この2つが同じ状態かは未確定のため、区別せず<b>向きだけ</b>を保持しています。</p>
     <p><b>カードデータ</b>：<code>data/cards.json</code> の印字内容をそのまま表示します。読めない項目は <code>unknown</code> と出ます。</p>
-    <p><b>手で処理するもの</b>（手引書に書かれていない・未確定のため）：2ダメージ（ダブルダメージ）がハートにどう入るか／束の下のカードの扱い／ブーストを使う操作（どこから使うかが未確定）／効果の「コストは1大きくなる」が何のコストか。トリガーで「コストは支払わない」で出すときは、ハートゾーンからラインへ直接動かせます（支払いは聞きません）。</p>
+    <p><b>手で処理するもの</b>（手引書・ルール動画に書かれていない・未確定のため）：2ダメージ（ダブルダメージ）がハートにどう入るか／束の下のカードの扱い／効果の「コストは1大きくなる」が何のコストか。トリガーで「コストは支払わない」で出すときは、ハートゾーンからラインへ直接動かせます（支払いは聞きません）。</p>
     <p>※ 元情報は「開発中の画像」であり、製品版と異なる場合があります。</p>
   </details>
 
@@ -584,7 +587,7 @@ function moveCard(uid, pi, zone, idx, toBottom){
   var dst = targetList(pi, zone, idx); if (!dst) return;
   f.list.splice(f.idx, 1);
   // ラインを離れたホロビトの「使ったワザ」の記録と、手札・山札に戻ったワザの「使ったホロビト」の記録は消す
-  if (zone !== "line") delete f.card.wazaUsed;
+  if (zone !== "line"){ delete f.card.wazaUsed; delete f.card.boostUsed; }
   if (zone === "hand" || zone === "deck") delete f.card.usedBy;
   if (zone === "deck" && !toBottom) dst.unshift(f.card); else dst.push(f.card);
 }
@@ -719,7 +722,7 @@ function endPhase(){
     var w = P.waza.slice();
     w.forEach(function(c){ moveCard(c.uid, pi, "grave"); c.turned = false; });
     if (w.length) fxLog(SIDE_NAME[pi] + "：バトルが終わったので、ワザゾーンに残っていた " + w.length + " 枚を墓地に置いた");
-    P.line.forEach(function(st){ st.forEach(function(c){ delete c.wazaUsed; }); });
+    P.line.forEach(function(st){ st.forEach(function(c){ delete c.wazaUsed; delete c.boostUsed; }); });
     // スライドステップ（手引書）: 空いたラインを第1ラインに向かって詰める
     var stacks = P.line.filter(function(st){ return st.length; });
     var moved = stacks.some(function(st, i){ return P.line[i] !== st; });
@@ -862,10 +865,13 @@ var PART_FX = {
       var d = cardDef(x.front);
       return ASK("正面のホロビト「" + nm(x.front) + "」の印字のコストは " + (d ? d.cost : "unknown") + " です。コストが" + a.n +
         "以下として扱いますか？（コストの増減はシミュレーターでは計算しません）"); } },
-  boost_used_on_this:      { how:"判定しない", why:"ブーストの使い方は確定した（手引書⑦）が、ブーストを使う操作はまだ作っていない。盤面に印は出さず、メニューで手で確認するよう案内する", untracked:true,
-    cond:function(){ return ASK("このホロビトにブーストを使っていますか？"); } },
-  boost_used_by_this:      { how:"判定しない", why:"ブーストを使う操作はまだ作っていない（「に使う」と「が使う」が同じ意味かも未確定）。盤面に印は出さず、メニューで手で確認するよう案内する", untracked:true,
-    cond:function(){ return ASK("このホロビトがブーストを使っていますか？"); } },
+  boost_used_on_this:      { how:"自動", why:"バトル中に、このホロビトにブーストを使ったか（シミュレーターが記録する。バトルが終わると消す）",
+    cond:function(x){ return boostUsesOf(x.card).length ? YES : NO; } },
+  boost_used_by_this:      { how:"質問", why:"ブーストを使っていなければ満たさない。使っていれば、「このホロビトが使っている」が「このホロビトに使っている」と同じ意味かは印字から分からないので聞く",
+    cond:function(x){
+      var n = boostUsesOf(x.card).length;
+      if (!n) return NO;
+      return ASK("このバトルで「" + nm(x.card) + "」にブーストを " + n + " 枚使っています。これが「このホロビトがブーストを使っている」に当たるとして扱いますか？（「が使う」と「に使う」が同じ意味かは印字から分かりません）"); } },
   won_this_battle:         { how:"自動", why:"バトルの結果で判定する。バトルの外では聞く",
     cond:function(x){ return x.won === true ? YES : x.won === false ? NO : ASK("このバトルに勝ちましたか？"); } },
   // ---- 効果 ----
@@ -1073,7 +1079,7 @@ function contRowsHTML(items){
   return items.map(function(i){
     return '<div class="fxst ' + i.st + '">' + esc(i.t) + '：' +
       (i.st === "on" ? "有効" : i.st === "off" ? "条件を満たしていない" :
-       i.st === "u" ? "シミュレーターでは判定しない（ブーストを使う操作はまだないため、手で確認）" :
+       i.st === "u" ? "シミュレーターでは判定しない（手で確認）" :
        "未確定（判定できない条件を含む）") + '</div>';
   }).join("");
 }
@@ -1088,6 +1094,7 @@ function fxBadges(){
       var list = ABILITY_MAP[c.key] || [];
       var x = ctxOf(c), b = [];
       wazaUsesOf(c).forEach(function(u){ b.push({ t:"ワザ" + (u.mod === "unknown" ? "?" : u.mod), cls:"wz" }); });
+      boostUsesOf(c).forEach(function(u){ b.push({ t:"ブースト" + u.mod, cls:"wz" }); });
       list.forEach(function(ab){
         (contEval(x, ab) || []).forEach(function(i){
           if (i.st === "on" || i.st === "q") b.push({ t:i.t + (i.st === "q" ? "?" : ""), cls:i.st }); });
@@ -1389,6 +1396,69 @@ function enaCharge(uid, pi){
   render();
 }
 
+// ---- バトル中にエナで払う（ワザ・ブースト）----
+// コストは「必要なエナの色と数」（手引書②）。同じ色のエナだけで払えば、何枚がその色である必要があるか
+// （未確定。B-3）に関係なく条件を満たすので、そのときは同じ色のエナで自動で払う。足りなければ払うエナを選ばせる。
+// paid: 払えた / stop: やめた / cant: 未使用のエナが足りない
+function payEna(pi, cost, col, title, paid, stop, cant){
+  if (typeof cost !== "number")
+    return fxChoose("コストが印字から読めていません（" + cost + "）。エナの支払いは手で行ってください。",
+      ["支払いは手で行って使う", "使わない"], function(i){ if (i === 0) paid(); else stop(); }, stop, title);
+  if (cost === 0) return paid();
+  var free = untappedEna(pi);
+  if (free.length < cost){ fxLog("使えない：コスト " + cost + " に対して、未使用のエナが " + free.length + " 枚しかありません（使用にはエナが必要。ティザー⑫）"); return cant(); }
+  var same = free.filter(function(c){ var e = cardDef(c); return e && e.color_mark === col; });
+  if (col !== "unknown" && same.length >= cost){
+    same.slice(0, cost).forEach(function(c){ c.turned = true; });
+    fxLog("コスト " + cost + "（" + col + "）：" + col + "のエナ " + cost + " 枚を使用済み（横向き）にした");
+    return paid();
+  }
+  fxChoose("コスト " + cost + "（" + col + "）：必要なエナの色と数（手引書②）のうち、何枚が" + col + "である必要があるかは未確定です（→ B-3）。" +
+    col + "の未使用のエナは " + same.length + " 枚です。支払うエナを選んでください。",
+    ["支払うエナを選ぶ", "使わない"], function(i){
+      if (i !== 0) return stop();
+      var chosen = [];
+      (function pickOne(){
+        if (chosen.length === cost){
+          chosen.forEach(function(e){ e.turned = true; });
+          fxLog("エナ " + chosen.map(nm).join("・") + " を使用済みにした");
+          return paid();
+        }
+        var rest = untappedEna(pi).filter(function(e){ return chosen.indexOf(e) < 0; });
+        startPick(rest.map(function(e){ return e.uid; }), "支払うエナを選んでください（" + (chosen.length + 1) + " / " + cost + " 枚目）",
+          function(u){ chosen.push(findCard(u).card); pickOne(); }, stop);
+      })();
+    }, stop, title);
+}
+
+// ---- ブースト（ルール動画 2026-10-15 受領・手引書⑦）----
+// 確定: ホロビトの左辺の「+N」と丸数字がブースト（手引書⑦「他のホロビトのバトル中、1コスト支払ってワザカードのように使える」）。
+//   丸数字は払うエナの数（動画「左側に『1エナ、+2000』って書いてある」）。手札から横向きでワザゾーンに置くことで、
+//   バトル中のホロビトのパワーを +N する（動画）。ワザとブーストは、お互いに1枚ずつ交互に使う（動画・手引書）。
+//   使い終わったブーストは墓地に置く（手引書 盤面見本「バトルで使い終わったワザ・ブースト」）
+function boostOf(c){
+  var d = cardDef(c);
+  if (!c.up || !d || d.type !== "ホロビト" || !d.left_edge || d.left_edge === "unknown") return null;
+  var m = /^\+(\d+)$/.exec(d.left_edge.modifier || "");
+  return m ? { n:+m[1], mod:d.left_edge.modifier, cost:d.left_edge.cost } : null;
+}
+function boostUsesOf(c){ return (c && c.boostUsed) || []; }
+// バトル中に、user（バトル中のホロビト）に、手札のホロビト uid をブーストとして使う。done(true) 使った / done(false) 使わなかった
+function useBoost(uid, user, done){
+  var f = findCard(uid); if (!f) return done(false);
+  var c = f.card, d = cardDef(c), b = boostOf(c), pi = c.owner;
+  if (!b) return done(false);
+  var stop = function(){ fxLog("「" + d.name + "」をブーストで使うのをやめた"); render(); done(false); };
+  fxLog("【" + nm(c) + "】" + nm(user) + " のバトルでブーストとして使う（" + (typeof b.cost === "number" ? b.cost + "エナ" : "コスト " + b.cost) + "・" + b.mod + "）");
+  // 丸数字の色はカードの色で印字されている（例: ケサランパサラン は緑）。何枚がその色である必要があるかは未確定（B-3）
+  payEna(pi, b.cost, d.color_mark, "ブーストのコスト", function(){
+    moveCard(c.uid, pi, "waza"); c.up = true; c.turned = true; c.usedBy = user.uid;
+    user.boostUsed = boostUsesOf(user).concat([{ uid:c.uid, key:c.key, mod:b.mod }]);
+    fxLog("「" + d.name + "」を手札から横向きでワザゾーンに置いた。" + nm(user) + " のパワー " + b.mod + "（ブースト）");
+    render(); done(true);
+  }, stop, function(){ render(); done(false); });
+}
+
 // ---- ワザを使う（依頼者の指示 2026-10-04。2026-10-12 からバトルフェイズの中で使う）----
 // 確定していること: ワザは手札から使う（入門⑪）／バトル中のホロビトが使う（手引書）／
 //   コストは「必要なエナの色と数」で、使用済み（横向き）にして払う（手引書②・入門⑥）／
@@ -1431,39 +1501,8 @@ function useWaza(uid, user, done){
       fxChoose(res.ask, ["満たしている（使える）", "満たしていない（使えない）"], function(i){ if (i === 0) next(); else no(); }, stop);
     })();
   }
-  // コストは「必要なエナの色と数」（手引書②）。同じ色のエナだけで払えば、何枚がその色である必要があるか
-  // （未確定。B-3）に関係なく条件を満たすので、そのときは同じ色のエナで払う。足りなければ払うエナを選ばせる
   function pay(){
-    var cost = d.cost;
-    if (typeof cost !== "number")
-      return fxChoose("このワザのコストは印字から読めていません（" + cost + "）。エナの支払いは手で行ってください。",
-        ["支払いは手で行って使う", "使わない"], function(i){ if (i === 0) place(); else stop(); }, stop, "ワザのコスト");
-    if (cost === 0) return place();
-    var free = untappedEna(pi);
-    if (free.length < cost)
-      { fxLog("使えない：コスト " + cost + " に対して、未使用のエナが " + free.length + " 枚しかありません（使用にはエナが必要。ティザー⑫）"); render(); return done(false); }
-    var col = d.color_mark, same = free.filter(function(c){ var e = cardDef(c); return e && e.color_mark === col; });
-    if (col !== "unknown" && same.length >= cost){
-      same.slice(0, cost).forEach(function(c){ c.turned = true; });
-      fxLog("コスト " + cost + "（" + col + "）：" + col + "のエナ " + cost + " 枚を使用済み（横向き）にした");
-      return place();
-    }
-    fxChoose("コスト " + cost + "（" + col + "）：必要なエナの色と数（手引書②）のうち、何枚が" + col + "である必要があるかは未確定です（→ B-3）。" +
-      col + "の未使用のエナは " + same.length + " 枚です。支払うエナを選んでください。",
-      ["支払うエナを選ぶ", "使わない"], function(i){
-        if (i !== 0) return stop();
-        var chosen = [];
-        (function pickOne(){
-          if (chosen.length === cost){
-            chosen.forEach(function(e){ e.turned = true; });
-            fxLog("エナ " + chosen.map(nm).join("・") + " を使用済みにした");
-            return place();
-          }
-          var rest = untappedEna(pi).filter(function(e){ return chosen.indexOf(e) < 0; });
-          startPick(rest.map(function(e){ return e.uid; }), "支払うエナを選んでください（" + (chosen.length + 1) + " / " + cost + " 枚目）",
-            function(u){ chosen.push(findCard(u).card); pickOne(); }, stop);
-        })();
-      }, stop, "ワザのコスト");
+    payEna(pi, d.cost, d.color_mark, "ワザのコスト", place, stop, function(){ render(); done(false); });
   }
   // 使ったワザはワザゾーンに横向きで置く（確定: 手引書 盤面見本）
   function place(){
@@ -1497,11 +1536,12 @@ function useWaza(uid, user, done){
    - ダブルダメージ: 勝ったとき相手プレイヤーに2ダメージ。1バリア: 負けたときプレイヤーが受けるダメージを1減らす
    - ハートが0枚のときにダメージを受けると負け（勝利条件①）。ハートが残っている間は何ダメージでもトドメにならない
    - 使ったワザはバトルが終わったとき墓地。第1ラインのバトルに勝ったプレイヤーが次の先手、引き分けなら先手後手が入れ替わる
-   依頼者の指定（2026-10-12）: ダメージを受けるハートは、ハートゾーンの列の一番上の1枚（heart[0]）
+   ルール動画: ハートは「上から順番に」ダメージが入る。図では、重なりの一番上（持ち主にいちばん近い端）の1枚。
+   シミュレーターでは、あとから置いたカードほど上に重ねて表示するので、配列の最後（heart[heart.length - 1]）
    決めずに聞く・手で処理してもらうもの（未確定）: ワザの使用をいつ終えるか（プレイヤーが終える）／
    2ダメージがハートにどう入るか（A-25）／束の下のカード（B-4）／勝ったときの効果とダメージの順番／ブースト（操作がない）
    途中でやめても state.battle に進み具合が残るので、「バトルを続ける」で再開できる */
-function newBattle(line){ return { line:line, stage:"start", turn:state.first, users:[null, null], used:[[], []], ask:{}, done:{} }; }
+function newBattle(line){ return { line:line, stage:"start", turn:state.first, users:[null, null], used:[[], []], boosts:[[], []], ask:{}, done:{} }; }
 function startBattle(){ state.battle = newBattle(0); fxLog("バトルフェイズ：第1ラインから順にバトルする（手引書）"); }
 function lineTop(pi, i){ var st = state.players[pi].line[i]; return st.length ? st[st.length - 1] : null; }
 // バトル中のホロビト。バトルを始めたときのホロビトが、まだそのラインの束の一番上にいるときだけ返す
@@ -1516,8 +1556,8 @@ function sideBrief(p){
   var c = battler(p);
   if (!c) return SIDE_NAME[p] + "：ホロビトなし";
   var d = cardDef(c), pw = d && typeof d.power === "number" ? String(d.power) : "?";
-  var ws = wazaUsesOf(c).map(function(u){ return u.mod; });
-  return SIDE_NAME[p] + "「" + nm(c) + "」（印字のパワー " + pw + (ws.length ? "・使ったワザ " + ws.join(" ") : "") + "）";
+  var ws = wazaUsesOf(c).map(function(u){ return u.mod; }), bs = boostUsesOf(c).map(function(u){ return u.mod; });
+  return SIDE_NAME[p] + "「" + nm(c) + "」（印字のパワー " + pw + (ws.length ? "・使ったワザ " + ws.join(" ") : "") + (bs.length ? "・ブースト " + bs.join(" ") : "") + "）";
 }
 function battleRun(){
   var b = state.battle;
@@ -1539,7 +1579,7 @@ function askNextFirst(why, cont){
 function bStart(){
   var b = state.battle, i = b.line, t = [lineTop(0, i), lineTop(1, i)], L = "第" + (i + 1) + "ライン";
   b.users = [t[0] ? t[0].uid : null, t[1] ? t[1].uid : null];
-  b.used = [[], []]; b.ask = {}; b.done = {}; b.turn = state.first;
+  b.used = [[], []]; b.boosts = [[], []]; b.ask = {}; b.done = {}; b.turn = state.first;
   delete b.winner; delete b.order; delete b.noBarrier; delete b.pw; delete b.dmg;
   if (!t[0] && !t[1]){
     fxLog(L + "：両者ともホロビトがいないので、バトルはない");
@@ -1547,14 +1587,14 @@ function bStart(){
     if (i === 0 && state.nextFirst === undefined) return askNextFirst("第1ラインに両者ともホロビトがいないため、バトルがありません。", skip);
     return skip();
   }
-  t.forEach(function(c){ if (c) delete c.wazaUsed; });
+  t.forEach(function(c){ if (c){ delete c.wazaUsed; delete c.boostUsed; } });
   if (!t[0] || !t[1]){
     var w = t[0] ? 0 : 1;
     fxLog(L + "：" + SIDE_NAME[w] + "の「" + nm(t[w]) + "」だけがいる → 不戦勝（勝ちとなり、ダメージを与えられる。手引書）");
   } else fxLog(L + "：" + SIDE_NAME[0] + "「" + nm(t[0]) + "」 対 " + SIDE_NAME[1] + "「" + nm(t[1]) + "」");
   b.stage = "waza"; battleRun();
 }
-// ---- ワザ: 先手から交互に1枚ずつ（手引書）。いつ終えるかは書かれていないので、プレイヤーが終える ----
+// ---- ワザ・ブースト: 先手から交互に1枚ずつ（手引書・ルール動画）。いつ終えるかは書かれていないので、プレイヤーが終える ----
 function usableWaza(p){
   if (!battler(p)) return [];
   return state.players[p].hand.filter(function(c){
@@ -1562,34 +1602,48 @@ function usableWaza(p){
     var a = affordState(c); return !a || a.st !== "no";
   });
 }
+// ブーストとして使える手札のホロビト（左辺に +N と丸数字があり、未使用のエナが足りるもの）
+function usableBoosts(p){
+  if (!battler(p)) return [];
+  return state.players[p].hand.filter(function(c){
+    var b = boostOf(c); if (!b) return false;
+    return typeof b.cost !== "number" || untappedEna(p).length >= b.cost;
+  });
+}
+function battleActs(p){
+  return usableWaza(p).map(function(c){ return { c:c, kind:"waza" }; })
+    .concat(usableBoosts(p).map(function(c){ return { c:c, kind:"boost" }; }));
+}
+function actLabel(a){
+  var d = cardDef(a.c);
+  if (a.kind === "boost"){ var b = boostOf(a.c); return "「" + d.name + "」をブーストで使う（" + (typeof b.cost === "number" ? b.cost + "エナ" : "コスト " + b.cost) + "・" + b.mod + "）"; }
+  return "「" + d.name + "」を使う（ワザ・コスト " + d.cost + "・ワザのパワー " + (d.left_edge && d.left_edge !== "unknown" ? d.left_edge.modifier : "unknown") + "）";
+}
 function bWaza(){
-  var b = state.battle, can = [usableWaza(0), usableWaza(1)];
+  var b = state.battle, can = [battleActs(0), battleActs(1)];
   if (!can[0].length && !can[1].length){
-    fxLog("ワザ：両者とも使えるワザがない（手札にない・エナが足りない・バトルしているホロビトがいない）");
+    fxLog("ワザ・ブースト：両者とも使えるものがない（手札にない・エナが足りない・バトルしているホロビトがいない）");
     b.stage = "judge"; return battleRun();
   }
   var p = b.turn;
-  if (!can[p].length){ fxLog(SIDE_NAME[p] + "：使えるワザがない"); p = b.turn = 1 - p; }
+  if (!can[p].length){ fxLog(SIDE_NAME[p] + "：使えるワザ・ブーストがない"); p = b.turn = 1 - p; }
   var o = 1 - p, user = battler(p);
-  var labels = can[p].map(function(c){
-    var d = cardDef(c);
-    return "「" + d.name + "」を使う（コスト " + d.cost + "・ワザのパワー " + (d.left_edge && d.left_edge !== "unknown" ? d.left_edge.modifier : "unknown") + "）"; });
-  var nUse = labels.length;
+  var labels = can[p].map(actLabel), nUse = labels.length;
   if (can[o].length) labels.push("使わない（" + SIDE_NAME[o] + "の番へ）");
   labels.push("ワザの使用を終えて、パワーを比べる");
-  fxChoose(sideBrief(0) + " 対 " + sideBrief(1) + "。ワザは先手から交互に1枚ずつ使えます（手引書）。いまは" + SIDE_NAME[p] + "の番です。" +
-    "（いつ終わるかは手引書に書かれていないので、終えるときは「ワザの使用を終えて、パワーを比べる」を押します。ブーストの操作はまだありません）",
+  fxChoose(sideBrief(0) + " 対 " + sideBrief(1) + "。ワザとブーストは先手から交互に1枚ずつ使えます（手引書・ルール動画）。いまは" + SIDE_NAME[p] + "の番です。" +
+    "（いつ終わるかは手引書に書かれていないので、終えるときは「ワザの使用を終えて、パワーを比べる」を押します）",
     labels, function(i){
       if (i < nUse){
-        var wc = can[p][i]; snap(); fxClear();
-        return useWaza(wc.uid, user, function(used){
+        var a = can[p][i]; snap(); fxClear();
+        return (a.kind === "boost" ? useBoost : useWaza)(a.c.uid, user, function(used){
           var B = state.battle; if (!B) return render();
-          if (used){ B.used[p].push(wc.uid); B.turn = o; }
+          if (used){ (a.kind === "boost" ? B.boosts : B.used)[p].push(a.c.uid); B.turn = o; }
           battleRun(); });
       }
       snap();
-      if (can[o].length && i === nUse){ fxLog(SIDE_NAME[p] + "：ワザを使わない"); state.battle.turn = o; return battleRun(); }
-      fxLog("ワザの使用を終えた"); state.battle.stage = "judge"; battleRun();
+      if (can[o].length && i === nUse){ fxLog(SIDE_NAME[p] + "：使わない"); state.battle.turn = o; return battleRun(); }
+      fxLog("ワザ・ブーストの使用を終えた"); state.battle.stage = "judge"; battleRun();
     }, battlePause, bTitle());
 }
 // ---- パワー ----
@@ -1637,6 +1691,10 @@ function powerOf(p, cb){
     var wf = findCard(u.uid); if (!wf) return;
     var wx = ctxOf(wf.card); wx.user = c;
     (ABILITY_MAP[u.key] || []).forEach(function(ab){ powerFx(wx, ab, "このワザ", parts, asks, "ワザ「" + wd.name + "」の効果"); });
+  });
+  boostUsesOf(c).forEach(function(u){
+    var bd = CARDS[u.key], m = /^\+(\d+)$/.exec(u.mod || "");
+    if (m) parts.push({ t:"ブースト「" + (bd ? bd.name : u.key) + "」" + u.mod, n:+m[1] });
   });
   if (why) return cb(null, "", why);
   var under = locOf(c).pos > 0;
@@ -1858,13 +1916,14 @@ function playerDamage(p, next){
     heartDamage(p, next);
   }
 }
-// ハートへの1ダメージ: 列の一番上の1枚（依頼者の指定）。縦向きならダウン、ダウンしていれば破壊
+// ハートへの1ダメージ: 重なりの一番上の1枚（ルール動画）。縦向きならダウン、ダウンしていれば破壊
+function topHeart(p){ var H = state.players[p].heart; return H[H.length - 1]; }
 function heartDamage(p, next){
-  var h = state.players[p].heart[0];
+  var h = topHeart(p);
   if (!h){ fxLog(SIDE_NAME[p] + "のハートがない（手で動かした？）。ハートへのダメージは手で処理してください"); return next(); }
   if (!h.turned){
     h.turned = true; state.battle.done.heart = true;
-    fxLog(SIDE_NAME[p] + "のハート（列の一番上）がダメージを受けてダウンした（横向き）");
+    fxLog(SIDE_NAME[p] + "のハート（重なりの一番上）がダメージを受けてダウンした（横向き）");
     render(); return next();
   }
   heartBreak(p, h, next);
@@ -1886,7 +1945,7 @@ function heartBreak(p, h, next){
            : kw === "unknown" ? "（このカードのトリガーは印字から読めていません）"
            : trig && !trig.can(p, h) ? "（" + kw + " は、いまは使えません：" + trig.cant(p, h) + "）"
            : !trig ? "（このカードのトリガーはシミュレーターでは処理できません。使うなら手で処理してください）" : "";
-  fxChoose(SIDE_NAME[p] + "のハート（列の一番上）はダウンしていたので、ダメージで破壊されました。カードは「" + nm(h) + "」です。" +
+  fxChoose(SIDE_NAME[p] + "のハート（重なりの一番上）はダウンしていたので、ダメージで破壊されました。カードは「" + nm(h) + "」です。" +
     "手札に加わります。その際、加える代わりにトリガーを使えます（使用は任意。手引書）。" + note, labels, function(i){ acts[i](); }, battlePause, "ハートが破壊された");
 }
 // オーバービートの下にできる、自分のラインの一番上のホロビト（コストが小さいもの。手引書 メインステップ）
@@ -1979,16 +2038,16 @@ function bEnd(){
     });
     if (q.length) return runQueue(q, function(){ if (state.battle) bEnd(); });
   }
-  // 使ったワザは、バトルが終わったとき墓地に置く（手引書）
+  // 使ったワザ・ブーストは、バトルが終わったとき墓地に置く（手引書）
   var n = 0;
   [0, 1].forEach(function(p){
-    B.used[p].forEach(function(uid){
+    B.used[p].concat(B.boosts ? B.boosts[p] : []).forEach(function(uid){
       var f = findCard(uid); if (!f || zoneOfCard(f.card).zone !== "waza") return;
       moveCard(uid, f.card.owner, "grave"); f.card.turned = false; n++;
     });
-    var u = B.users[p] && findCard(B.users[p]); if (u) delete u.card.wazaUsed;
+    var u = B.users[p] && findCard(B.users[p]); if (u){ delete u.card.wazaUsed; delete u.card.boostUsed; }
   });
-  if (n) fxLog("バトルが終わったので、使ったワザ " + n + " 枚を墓地に置いた（手引書）");
+  if (n) fxLog("バトルが終わったので、使ったワザ・ブースト " + n + " 枚を墓地に置いた（手引書）");
   var fin = function(){ var B2 = state.battle; B2.line++; B2.stage = "start"; battleRun(); };
   // 第1ラインの結果で次の先手が決まる（手引書）
   if (B.line === 0 && state.nextFirst === undefined){

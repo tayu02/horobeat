@@ -231,25 +231,25 @@ async function run(label, viewport, touch){
   s=await S();
   ok(s.players[0].line[1][0].turned===false && (await log()).includes('回復した'),'HD01-014: 選んだダウンしているホロビトが縦向きになる');
 
-  // 13e. ブーストを使っているなら +2000（HD02-012）: シミュレーターが追いかけない状態なので盤面に印を出さない
+  // 13e. ブーストを使っているなら +2000（HD02-012）: ブーストを使っていなければ満たさない（使ったかはバトルの中で記録する）
   await setup({line:[['HD02-012']]},{});
   badge=await p.evaluate(()=>document.querySelector('#side-0 .fxb')?.textContent||'');
-  ok(badge==='','HD02-012: 「ブーストを使っているなら」の +2000 は盤面に印を出さない（? も出さない）');
+  ok(badge==='','HD02-012: ブーストを使っていなければ +2000 の印は出ない（? も出さない）');
   s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await wait(450);
   const rows=await p.evaluate(()=>[...document.querySelectorAll('#sheet .fxst')].map(e=>e.className+':'+e.textContent).join(' | '));
-  ok(rows.includes('fxst u') && rows.includes('+2000') && rows.includes('手で確認'),'HD02-012: メニューでは「判定しない（手で確認）」と +2000 を示す');
+  ok(rows.includes('fxst off') && rows.includes('+2000') && rows.includes('条件を満たしていない'),'HD02-012: メニューでは「条件を満たしていない」と +2000 を示す');
   ok(await p.evaluate(()=>(document.querySelector('#sheet .fxbtn')||{}).textContent||'').then(t=>t.includes('バトルに勝ったとき')),'HD02-012: 「バトルに勝ったとき」の効果のボタンがある');
   await clickSheet('.fxbtn'); await wait(150);
   s=await S();
   ok(s.players[0].deck.length===9 && s.players[0].hand.length===1,'HD02-012: バトルに勝ったとき → 1枚引く');
 
-  // 13f. ホロビト「が」ブーストを使っているなら +3000（HD01-012）: HD02-012 と同じく追いかけない状態
+  // 13f. ホロビト「が」ブーストを使っているなら +3000（HD01-012）: ブーストを使っていなければ満たさない
   await setup({line:[['HD01-012']]},{});
   badge=await p.evaluate(()=>document.querySelector('#side-0 .fxb')?.textContent||'');
-  ok(badge==='','HD01-012: 「ブーストを使っているなら」の +3000 は盤面に印を出さない（? も出さない）');
+  ok(badge==='','HD01-012: ブーストを使っていなければ +3000 の印は出ない（? も出さない）');
   s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].line[0][0].uid); await wait(450);
   const rows2=await p.evaluate(()=>[...document.querySelectorAll('#sheet .fxst')].map(e=>e.className+':'+e.textContent).join(' | '));
-  ok(rows2.includes('fxst u') && rows2.includes('+3000') && rows2.includes('手で確認'),'HD01-012: メニューでは「判定しない（手で確認）」と +3000 を示す');
+  ok(rows2.includes('fxst off') && rows2.includes('+3000') && rows2.includes('条件を満たしていない'),'HD01-012: メニューでは「条件を満たしていない」と +3000 を示す');
   ok(await p.evaluate(()=>!document.querySelector('#sheet .fxbtn')),'HD01-012: 発動のきっかけを持たないので効果のボタンは出ない');
   ok(await p.evaluate(()=>document.getElementById('sheet').textContent.includes('1度しか発動しない')),'HD01-012: 補足「（2回以上ブーストしていても…）」がメニューに出る');
 
@@ -339,7 +339,7 @@ async function run(label, viewport, touch){
   await battle();
   ok((await fxq()).includes('いまは相手の番'),'ワザ: 先手が相手なら、相手の番から始まる');
   await pickOpt('ワザの使用を終えて');
-  ok((await log()).includes('ワザの使用を終えた') && (await S()).players[0].hand.length===1,'ワザ: 「終える」を押せば、使わずにパワーを比べる（手札に残る）');
+  ok((await log()).includes('ワザ・ブーストの使用を終えた') && (await S()).players[0].hand.length===1,'ワザ: 「終える」を押せば、使わずにパワーを比べる（手札に残る）');
   // 手札・ワザゾーンのワザのメニューには「使う」ボタンを出さない（バトルのワザの手番で使う）
   await setup({hand:['HD02-008'], waza:['HD02-008']},{});
   s=await S(); await p.evaluate(u=>openCardSheet(u),s.players[0].hand[0].uid); await wait(450);

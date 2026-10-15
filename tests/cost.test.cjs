@@ -143,7 +143,7 @@ async function run(label, viewport, touch){
     for(let i=0;i<5;i++) state.players[1].heart.push({uid:'XH'+i,owner:1,key:null,up:false,turned:false,note:''});
     state.phase=2; startBattle(); battleRun(); });
   await wait(460);
-  ok(!(await q()).includes('電光攻火') && (await p.evaluate(()=>fxLines.join('/'))).includes('使えるワザがない') && (await S()).players[0].hand.length===1,
+  ok(!(await q()).includes('電光攻火') && (await p.evaluate(()=>fxLines.join('/'))).includes('両者とも使えるものがない') && (await S()).players[0].hand.length===1,
     'ワザ: エナが足りなければ、バトルのワザの手番で使う候補に出ない（手札に残る）');
   await setup({hand:['PR-013'], line:[['HB01-001']], ena:['HD01-001']});
   await p.evaluate(u=>useWaza(u, state.players[0].line[0][0], function(){}),await hand('PR-013')); await wait(100);

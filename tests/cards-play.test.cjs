@@ -111,13 +111,13 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
     await setup({line:[[k]]});
     ok((await badges(0,0)).includes(t),k+': 「'+t+'」の印');
   }
-  // ブースト（シミュレーターが追いかけない状態）: 印を出さず、メニューで手で確認するよう案内
+  // ブースト（2026-10-15〜 バトル中に使ったものをシミュレーターが記録する）: 使っていなければ条件を満たさない
   for(const [k,n] of [['HD02-012','+2000'],['HD01-012','+3000']]){
     await setup({line:[[k]]});
-    ok(!(await badges(0,0)).includes(n),k+': ブーストの '+n+' は盤面に印を出さない');
+    ok(!(await badges(0,0)).includes(n),k+': ブーストを使っていなければ '+n+' の印は出ない');
     await tap(await top(0,0));
     const sh=await sheet();
-    ok(sh.includes(n) && sh.includes('手で確認'),k+': メニューで「判定しない（手で確認）」と '+n+' を示す');
+    ok(sh.includes(n) && sh.includes('条件を満たしていない'),k+': メニューで「条件を満たしていない」と '+n+' を示す');
     await close();
   }
 
@@ -298,6 +298,26 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   ok(s.players[1].hand.some(c=>c.key==='HD01-001') && s.players[1].line[0].length===1,'HB01-097: 一番上だけが持ち主の手札に戻り、下のカードは残る');
   ok((await q()).includes('いなくなりました'),'HB01-097: バトルの相手がいなくなったときの結果は手引書にないので聞く');
   await choose('バトルなし');
+
+  // ===== ブースト（ルール動画: 手札から横向きでワザゾーンに置き、バトル中のホロビトのパワーを+2000。左辺の丸数字はエナの数）=====
+  // HD02-012 このホロビトにブーストを使っているなら、パワーは+2000される（ワザでは発動しない）
+  await setup({hand:['HD02-010'], line:[['HD02-012']], ena:['HD02-001'], heart:H5},{line:[['HB01-033']], heart:H5});
+  await battle();
+  ok((await opts()).some(t=>t.includes('「ケサランパサラン」をブーストで使う（1エナ・+2000）')),'ブースト: 左辺に +2000 と丸数字のある手札のホロビトを、ブーストとして使える（1エナ）');
+  await choose('ブーストで使う');
+  s=await S();
+  ok(s.players[0].waza.some(c=>c.key==='HD02-010' && c.turned) && s.players[0].ena[0].turned && !s.players[0].hand.length,'ブースト: 緑のエナ1枚を使用済みにし、手札から横向きでワザゾーンに置く');
+  ok((await badges(0,0)).includes('ブースト+2000') && (await badges(0,0)).includes('+2000'),'HD02-012: ブーストを使ったので「+2000」の印が付く（使ったブーストの印も出る）');
+  ok((await log()).includes('自分 10000') && (await log()).includes('ブースト「ケサランパサラン」+2000') && (await log()).includes('効果 +2000'),'HD02-012: パワーは 6000＋ブースト 2000＋効果 2000 ＝ 10000');
+  await choose('ダメージを先に');
+  s=await S();
+  ok(s.players[0].grave.some(c=>c.key==='HD02-010') && !s.players[0].waza.length,'ブースト: バトルが終わると墓地へ（手引書「バトルで使い終わったワザ・ブースト」）');
+  // HD01-012 このホロビトがブーストを使っているなら、このホロビトのパワーは+3000される
+  await setup({hand:['HD01-001'], line:[['HD01-012']], ena:[R()], heart:H5},{line:[['HB01-033']], heart:H5});
+  await battle(); await choose('ブーストで使う');
+  ok((await q()).includes('「このホロビトがブーストを使っている」に当たる') && (await q()).includes('同じ意味かは印字から分かりません'),'HD01-012: ブーストを使ったとき、「が使っている」に当たるかは聞く（「に使う」と同じ意味かは未確定）');
+  await ans(0);
+  ok((await log()).includes('自分 11000'),'HD01-012: 「当たる」→ 6000＋ブースト 2000＋3000 ＝ 11000');
 
   // 合術 うつし身の撃: このワザは自分がこのバトルで他のワザを使っているときのみ使える／勝ったならダメージ+1
   await setup({hand:['UNKNOWN-utsushimi'], line:[['HB01-001']], ena:[R(),R()], heart:H5},{line:[['HD01-001']], heart:H5});

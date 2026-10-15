@@ -49,7 +49,11 @@ async function run(label, viewport, touch){
   ok(await p.textContent('#phaseLbl')==='バトルフェイズ','フェイズ送りでバトルフェイズに入り、自動でバトルが進む');
   ok((await log()).includes('自分 4000') && (await log()).includes('相手 2000') && (await log()).includes('自分の勝ち'),'パワーを比べる: 4000 対 2000 → 自分の勝ち');
   ok(top(s,1,0).turned && !top(s,0,0).turned,'負けた相手のホロビトがダウン（横向き）、勝った側はそのまま');
-  ok(s.players[1].heart[0].turned && s.players[1].heart.slice(1).every(c=>!c.turned) && s.players[0].heart.every(c=>!c.turned),'負けた側のハートは、列の一番上の1枚だけがダウン');
+  ok(s.players[1].heart[4].turned && s.players[1].heart.slice(0,4).every(c=>!c.turned) && s.players[0].heart.every(c=>!c.turned),'負けた側のハートは、重なりの一番上の1枚だけがダウン（ルール動画「上から順番に」）');
+  // 重なりの一番上は、持ち主にいちばん近い端（相手は上端）に、ほかのハートの上に重ねて表示する
+  const hp=await p.evaluate(()=>{ const els=[...document.querySelectorAll('#side-1 .z-heart .card')]; const r=els.map(e=>e.getBoundingClientRect().top);
+    const t=els.findIndex(e=>e.classList.contains('turned')); return {t, top:r[t], others:r.filter((_,i)=>i!==t), z:els[t]===document.elementFromPoint(els[t].getBoundingClientRect().left+8, els[t].getBoundingClientRect().top+8)?.closest('.card')}; });
+  ok(hp.t===4 && hp.others.every(y=>y>hp.top) && hp.z,'相手のダウンしたハートは、相手の列の上端（相手に近い端）で、ほかのハートの上に重なって見える '+JSON.stringify(hp));
   ok(s.nextFirst===0 && (await log()).includes('次のラウンドの先手'),'第1ラインに勝った自分が次の先手（いまの先手は相手）');
   ok(s.battle===null && (await p.textContent('#flow')).includes('バトルフェイズ終了'),'5つのラインを終えるとバトルフェイズ終了と出る');
   ok(await p.evaluate(()=>!!document.querySelector('#side-1 .lineslot[data-idx="0"] .card.turned')),'盤面でもダウンしたカードが横向きに出る');
@@ -96,7 +100,7 @@ async function run(label, viewport, touch){
   // いったん閉じて、手で処理して、続ける
   await choose('中断する');
   ok((await p.textContent('#flow')).includes('バトルを続ける'),'中断すると、上部に「バトルを続ける」が出る');
-  await p.evaluate(()=>{ state.players[1].heart[0].turned=true; state.players[1].heart[1].turned=true; render(); });
+  await p.evaluate(()=>{ state.players[1].heart[4].turned=true; state.players[1].heart[3].turned=true; render(); });
   await p.click('#flow button[data-flow="resume"]'); await wait(200);
   ok((await opts()).some(t=>t.includes('手で処理した')) && (await q()).includes('2 ダメージ'),'「バトルを続ける」で同じ所から再開する（聞いたことは聞き直さない）');
   await choose('手で処理した');
@@ -105,7 +109,13 @@ async function run(label, viewport, touch){
   // ダブルダメージ × 1バリア → 1ダメージ（手引書）
   await setup({line:[['HD02-006']]},{line:[['HD02-002']]});
   await battle(); s=await S();
-  ok((await log()).includes('受けるダメージ：1') && s.players[1].heart[0].turned,'ダブルダメージ × 1バリア → 1ダメージ（手引書）で、ハートがダウン');
+  ok((await log()).includes('受けるダメージ：1') && s.players[1].heart[4].turned,'ダブルダメージ × 1バリア → 1ダメージ（手引書）で、ハートがダウン');
+  // 自分が負けたとき: 自分のハートは、自分の列の下端（自分に近い端）の1枚からダウンする
+  await setup({line:[['HD01-001']]},{line:[['HB01-001']]});
+  await battle(); s=await S();
+  const mp=await p.evaluate(()=>{ const els=[...document.querySelectorAll('#side-0 .z-heart .card')]; const r=els.map(e=>e.getBoundingClientRect().top);
+    const t=els.findIndex(e=>e.classList.contains('turned')); return {t, top:r[t], others:r.filter((_,i)=>i!==t)}; });
+  ok(s.players[0].heart[4].turned && mp.t===4 && mp.others.every(y=>y<mp.top),'自分のハートは、自分の列の下端（自分に近い端）の1枚がダウンする '+JSON.stringify(mp));
 
   // ---- 7. トドメ: ハートが0枚のときにダメージ → 勝利（勝利条件①）。そこで止まる ----
   await setup({line:[['HB01-001'],['HB01-001']]},{line:[['HD01-001'],['HD01-001']], heart:0});
@@ -122,12 +132,12 @@ async function run(label, viewport, touch){
   s=await S();
   ok(s.players[1].grave.some(c=>c.key==='PR-013') && s.players[1].hand.length===3 && !s.players[1].heart.length,'ドロートリガー: 墓地へ置き、3枚引く');
   // 使わない → 手札に加える
-  await setup({line:[['HB01-001']]},{line:[['HD01-001']], heart:[{k:'PR-013',turned:true},'HD01-001']});
+  await setup({line:[['HB01-001']]},{line:[['HD01-001']], heart:['HD01-001',{k:'PR-013',turned:true}]});
   await battle(); await choose('使わずに手札に');
   s=await S();
   ok(s.players[1].hand.some(c=>c.key==='PR-013' && c.up) && s.players[1].heart.length===1,'トリガーを使わなければ手札に加える（表向き）');
   // エントリーT: 空いているラインの1番前に出す。出たときの効果も発動（アカナー: 下にカードがないなら1枚引く）
-  await setup({line:[['HB01-001'],['HB01-001']]},{line:[['HD01-001'],['HB01-001']], heart:[{k:'HD01-010',turned:true},'HD01-001']});
+  await setup({line:[['HB01-001'],['HB01-001']]},{line:[['HD01-001'],['HB01-001']], heart:['HD01-001',{k:'HD01-010',turned:true}]});
   await battle();
   ok((await opts()).some(t=>t.includes('エントリーT')),'エントリートリガーを使うか聞く');
   await choose('トリガーを使う');
@@ -137,7 +147,7 @@ async function run(label, viewport, touch){
   ok(s8.players[1].line[2].length===1 && s8.players[1].line[2][0].key==='HD01-010' && s8.players[1].hand.length===1,'エントリートリガー: 第3ラインに出て、「出たとき」で1枚引く（コストは支払わない）');
   ok((await log()).includes('第2ライン'),'そのあと第2ラインのバトルへ進む');
   // オーバーT: コストが小さいホロビトの上にオーバービートで出す
-  await setup({line:[['HB01-001']]},{line:[['HD01-001'],['HB01-001']], heart:[{k:'HB01-033',turned:true},'HD01-001']});
+  await setup({line:[['HB01-001']]},{line:[['HD01-001'],['HB01-001']], heart:['HD01-001',{k:'HB01-033',turned:true}]});
   await battle(); await choose('トリガーを使う');
   let pk=await picks();
   s8=await S();
@@ -155,7 +165,7 @@ async function run(label, viewport, touch){
   s8=await S();
   ok(top(s8,1,1).key==='HD02-006' && s8.players[1].hand.length===1,'ラストオーバートリガー: 手札からオーバービートで出る（コストは支払わない）');
   // ハートが2枚以上残っていれば、オーバービートでは出せない
-  await setup({line:[['HB01-001']]},{line:[['HD01-001'],['HB01-001']], heart:[{k:'HD02-006',turned:true},'HD01-001','HD01-001']});
+  await setup({line:[['HB01-001']]},{line:[['HD01-001'],['HB01-001']], heart:['HD01-001','HD01-001',{k:'HD02-006',turned:true}]});
   await battle(); await choose('トリガーを使う');
   ok((await log()).includes('1枚以下ではない') && (await S()).players[1].hand.length===2,'ラストオーバートリガー: ハートが2枚残っていれば、手札に加えて1枚引くだけ');
 
