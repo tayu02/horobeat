@@ -211,6 +211,19 @@ async function run(label, viewport, touch){
   await p.click('#btnPhase'); await wait(100);
   ok((await S()).phase===3 && (await log()).includes('残りのバトルを行わずに'),'バトルの途中でフェイズ送り → 確かめてからエンドフェイズへ');
 
+  // ---- 13b. バトルで第2ラインが破壊されたら、エンドフェイズのスライドステップで第3ラインを第2ラインへ詰める（手引書・ルール動画）----
+  await setup({line:[['HB01-001'],[{k:'HD01-001',turned:true}],['HB01-001']]},{line:[['HD01-001'],['HB01-001'],['HD02-003']]});
+  await battle();
+  s=await S();
+  ok(s.battle===null && !s.players[0].line[1].length && s.players[0].grave.some(c=>c.key==='HD01-001') && s.players[0].line[2].length===1,
+    '第1〜第3ラインでバトルし、ダウンしていた自分の第2ラインのホロビトが負けて破壊され、第2ラインが空く');
+  await p.click('#btnPhase'); await wait(100);
+  s=await S();
+  ok(s.phase===3 && s.players[0].line[1].length===1 && s.players[0].line[1][0].key==='HB01-001' && !s.players[0].line[2].length && s.players[0].line[0].length===1,
+    'エンドフェイズのスライドステップで、第3ラインのホロビトが空いた第2ラインへ移る');
+  ok(s.players[1].line.slice(0,3).every(st=>st.length===1),'相手のラインは空いていないので動かない（詰めるのはプレイヤーごと）');
+  ok((await log()).includes('スライドステップ'),'記録にスライドステップが出る');
+
   // ---- 14. 召喚フェイズ: エナチャージ・新しいライン・番 ----
   await setup({hand:['HD01-001','HB01-001','HD01-010','PR-013'], ena:['HD01-001','HD01-001','HD01-001','HD01-001']},{hand:['HD02-001']},{phase:0});
   const openH=async key=>{ const u=(await S()).players[0].hand.find(c=>c.key===key).uid; await p.evaluate(u=>openCardSheet(u),u); await wait(460); };
