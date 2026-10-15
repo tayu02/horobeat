@@ -2,7 +2,7 @@
 // 確定（手引書）: 第1ラインから順にバトル／不戦勝／パワーの高いほうが勝つ／引き分けはお互いのホロビトだけがダメージ／
 //   ダメージでダウン、ダウン中なら破壊（ホロビトは墓地・ハートは手札。代わりにトリガーを使える）／
 //   ダブルダメージ・1バリア／ハートが0枚のときのダメージでトドメ／第1ラインの結果で次の先手
-// 依頼者の指定: ダメージを受けるハートは列の一番上。2ダメージの入り方は未確定なので手で
+// 遊び方動画: ハートは上から順番に（重なりの一番上から）ダメージ。2ダメージはそのまま1ダメージを2回（依頼者の説明 2026-10-15）
 // 召喚フェイズ: エナチャージは手札から1枚・ホロビトを出す前だけ／新しいラインは第1ラインに最も近い空きライン
 const H = require('./harness.cjs');
 const { devices, ok } = H;
@@ -92,20 +92,34 @@ async function run(label, viewport, touch){
   await battle(); s=await S();
   ok(top(s,1,0).turned && s.players[1].heart.every(c=>!c.turned) && (await log()).includes('1バリア −1'),'1バリア: 負けたホロビトはダウンするが、ハートへのダメージは 1−1＝0');
 
-  // ---- 6. ダブルダメージ: ハートが残っていれば、2ダメージの入り方は未確定なので手で ----
-  await setup({line:[['HD02-006']]},{line:[['HB01-001']]});
+  // ---- 6. ダブルダメージ: 2ダメージはそのまま1ダメージを2回（遊び方動画。依頼者の説明 2026-10-15）----
+  // 依頼者の例: 一番上のハートがダウンしているなら、それが破壊されてトリガーチェック、次のハートがダウン
+  await setup({line:[['HD02-006']]},{line:[['HB01-001']], heart:['HD01-001','HD01-001','HD01-001',{k:'PR-013',turned:true}]});
   await battle();
-  ok((await log()).includes('受けるダメージ：2') && (await q()).includes('手引書に書かれていません') && (await q()).includes('トドメにはなりません'),'ダブルダメージ: 2ダメージ。ハートが残っているときは入り方を手で（→ A-25）');
-  ok((await S()).players[1].heart.every(c=>!c.turned),'2ダメージのときは、ハートを自動では動かさない');
-  // いったん閉じて、手で処理して、続ける
+  ok((await log()).includes('受けるダメージ：2') && (await log()).includes('1 回目') && (await q()).includes('電光攻火') && (await q()).includes('破壊されました'),
+    'ダブルダメージ: 1回目で、一番上のダウンしているハート（電光攻火）が破壊され、トリガーを使うか聞く（トリガーチェック）');
   await choose('中断する');
   ok((await p.textContent('#flow')).includes('バトルを続ける'),'中断すると、上部に「バトルを続ける」が出る');
-  await p.evaluate(()=>{ state.players[1].heart[4].turned=true; state.players[1].heart[3].turned=true; render(); });
   await p.click('#flow button[data-flow="resume"]'); await wait(200);
-  ok((await opts()).some(t=>t.includes('手で処理した')) && (await q()).includes('2 ダメージ'),'「バトルを続ける」で同じ所から再開する（聞いたことは聞き直さない）');
-  await choose('手で処理した');
+  ok((await q()).includes('電光攻火') && (await S()).players[1].heart.length===4,'「バトルを続ける」で同じ所から再開する（ダメージを入れ直さない）');
+  await choose('使わずに手札に');
   s=await S();
-  ok(s.battle===null && s.players[1].heart.filter(c=>c.turned).length===2,'続けると残りのラインを処理して終わる（手で入れたダメージはそのまま）');
+  ok(s.players[1].heart.length===3 && s.players[1].heart[2].turned && s.players[1].heart.slice(0,2).every(c=>!c.turned) && s.players[1].hand.some(c=>c.key==='PR-013'),
+    'ダブルダメージ: 2回目で、次のハートがダウンする（依頼者の説明どおり）');
+  ok(s.battle===null && (await log()).includes('2 回目'),'2回目まで入れて、残りのラインを処理して終わる');
+  // ハートがすべて縦向きなら: 1回目で一番上がダウン、2回目でそのハートが破壊（1ダメージを2回）
+  await setup({line:[['HD02-006']]},{line:[['HB01-001']]});
+  await battle();
+  ok((await q()).includes('破壊されました') && (await S()).players[1].heart.length===5,'すべて縦向き: 1回目で一番上がダウンし、2回目でそのハートが破壊される');
+  await choose('使わずに手札に');
+  s=await S();
+  ok(s.players[1].heart.length===4 && s.players[1].heart.every(c=>!c.turned),'すべて縦向き: 残りの4枚は縦向きのまま');
+  // 途中でハートが0枚になってもトドメにはならない
+  await setup({line:[['HD02-006']]},{line:[['HB01-001']], heart:[{k:'PR-013',turned:true}]});
+  await battle(); await choose('使わずに手札に');
+  s=await S();
+  ok(s.winner===undefined && !s.players[1].heart.length && (await log()).includes('トドメにはならない'),
+    '1回目で最後のハートが破壊されて0枚になっても、2回目でトドメにはならない（手引書「相手のハートが残っている時は、何ダメージ与えてもトドメを刺せません」）');
   // ダブルダメージ × 1バリア → 1ダメージ（手引書）
   await setup({line:[['HD02-006']]},{line:[['HD02-002']]});
   await battle(); s=await S();
@@ -181,7 +195,8 @@ async function run(label, viewport, touch){
   s=await S();
   ok(s.players[1].grave.some(c=>c.key==='HD02-002') && !(await q()).includes('倍以上ですか'),'HB01-065: パワー 14000 は正面の 2000 の2倍以上 → 聞かずに正面を破壊');
   ok((await log()).includes('1バリアは発動しない') && (await log()).includes('受けるダメージ：2'),'HB01-065: 破壊した相手の1バリアは発動しない（印字）。ダブルダメージで2');
-  await choose('手で処理した');
+  ok((await q()).includes('破壊されました'),'HB01-065: 2ダメージ（1ダメージを2回）で、一番上のハートがダウンしてから破壊される');
+  await choose('使わずに手札に');
 
   // ---- 11. 常時の効果のパワー: 判定できれば足す（疾風のカマイチ 第2ライン +2500） ----
   await setup({line:[[],['HD01-005']]},{line:[[],['HB01-001']]});

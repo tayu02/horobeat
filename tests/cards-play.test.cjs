@@ -332,8 +332,8 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await choose('自分の勝ち');
   ok((await q()).includes('+1 しますか'),'うつし身の撃: 勝ったので「ダメージを+1する」の条件は満たす。「このホロビト」が誰かは印字から分からないので、足すか聞く');
   await choose('+1 する');
-  ok((await log()).includes('受けるダメージ：2') && (await q()).includes('手引書に書かれていません'),'うつし身の撃: ダメージは2。ハートが残っているときの2ダメージは手で処理するよう案内する（→ A-25）');
-  await choose('手で処理した');
+  ok((await log()).includes('受けるダメージ：2') && (await q()).includes('破壊されました') && (await q()).includes('レオまる'),'うつし身の撃: ダメージは2。1ダメージを2回入れるので、一番上のハートがダウンしてから破壊される');
+  await choose('使わずに手札に');
 
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));
   await b.close();
