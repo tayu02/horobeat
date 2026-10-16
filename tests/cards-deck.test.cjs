@@ -17,13 +17,14 @@ async function run(label, viewport, touch){
   ok(await p.evaluate(()=>CARD_LIST.length)===EXPECTED_CARDS,'カードDBが cards.json と同じ '+EXPECTED_CARDS+' 枚埋め込まれている');
   ok(await p.evaluate(()=>CARDS['HB01-049'].abilities[0].includes('下にあるカード')),'能力文が印字どおり入っている');
 
-  // --- デッキ編集: 4枚上限、50枚固定、未確定で埋める ---
-  await p.evaluate(()=>{document.getElementById('deckPanel').open=true;});
+  // --- デッキ編集（「🔍 カード」の一覧の −／＋）: 4枚上限、50枚固定、未確定で埋める ---
+  await p.click('.navbtn[data-view="cards"]');
   for(let i=0;i<5;i++) await p.click('button[data-dk="+"][data-pi="0"][data-key="HB01-001"]').catch(()=>{});
   ok((await S()).players[0].decklist['HB01-001']===4,'同名4枚で止まる');
   await p.click('button[data-dk="+"][data-pi="0"][data-key="HB01-097"]');
   await p.click('button[data-dk="+"][data-pi="0"][data-key="HB01-097"]');
   await p.click('button[data-dk="+"][data-pi="0"][data-key="UNKNOWN-utsushimi"]');
+  await p.click('.navbtn[data-view="deck"]');
   p.once('dialog',d=>d.accept());
   await p.click('button[data-act="rebuild"][data-pi="0"]');
   let s=await S();
@@ -35,6 +36,8 @@ async function run(label, viewport, touch){
 
   // --- 同名4枚はカード名で数える（HB01-034 と HD02-001 はどちらも「しなずいさま」） ---
   await p.evaluate(()=>{ state.players[1].decklist={}; render(); });
+  await p.click('.navbtn[data-view="cards"]');
+  await p.click('#viewCards button[data-deckpi="1"]');
   for(let i=0;i<5;i++) await p.click('button[data-dk="+"][data-pi="1"][data-key="HB01-034"]').catch(()=>{});
   ok((await S()).players[1].decklist['HB01-034']===4,'HB01-034 を4枚入れられる');
   const dis=await p.evaluate(()=>document.querySelector('button[data-dk="+"][data-pi="1"][data-key="HD02-001"]').disabled);
@@ -50,6 +53,7 @@ async function run(label, viewport, touch){
   const cnt=await p.evaluate(()=>state.players[1].deck.filter(c=>c.key&&CARDS[c.key]&&CARDS[c.key].name==='しなずいさま').length);
   ok(cnt===4,'壊れた構成を読み込んでも同名は4枚に丸められる ('+cnt+')');
   await p.evaluate(()=>{ state.players[1].decklist={}; rebuildPlayer(1); render(); });
+  await p.click('.navbtn[data-view="play"]');
 
   // --- 準備して表示（先手を選んで配る → 両者このまま → ハート・エナ → 召喚フェイズ） ---
   await H.prep(p);

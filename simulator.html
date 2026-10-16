@@ -209,18 +209,49 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 .setrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:6px 0}
 .setrow .who{font-size:11px;width:2.6em;flex:0 0 auto}
 .who.me{color:#e79a9e} .who.opp{color:#9dbaf0}
-.deckcols{display:flex;flex-direction:column;gap:8px}
-.deckcol{border:1px solid var(--line);border-radius:8px;padding:6px}
-.deckcol h4{margin:0 0 4px;font-size:12px}
-.dkrow{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #221c1c;font-size:11.5px;color:var(--txt)}
-.dkrow:last-of-type{border-bottom:0}
-.dkname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dkmeta{color:var(--sub);font-size:10px;white-space:nowrap}
-.dkdot{width:9px;height:9px;border-radius:50%;background:var(--c-unk);flex:0 0 auto}
-.dkdot[data-color="赤"]{background:var(--c-red)} .dkdot[data-color="緑"]{background:var(--c-green)} .dkdot[data-color="青"]{background:var(--c-blue)}
 .dkn{width:1.6em;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+/* ---- 画面の切り替え（カード／デッキ／試遊）。依頼者の指示 2026-10-16 ---- */
+.navrow{gap:6px}
+.navbtn{font-size:13px;padding:6px 10px;font-weight:700}
+.navbtn.on{background:var(--red2);border-color:var(--red)}
+.deckcount{font-weight:800;color:var(--gold);font-size:13px;white-space:nowrap}
+.view{display:none}
+body.view-play #viewPlay, body.view-cards #viewCards, body.view-deck #viewDeck{display:block}
+body.view-play .buildonly, body:not(.view-play) .playonly{display:none !important}
+.seg{display:flex;gap:4px;margin:2px 0 8px}
+.seg button{flex:1;font-size:12px}
+/* 絞り込み */
+.filters{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);gap:6px;margin:0 0 8px}
+.filters input,.filters select{font:inherit;font-size:13px;min-width:0;width:100%;padding:8px 8px;border-radius:9px;border:1px solid var(--line);background-color:#120e0e;color:var(--txt);-webkit-appearance:none;appearance:none}
+.filters select{background-image:linear-gradient(45deg,transparent 50%,var(--sub) 50%),linear-gradient(135deg,var(--sub) 50%,transparent 50%);background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:20px;text-overflow:ellipsis}
+.filters .on{border-color:var(--gold);color:var(--gold)}
+.filters #fClear{min-height:0}
+.cres{font-size:11px;color:var(--sub);margin:0 0 6px}
+/* カードの一覧（画像と −／＋） */
+.cgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.ctile{background:var(--panel);border:2px solid var(--line);border-radius:9px;padding:3px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.ctile.in{border-color:var(--gold)}
+.ctimg{position:relative;width:100%;aspect-ratio:596/833;border-radius:6px;overflow:hidden;background:#241c1c;cursor:pointer}
+.ctimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cttxt{position:absolute;inset:0;padding:4px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-size:10px;font-weight:700;color:var(--txt);line-height:1.35}
+.ctn{position:absolute;right:3px;bottom:3px;z-index:2;background:var(--gold);color:#1a1212;font-weight:800;border-radius:5px;padding:0 6px;font-size:12px;line-height:18px}
+.ctname{font-size:9.5px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;line-height:1.3}
+.ctctl{display:flex;align-items:center;gap:2px}
+.ctctl button{flex:1;min-height:30px;padding:0;font-size:17px;font-weight:800;border-radius:7px}
+.ctctl button[data-dk="-"]{background:#5a2020;border-color:#7a2a2a}
+.ctctl button[data-dk="+"]{background:#24461f;border-color:#3a6a2e}
+.ctctl .dkn{flex:0 0 1.7em;width:auto;color:var(--gold);font-size:14px}
+.ctctl.big button{min-height:40px;font-size:20px}
+/* デッキの集計 */
+.dsum{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:0 0 8px;font-size:12px;color:var(--sub);line-height:1.7}
+.dsum b{color:var(--txt);font-size:14px}
+.curve{display:flex;align-items:flex-end;justify-content:center;gap:4px;height:74px;margin:6px 0 2px}
+.cv{flex:0 1 38px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;font-size:10px;min-width:0}
+.cvbar{width:70%;background:var(--gold);border-radius:3px 3px 0 0;min-height:1px}
+.cv small{color:var(--sub)}
+.dbtns{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.dbtns button{flex:1 1 auto}
 .dkshare{background:#3a2f1a;color:var(--gold);border:1px solid #5a4a2a;border-radius:3px;font-size:9px;padding:0 3px;white-space:nowrap}
-.dksum{font-size:11px;color:var(--sub);margin:6px 0 4px}
 /* スタートデッキを選ぶタブ */
 .dktabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 4px}
 .dktabs button{flex:1 1 auto}
@@ -306,8 +337,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
       "heart0 ena0   grave0"
       ".      hand0  ."}
   .jumpbar{display:none}
-  .deckcols{flex-direction:row}
-  .deckcol{flex:1}
+  .cgrid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
 }
 /* ---- カード画像（メニューに大きく出す） ---- */
 .cimgwrap{display:flex;justify-content:center;margin:2px 0 8px}
@@ -366,7 +396,15 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 <body>
 
 <header>
-  <div class="hrow">
+  <div class="hrow navrow">
+    <button class="navbtn" data-view="cards">🔍 カード</button>
+    <button class="navbtn" data-view="deck">📋 デッキ</button>
+    <button class="navbtn" data-view="play">🎮 試遊</button>
+    <span class="spacer"></span>
+    <button id="btnUndo2" class="mini buildonly" disabled>戻す</button>
+    <span class="deckcount" id="deckCount"></span>
+  </div>
+  <div class="hrow playonly">
     <span class="badge dark" id="roundLbl">ラウンド 1</span>
     <span class="badge" id="phaseLbl">準備</span>
     <button id="btnPhase" class="primary">フェイズ送り ▶</button>
@@ -379,10 +417,35 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
       <button class="mini" data-jump="0">自分へ</button>
     </span>
   </div>
-  <div class="hrow" id="flow"></div>
+  <div class="hrow playonly" id="flow"></div>
 </header>
 
 <main>
+  <!-- デッキを作る（依頼者の指示 2026-10-16）: カードの一覧から選ぶ／いまのデッキ。試遊は盤面 -->
+  <div id="viewCards" class="view">
+    <div class="seg deckseg"></div>
+    <div class="filters">
+      <input id="fQ" type="search" placeholder="カード名・種族" autocomplete="off">
+      <select id="fType" data-f="type"></select>
+      <button id="fClear" class="mini">クリア</button>
+      <input id="fFx" type="search" placeholder="効果テキスト" autocomplete="off">
+      <select id="fColor" data-f="color"></select>
+      <select id="fCost" data-f="cost"></select>
+      <select id="fTrig" data-f="trig"></select>
+      <select id="fPre" data-f="pre"></select>
+      <select id="fIll" data-f="ill"></select>
+      <select id="fFam" data-f="fam"></select>
+      <select id="fRar" data-f="rar"></select>
+      <select id="fSort" data-f="sort"></select>
+    </div>
+    <div class="cres" id="cres"></div>
+    <div class="cgrid" id="cgrid"></div>
+  </div>
+  <div id="viewDeck" class="view">
+    <div class="seg deckseg"></div>
+    <div id="deckView"></div>
+  </div>
+  <div id="viewPlay" class="view">
   <div class="ophint">
     <span>カードを<b>タップ</b>＝内容とメニュー</span>
     <span><b>ドラッグ</b>＝ゾーンへ直接移動</span>
@@ -393,7 +456,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
   <div class="guide" id="guide">
     <h2>はじめかた</h2>
     <ol>
-      <li>（任意）<b>スタートデッキ</b>で遊ぶなら、ここで選びます（公式の収録カード一覧どおりの50枚）。自分で組むなら下の<b>「デッキ編集」</b>で、公開済みのカードを入れます。入れなかった枠は<b>未確定カード</b>（灰色）で埋まります。
+      <li>（任意）<b>スタートデッキ</b>で遊ぶなら、ここで選びます（公式の収録カード一覧どおりの50枚）。自分で組むなら上部の<b>「🔍 カード」</b>で、カードの画像の一覧から −／＋ で入れます（<b>「📋 デッキ」</b>でいまのデッキを確かめられます）。入れなかった枠は<b>未確定カード</b>（灰色）で埋まります。
         <div class="starterrow" id="guideStarters"></div></li>
       <li>じゃんけんで<b>先手</b>を決めて、下のボタン（上部の「準備」の欄と同じ）を押します。山札を混ぜて6枚ずつ配ります（準備①②③）。</li>
       <li>両者が<b>「引き直す」か「このまま」</b>を選びます（④）。両者が決めたら、ハート5枚・エナ1枚を置いて（⑤⑥）、自動で<b>召喚フェイズ（先手）</b>に進みます。</li>
@@ -410,6 +473,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 
   <details class="doc">
     <summary>このシミュレーターについて / 操作方法</summary>
+    <p><b>画面</b>：上部の<b>「🔍 カード」</b>でカードの画像の一覧から −／＋ でデッキに入れ（名前・効果テキスト・色・コストなどで絞り込めます。選べる値は印字にあるものだけで、読めない値は「unknown（読めない）」）、<b>「📋 デッキ」</b>でいまのデッキの枚数・種別・色・コスト別の枚数を確かめ、<b>「🎮 試遊」</b>で盤面に戻ります。同名のカードは番号が違っても合計4枚、デッキは50枚までです。</p>
     <p><b>操作</b>：カードを<b>タップ</b>＝印字内容とメニュー（移動・向き・表裏・メモ）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
     <p><b>進行</b>（公式の手引書のラウンドの進行どおり）：準備 → 召喚フェイズ（先手）→ 召喚フェイズ（後手）→ バトルフェイズ → エンドフェイズ → 次のラウンド。準備は、先手を選んで配り、両者が引き直すかを決めると自動で終わります。上部の欄に、いまのフェイズと誰の番かが出ます。</p>
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ）。<b>エナが足りないときは使えません</b>。</p>
@@ -437,12 +501,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     </div>
   </details>
 
-  <details class="doc" id="deckPanel">
-    <summary>デッキ編集（50枚・同名4枚まで）</summary>
-    <p>公開済みのカードを枚数指定で入れます。残りの枠は<b>未確定カード</b>で埋めて50枚にします。「このデッキで初期化」でその陣地を組み直します（盤面は消えます）。</p>
-    <p><b>同名4枚</b>の上限は<b>カード名</b>で数えます。同じ名前で番号違いのカード（<span class="dkshare">同名</span>印）は合計で4枚までです。</p>
-    <div class="deckcols" id="deckcols"></div>
-  </details>
+  </div>
 
   <div class="hint">
     <b>非公式のファンツールです。</b>小学館／TOMY とは関係ありません。<br>
@@ -2387,28 +2446,154 @@ function starterTabsHTML(pi){
     '<div class="dknow">いまのデッキ: ' + (cur ? "スタートデッキ " + esc(starterLabel(cur)) + "（" + esc(cur.id) + "）そのまま"
       : (n ? "自分で組んだデッキ（登録 " + n + " 枚）" : "空（すべて未確定カード）")) + '</div>';
 }
-function deckPanelHTML(){
-  var h = "";
-  for (var pi = 0; pi < 2; pi++){
-    var dl = state.players[pi].decklist, known = 0;
-    var rows = CARD_LIST.map(function(d){
-      var n = dl[d.key] | 0; known += n;
-      var lim = maxFor(dl, d.key);
-      var shared = CARD_LIST.filter(function(o){ return o.name === d.name; }).length > 1;
-      var meta = (d.type === "ワザ" ? "ワザ" : "コスト" + fmt(d.cost) + " / " + fmt(d.power)) +
-                 (d.id === "unknown" ? " / 番号不明" : " / " + esc(d.id));
-      return '<div class="dkrow"><span class="dkdot" data-color="' + esc(d.color_mark) + '"></span>' +
-             '<span class="dkname">' + esc(d.name) + (shared ? ' <span class="dkshare">同名</span>' : "") + '</span>' +
-             '<span class="dkmeta">' + meta + '</span>' +
-             '<button class="mini" data-dk="-" data-pi="' + pi + '" data-key="' + esc(d.key) + '"' + (n <= 0 ? " disabled" : "") + '>−</button>' +
-             '<span class="dkn">' + n + '</span>' +
-             '<button class="mini" data-dk="+" data-pi="' + pi + '" data-key="' + esc(d.key) + '"' + (n >= lim || known >= DECK_SIZE ? " disabled" : "") + '>＋</button></div>';
-    }).join("");
-    h += '<div class="deckcol"><h4 class="who ' + (pi === 0 ? "me" : "opp") + '">' + SIDE_NAME[pi] + 'のデッキ</h4>' + starterTabsHTML(pi) + rows +
-         '<div class="dksum">登録 ' + known + ' 枚 ＋ 未確定 ' + Math.max(0, DECK_SIZE - known) + ' 枚 ＝ ' + DECK_SIZE + ' 枚</div>' +
-         '<button data-act="rebuild" data-pi="' + pi + '" data-confirm="' + SIDE_NAME[pi] + 'の盤面を消して、このデッキで組み直します。よろしいですか？">このデッキで初期化</button></div>';
-  }
+// ---- デッキを作る（依頼者の指示 2026-10-16「こういうデッキを作るのが欲しい」）----
+// 上部で「カード」（一覧から −／＋ で入れる）・「デッキ」（いまのデッキと集計）・「試遊」（盤面）を切り替える。
+// 絞り込みに使うのは、data/cards.json に印字から写した項目だけ（読めない値は unknown のまま選べる）。
+// どの画面を開いているか・どちらのデッキを組んでいるか・絞り込みは、この端末だけの表示の設定として保存する（盤面の「戻す」には含めない）
+var UI_KEY = "horobeat-sim-ui";
+var ui = loadUI();
+function loadUI(){
+  var d = { view:"play", deckPi:0, f:{} };
+  try {
+    var s = JSON.parse(localStorage.getItem(UI_KEY) || "null");
+    if (s){ if (["play", "cards", "deck"].indexOf(s.view) >= 0) d.view = s.view; d.deckPi = s.deckPi === 1 ? 1 : 0; if (s.f && typeof s.f === "object") d.f = s.f; }
+  } catch(e){}
+  return d;
+}
+function saveUI(){ try { localStorage.setItem(UI_KEY, JSON.stringify(ui)); } catch(e){} }
+function deckTotal(pi){ var dl = state.players[pi].decklist, n = 0; for (var k in dl) n += dl[k] | 0; return n; }
+var UNK_LABEL = "unknown（読めない）";
+// 絞り込みの項目。vals はそのカードが持つ値（印字の写し）
+var FILTERS = [
+  { id:"fType",  key:"type",  label:"種別",       vals:function(d){ return [d.type]; } },
+  { id:"fColor", key:"color", label:"色",         vals:function(d){ return [d.color_mark]; } },
+  { id:"fCost",  key:"cost",  label:"コスト",     vals:function(d){ return [String(d.cost)]; }, num:true },
+  { id:"fTrig",  key:"trig",  label:"トリガー",   vals:function(d){ return [d.trigger === "unknown" ? "unknown" : d.trigger.keyword]; } },
+  { id:"fPre",   key:"pre",   label:"番号の記号", vals:function(d){ return [d.id === "unknown" ? "unknown" : String(d.id).split("-")[0]]; } },
+  { id:"fIll",   key:"ill",   label:"絵師",       vals:function(d){ return d.printings.map(function(p){ return p.illustrator; }); } },
+  { id:"fFam",   key:"fam",   label:"種族",       vals:function(d){ return d.family === null ? [] : [d.family]; } },
+  { id:"fRar",   key:"rar",   label:"レアリティ", vals:function(d){ return d.printings.map(function(p){ return p.rarity_mark; }); } }
+];
+var SORTS = [["no", "並び: 番号順"], ["cost", "並び: コスト順"], ["power", "並び: パワー順"], ["name", "並び: 名前順"]];
+// 絞り込みの選択肢を、カードデータにある値から作る（起動時に1回）
+function setupFilters(){
+  FILTERS.forEach(function(F){
+    var seen = {};
+    CARD_LIST.forEach(function(d){ F.vals(d).forEach(function(v){ seen[v] = true; }); });
+    var vs = Object.keys(seen).filter(function(v){ return v !== "unknown"; });
+    vs.sort(F.num ? function(a, b){ return a - b; } : undefined);
+    if (seen.unknown) vs.push("unknown");
+    document.getElementById(F.id).innerHTML = '<option value="">' + F.label + '</option>' +
+      vs.map(function(v){ return '<option value="' + esc(v) + '">' + esc(v === "unknown" ? F.label + ": " + UNK_LABEL : F.label + ": " + v) + '</option>'; }).join("");
+  });
+  document.getElementById("fSort").innerHTML = SORTS.map(function(s){ return '<option value="' + s[0] + '">' + s[1] + '</option>'; }).join("");
+  syncFilterInputs();
+}
+function syncFilterInputs(){
+  var f = ui.f;
+  document.getElementById("fQ").value = f.q || "";
+  document.getElementById("fFx").value = f.fx || "";
+  FILTERS.forEach(function(F){ document.getElementById(F.id).value = f[F.key] || ""; });
+  document.getElementById("fSort").value = f.sort || "no";
+  ["fQ", "fFx"].forEach(function(id){ var e = document.getElementById(id); e.classList.toggle("on", !!e.value); });
+  FILTERS.forEach(function(F){ var e = document.getElementById(F.id); e.classList.toggle("on", !!e.value); });
+}
+function textOf(d){ return [d.name, d.name_ruby, d.family].filter(function(v){ return typeof v === "string"; }).join(" "); }
+function fxTextOf(d){
+  return (Array.isArray(d.abilities) ? d.abilities.join(" ") : "") + " " +
+         (d.trigger !== "unknown" && d.trigger ? [d.trigger.keyword, d.trigger.text].filter(function(v){ return typeof v === "string"; }).join(" ") : "");
+}
+function idRank(d){ return d.id === "unknown" ? "~" : d.id; }
+function catalogList(){
+  var f = ui.f, q = (f.q || "").trim(), fx = (f.fx || "").trim();
+  var list = CARD_LIST.filter(function(d){
+    if (q && textOf(d).indexOf(q) < 0) return false;
+    if (fx && fxTextOf(d).indexOf(fx) < 0) return false;
+    return FILTERS.every(function(F){ var v = f[F.key]; return !v || F.vals(d).indexOf(v) >= 0; });
+  });
+  var num = function(v){ return typeof v === "number" ? v : Infinity; };   // 読めない値は最後
+  var by = {
+    no:    function(a, b){ return idRank(a) < idRank(b) ? -1 : idRank(a) > idRank(b) ? 1 : 0; },
+    cost:  function(a, b){ return num(a.cost) - num(b.cost) || by.no(a, b); },
+    power: function(a, b){ return num(a.power) - num(b.power) || by.no(a, b); },
+    name:  function(a, b){ return a.name.localeCompare(b.name, "ja") || by.no(a, b); }
+  };
+  return list.sort(by[f.sort] || by.no);
+}
+// カード1枚の欄: 画像（なければ文字）・名前・−／＋
+function tileHTML(d, pi){
+  var dl = state.players[pi].decklist, n = dl[d.key] | 0, full = deckTotal(pi) >= DECK_SIZE;
+  var src = CARD_IMAGES[d.key], shared = CARD_LIST.filter(function(o){ return o.name === d.name; }).length > 1;
+  var txt = esc(d.name) + '<br>' + (d.type === "ワザ" ? "ワザ " + (d.left_edge && d.left_edge !== "unknown" ? esc(d.left_edge.modifier) : "") : "コスト " + fmt(d.cost) + " / " + fmt(d.power));
+  return '<div class="ctile' + (n ? " in" : "") + '" data-key="' + esc(d.key) + '" data-color="' + esc(d.color_mark) + '">' +
+    '<div class="ctimg" data-detail="' + esc(d.key) + '"><div class="cttxt">' + txt + '</div>' +
+      (src ? '<img src="' + esc(src) + '" alt="' + esc(d.name) + '" loading="lazy" decoding="async" onerror="this.remove()">' : "") +
+      (n ? '<span class="ctn">' + n + '</span>' : "") + '</div>' +
+    '<div class="ctname">' + (shared ? '<span class="dkshare">同名</span> ' : "") + esc(d.name) + '</div>' +
+    '<div class="ctctl"><button data-dk="-" data-pi="' + pi + '" data-key="' + esc(d.key) + '"' + (n <= 0 ? " disabled" : "") + '>−</button>' +
+      '<span class="dkn">' + n + '</span>' +
+      '<button data-dk="+" data-pi="' + pi + '" data-key="' + esc(d.key) + '"' + (n >= maxFor(dl, d.key) || full ? " disabled" : "") + '>＋</button></div></div>';
+}
+function deckSegHTML(){
+  return [0, 1].map(function(pi){ return '<button data-deckpi="' + pi + '" class="' + (ui.deckPi === pi ? "on" : "") + '">' + SIDE_NAME[pi] + 'のデッキ（' + deckTotal(pi) + '枚）</button>'; }).join("");
+}
+// いまのデッキ: 集計（枚数・種別・色・コストの分布）とカード
+function deckViewHTML(){
+  var pi = ui.deckPi, dl = state.players[pi].decklist, total = deckTotal(pi);
+  var ds = Object.keys(dl).filter(function(k){ return (dl[k] | 0) > 0 && CARDS[k]; }).map(function(k){ return CARDS[k]; });
+  var cnt = function(fn){ var m = {}; ds.forEach(function(d){ var v = fn(d); m[v] = (m[v] || 0) + (dl[d.key] | 0); }); return m; };
+  var types = cnt(function(d){ return d.type; }), colors = cnt(function(d){ return d.color_mark; }), costs = cnt(function(d){ return String(d.cost); });
+  var list = function(m){ return Object.keys(m).map(function(k){ return esc(k) + " " + m[k] + "枚"; }).join("・") || "—"; };
+  var ck = Object.keys(costs).filter(function(k){ return k !== "unknown"; }).sort(function(a, b){ return a - b; });
+  if (costs.unknown) ck.push("unknown");
+  var mx = Math.max.apply(null, [1].concat(ck.map(function(k){ return costs[k]; })));
+  var curve = ck.length ? '<div class="curve">' + ck.map(function(k){
+    return '<div class="cv"><span>' + costs[k] + '</span><div class="cvbar" style="height:' + Math.round(costs[k] / mx * 48) + 'px"></div><small>' + (k === "unknown" ? "?" : k) + '</small></div>'; }).join("") + '</div><div style="text-align:center;font-size:10px">コスト別の枚数</div>' : "";
+  var h = starterTabsHTML(pi);
+  h += '<div class="dsum"><b>' + total + '</b> 枚 ＋ 未確定カード ' + Math.max(0, DECK_SIZE - total) + ' 枚 ＝ ' + DECK_SIZE + ' 枚' +
+       '<br>種別: ' + list(types) + '<br>色: ' + list(colors) + curve + '</div>';
+  ds.sort(function(a, b){ return (typeof a.cost === "number" ? a.cost : 99) - (typeof b.cost === "number" ? b.cost : 99) || (idRank(a) < idRank(b) ? -1 : 1); });
+  h += ds.length ? '<div class="cgrid">' + ds.map(function(d){ return tileHTML(d, pi); }).join("") + '</div>'
+                 : '<div class="cres">まだカードが入っていません。「🔍 カード」で −／＋ を押して入れるか、上のスタートデッキを選びます。</div>';
+  h += '<div class="dbtns"><button data-act="rebuild" data-pi="' + pi + '" data-confirm="' + SIDE_NAME[pi] + 'の盤面を消して、このデッキで組み直します。よろしいですか？">このデッキで' + SIDE_NAME[pi] + 'の盤面を組み直す</button></div>' +
+       '<p class="cres">デッキを変えても、盤面はすぐには変わりません。「🎮 試遊」で先手を選んで配るか、上のボタンで組み直すと反映されます。同名のカード（<span class="dkshare">同名</span>）は、番号が違っても合計4枚までです。</p>';
   return h;
+}
+function renderBuilder(){
+  document.body.className = "view-" + ui.view;
+  document.querySelectorAll(".navbtn").forEach(function(b){ b.classList.toggle("on", b.dataset.view === ui.view); });
+  document.getElementById("deckCount").textContent = SIDE_NAME[ui.deckPi] + " " + deckTotal(ui.deckPi) + "枚";
+  document.getElementById("btnUndo2").disabled = !undoStack.length;
+  document.querySelectorAll(".deckseg").forEach(function(e){ e.innerHTML = deckSegHTML(); });
+  if (ui.view === "cards"){
+    var list = catalogList();
+    document.getElementById("cres").textContent = list.length + " 種類（全 " + CARD_LIST.length + " 種類）。画像をタップすると印字の全文が出ます";
+    document.getElementById("cgrid").innerHTML = list.map(function(d){ return tileHTML(d, ui.deckPi); }).join("") ||
+      '<div class="cres" style="grid-column:1/-1">条件に合うカードがありません</div>';
+  } else if (ui.view === "deck") document.getElementById("deckView").innerHTML = deckViewHTML();
+}
+// デッキの枚数を1枚増やす／減らす（同名4枚・50枚まで）
+function deckAdjust(pi, key, op){
+  var dl = state.players[pi].decklist, cur = dl[key] | 0, next = op === "+" ? cur + 1 : cur - 1;
+  if (next < 0 || next > maxFor(dl, key)) return false;
+  if (op === "+" && deckTotal(pi) >= DECK_SIZE) return false;
+  snap();
+  if (next === 0) delete dl[key]; else dl[key] = next;
+  render(); return true;
+}
+// 一覧のカードの印字の全文（盤面のカードのメニューと同じ書き方）と −／＋。
+// refresh: シートの −／＋ を押したあと。開いたまま中身だけ書き換える（開き直すと誤タップ防止の待ちが入り、続けて押した分が消えるため）
+function openCatalogSheet(key, refresh){
+  var d = CARDS[key]; if (!d) return;
+  var pi = ui.deckPi, dl = state.players[pi].decklist, n = dl[key] | 0, c = { uid:"—", key:key, up:true, owner:pi };
+  var h = '<h3>' + esc(d.name) + (d.name_ruby && d.name_ruby !== "unknown" ? '<small>' + esc(d.name_ruby) + '</small>' : "") + '<small>' + esc(d.id) + '</small></h3>';
+  h += imageHTML(c) + detailHTML(c);
+  h += '<div class="sect">' + SIDE_NAME[pi] + 'のデッキに入れる枚数（いま ' + deckTotal(pi) + ' 枚）</div>' +
+       '<div class="ctctl big"><button data-dk="-" data-pi="' + pi + '" data-key="' + esc(key) + '"' + (n <= 0 ? " disabled" : "") + '>−</button>' +
+       '<span class="dkn">' + n + '</span><button data-dk="+" data-pi="' + pi + '" data-key="' + esc(key) + '"' + (n >= maxFor(dl, key) || deckTotal(pi) >= DECK_SIZE ? " disabled" : "") + '>＋</button></div>';
+  h += '<div class="sgrid c2" style="margin-top:8px"><button data-close="1">閉じる</button></div>';
+  if (refresh && sheetWrap.classList.contains("on")){ var top = sheetEl.scrollTop; sheetEl.innerHTML = h; sheetEl.scrollTop = top; }
+  else openSheet(h);
 }
 function boardIsEmpty(){
   return state.players.every(function(P){
@@ -2466,7 +2651,7 @@ function render(){
   document.getElementById("flow").innerHTML = flowHTML();
   document.getElementById("side-1").innerHTML = sideHTML(1);
   document.getElementById("side-0").innerHTML = sideHTML(0);
-  document.getElementById("deckcols").innerHTML = deckPanelHTML();
+  renderBuilder();
   document.getElementById("guideStarters").innerHTML = [0, 1].map(function(pi){
     var cur = starterOf(state.players[pi].decklist);
     return '<span class="who ' + (pi === 0 ? "me" : "opp") + '">' + SIDE_NAME[pi] + '</span>' +
@@ -2674,6 +2859,7 @@ sheetEl.addEventListener("click", function(e){
     if (f0) f0.card.note = (inp ? inp.value : "").trim().slice(0, 24);
     closeSheet(); render(); return;
   }
+  if (ds.dk){ if (deckAdjust(+ds.pi, ds.key, ds.dk)) openCatalogSheet(ds.key, true); return; }
   if (ds.wzclr){ snap(); var fw = findCard(ds.wzclr); if (fw) delete fw.card.wazaUsed; closeSheet(); render(); return; }
   if (ds.tg){ snap(); var f1 = findCard(ds.tg), was = f1 && f1.card.turned; if (f1) f1.card.turned = !f1.card.turned; closeSheet(); render(); if (f1) fxAfterTurn(ds.tg, was); return; }
   if (ds.fl){ snap(); var f2 = findCard(ds.fl); if (f2) f2.card.up = !f2.card.up; closeSheet(); render(); return; }
@@ -2699,7 +2885,7 @@ sheetEl.addEventListener("keydown", function(e){
 
 /* ---------------- 準備手順・デッキ編集・ヘッダー ---------------- */
 document.querySelector("main").addEventListener("click", function(e){
-  var t = e.target.closest("button[data-act], button[data-dk], button[data-starter], .zlabel[data-zsheet]");
+  var t = e.target.closest("button[data-act], button[data-dk], button[data-starter], button[data-deckpi], [data-detail], .zlabel[data-zsheet]");
   if (!t) return;
   if (t.dataset.starter !== undefined){
     if (t.dataset.confirm && !window.confirm(t.dataset.confirm)) return;
@@ -2712,14 +2898,9 @@ document.querySelector("main").addEventListener("click", function(e){
     else if (t.dataset.zsheet === "ena") openEnaSheet(+t.dataset.pi);
     return;
   }
-  if (t.dataset.dk){
-    var dl = state.players[+t.dataset.pi].decklist, k = t.dataset.key;
-    var cur = dl[k] | 0, next = t.dataset.dk === "+" ? cur + 1 : cur - 1;
-    if (next < 0 || next > maxFor(dl, k)) return;
-    snap();
-    if (next === 0) delete dl[k]; else dl[k] = next;
-    render(); return;
-  }
+  if (t.dataset.dk){ deckAdjust(+t.dataset.pi, t.dataset.key, t.dataset.dk); return; }
+  if (t.dataset.deckpi !== undefined){ ui.deckPi = +t.dataset.deckpi; saveUI(); render(); return; }
+  if (t.dataset.detail){ openCatalogSheet(t.dataset.detail); return; }
   if (t.dataset.confirm && !window.confirm(t.dataset.confirm)) return;
   snap(); runAction(t.dataset.act, +t.dataset.pi); render();
 });
@@ -2739,6 +2920,20 @@ document.addEventListener("click", function(e){
   if (t.dataset.flow === "resume"){ if (fxAsk || picking) return; fxClear(); battleRun(); return; }
 });
 document.getElementById("btnUndo").addEventListener("click", function(){ picking = null; focusReset(); fxClear(); undo(); });
+document.getElementById("btnUndo2").addEventListener("click", function(){ picking = null; focusReset(); fxClear(); undo(); });
+// 画面の切り替え（カード／デッキ／試遊）と、絞り込み
+document.querySelector(".navrow").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-view]"); if (!b) return;
+  ui.view = b.dataset.view; saveUI(); render(); window.scrollTo(0, 0);
+});
+["fQ", "fFx"].forEach(function(id){
+  // 入力中の欄は書き換えない（文字の位置がずれないように）。印の色だけ変える
+  document.getElementById(id).addEventListener("input", function(e){ ui.f[id === "fQ" ? "q" : "fx"] = e.target.value; saveUI(); e.target.classList.toggle("on", !!e.target.value); renderBuilder(); });
+});
+document.querySelectorAll(".filters select").forEach(function(sel){
+  sel.addEventListener("change", function(){ ui.f[sel.dataset.f] = sel.value; saveUI(); syncFilterInputs(); renderBuilder(); });
+});
+document.getElementById("fClear").addEventListener("click", function(){ ui.f = {}; saveUI(); syncFilterInputs(); renderBuilder(); });
 document.getElementById("btnFx").addEventListener("click", function(){ snap(); state.fxAuto = !fxOn(); picking = null; fxClear(); render(); });
 document.getElementById("pickCancel").addEventListener("click", function(){ var p = picking; picking = null; render(); if (p) p.cancel(); });
 document.getElementById("fxlog").addEventListener("click", function(e){
@@ -2837,6 +3032,7 @@ document.addEventListener("contextmenu", function(e){ if (e.target.closest(".car
 
 /* ---------------- 起動 ---------------- */
 state = load() || newState();
+setupFilters();
 render();
 </script>
 </body>
