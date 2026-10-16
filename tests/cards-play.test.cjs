@@ -248,8 +248,11 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   // ===== ワザ（2026-10-12〜 バトルフェイズの中で使う）=====
   // 相手の第1ラインにレオまる（2000）を置き、ハートを5枚にして（トドメにならないように）、フェイズ送りでバトルに入る。
   // ワザの手番で「使う」を選ぶ → コスト → 「使ったとき」→ パワーを比べる、を画面のボタンだけで進める
-  const battle=async()=>{ await p.evaluate(()=>{ state.phase=1; render(); }); await p.click('#btnPhase'); await wait(200); };
-  const choose=async text=>{ await wait(460); await p.locator('#sheet button[data-fxa]',{hasText:text}).first().click(); await wait(150); };
+  // バトルの結果の画面（「続ける」だけ）は押して進める（2026-10-16〜 バトルごとに結果をカードの画像と並べて見せる）
+  const settle=async()=>{ for(let i=0;i<10;i++){ await wait(60); if(!(await p.$('#sheet [data-kind="result"]'))) return; await wait(450); await p.click('#sheet [data-kind="result"] button[data-fxa="0"]'); await wait(150); } };
+  const battle=async()=>{ await p.evaluate(()=>{ state.phase=1; render(); }); await p.click('#btnPhase'); await wait(200); await settle(); };
+  const choose=async text=>{ await wait(460); await p.locator('#sheet button[data-fxa]',{hasText:text}).first().click(); await wait(150); await settle(); };
+  const ansS=async i=>{ await ans(i); await settle(); };
   const opts=()=>p.evaluate(()=>[...document.querySelectorAll('#sheet button[data-fxa]')].map(b=>b.textContent));
   const H5=['HD01-001','HD01-001','HD01-001','HD01-001','HD01-001'].map(k=>({k,up:false}));
   // HD01-013 共鳴：ライガ／使ったとき1枚引く／このワザのパワーを+1000する
@@ -263,7 +266,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   ok((await badges(0,0)).includes('ワザ+2000'),'HD01-013: 使ったホロビトに「ワザ+2000」の印');
   ok((await q()).includes('このワザのパワーを+1000する') && (await q()).includes('ライガ'),'HD01-013: パワーを比べるとき、「このワザのパワーを+1000する」の共鳴の条件を聞く');
   await shot('waza');
-  await ans(0);
+  await ansS(0);
   ok((await log()).includes('7000') && (await log()).includes('自分の勝ち'),'HD01-013: パワーは 4000＋ワザ 2000＋1000 ＝ 7000 で、2000 に勝つ');
   s=await S();
   ok(s.players[0].grave.some(c=>c.key==='HD01-013') && !s.players[0].waza.length,'HD01-013: バトルが終わると、使ったワザは墓地へ（手引書）');
@@ -290,7 +293,13 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   ok(!(await log()).includes('2つ目'),'HB01-097: 1枚目では発動しない');
   await choose('電光攻火');
   ok((await log()).includes('2つ目のワザを使った'),'HB01-097: 2枚目で発動する');
-  ok((await q()).includes('8以下') && (await log()).includes('相手の第1ライン'),'HB01-097: 正面（相手の第1ライン）のコストを聞く'); await ans(0);
+  ok((await q()).includes('8以下') && (await log()).includes('相手の第1ライン'),'HB01-097: 正面（相手の第1ライン）のコストを聞く');
+  s=await S();
+  ok(await p.evaluate(([a,b])=>{ const src=document.querySelector('#sheet .fxcard.src[data-cid="'+a+'"]'), tgt=document.querySelector('#sheet .fxcard.tgt[data-cid="'+b+'"]');
+      const ba=document.querySelector('.card[data-cid="'+a+'"]'), bb=document.querySelector('.card[data-cid="'+b+'"]');
+      return src && tgt && src.textContent.includes('効果') && tgt.textContent.includes('対象') && ba.classList.contains('fx-src') && bb.classList.contains('fx-tgt'); },[s.players[0].line[0][0].uid, s.players[1].line[0][1].uid]),
+    'HB01-097: 質問の画面に効果を出すカードと対象（正面）の画像を並べ、盤面でも金の枠「効果」・赤の枠「対象」を付ける');
+  await ans(0);
   ok((await q()).includes('誰の手札'),'HB01-097: 誰の手札に戻すかを聞く');
   ok((await badges(0,0)).match(/ワザ\+5000/g).length===2,'HB01-097: 「ワザ+5000」の印が2つ');
   await ans(0);

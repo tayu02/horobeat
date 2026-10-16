@@ -319,9 +319,33 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 .fxb span.q{background:#6b6058;color:#fff}
 .fxb span.off{display:none}
 .fxb span.wz{background:#b8483a;color:#fff}
-.card.pickable .ci{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 10px rgba(201,164,76,.9)}
+.card.pickable .ci{outline:3px solid var(--gold);outline-offset:1px;box-shadow:0 0 10px rgba(201,164,76,.9)}
 .card.pickable .ci{animation:pk .9s ease-in-out infinite alternate}
 @keyframes pk{from{box-shadow:0 0 4px rgba(201,164,76,.5)}to{box-shadow:0 0 14px rgba(201,164,76,1)}}
+/* 盤面の印（依頼者の指示 2026-10-16「効果発揮の対象は枠を太くするなどしてわかりやすく」）:
+   効果を出しているカード＝金の太枠「効果」、効果の対象＝赤の太枠「対象」、バトル中＝白の太枠「バトル」、選ぶ候補＝金の太枠「選ぶ」 */
+.card .fxtag{position:absolute;left:-3px;top:-7px;z-index:4;font-size:8.5px;font-weight:800;border-radius:3px;padding:0 3px;line-height:12px;pointer-events:none;white-space:nowrap}
+.card.pickable .fxtag{background:var(--gold);color:#1a1212}
+.card.fx-src .ci{outline:3px solid var(--gold);outline-offset:1px;box-shadow:0 0 8px rgba(201,164,76,.8)}
+.card.fx-src .fxtag{background:var(--gold);color:#1a1212}
+.card.fx-tgt .ci{outline:3px solid #ff4d4d;outline-offset:1px;box-shadow:0 0 12px rgba(255,77,77,.95)}
+.card.fx-tgt .fxtag{background:#ff4d4d;color:#fff}
+.card.fx-bat .ci{outline:3px solid #fff;outline-offset:1px}
+.card.fx-bat .fxtag{background:#fff;color:#1a1212}
+/* 質問の上に出すカードの画像（バトルの2枚・効果のカードと対象・トリガーチェックのカード） */
+.fxcards{display:flex;justify-content:center;align-items:flex-start;gap:6px;margin:2px 0 8px}
+.fxcard{flex:0 1 min(36vw,150px);min-width:0;text-align:center;font-size:11px;color:var(--sub);line-height:1.35}
+.fxcard b{display:block;color:var(--txt);font-size:12px}
+.fxpic{position:relative;width:100%;aspect-ratio:596/833;border-radius:8px;overflow:hidden;background:#241c1c;border:3px solid #3a2b2b;margin-bottom:3px}
+.fxpic img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#241c1c}
+.fxpic .fxtxt{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px;color:var(--txt);font-size:12px;font-weight:700;line-height:1.4}
+.fxcard.win .fxpic{border-color:var(--gold)}
+.fxcard.lose .fxpic{opacity:.7}
+.fxcard.src .fxpic{border-color:var(--gold)}
+.fxcard.tgt .fxpic{border-color:#ff4d4d}
+.fxvs{align-self:center;font-weight:800;color:var(--gold);font-size:15px;flex:0 0 auto}
+.fxcard .res{display:inline-block;margin-top:2px;padding:0 7px;border-radius:4px;background:var(--gold);color:#1a1212;font-weight:800}
+.fxcard .res.lose{background:#6b6058;color:#fff}
 #pickbar{position:fixed;left:8px;right:8px;top:8px;z-index:95;display:none;background:#2a2020;border:2px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:13px;gap:8px;align-items:center;box-shadow:0 4px 18px rgba(0,0,0,.6)}
 #pickbar.on{display:flex}
 #pickbar span{flex:1}
@@ -389,7 +413,8 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
     <p><b>操作</b>：カードを<b>タップ</b>＝印字内容とメニュー（移動・向き・表裏・メモ）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
     <p><b>進行</b>（公式の手引書のラウンドの進行どおり）：準備 → 召喚フェイズ（先手）→ 召喚フェイズ（後手）→ バトルフェイズ → エンドフェイズ → 次のラウンド。準備は、先手を選んで配り、両者が引き直すかを決めると自動で終わります。上部の欄に、いまのフェイズと誰の番かが出ます。</p>
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ）。<b>エナが足りないときは使えません</b>。</p>
-    <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、負けたホロビトとハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ダブルダメージの2ダメージは、1ダメージを2回、上から順に入れます。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。</p>
+    <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、負けたホロビトとハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ダブルダメージの2ダメージは、1ダメージを2回、上から順に入れます。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。バトルのたびに両者のカードの画像を並べて出し、パワーを比べたら結果（勝ち・負け）を見せます（「続ける」で次へ）。ハートが破壊されたときは、そのカードの画像を出してトリガーチェックします。</p>
+    <p><b>盤面の印</b>：効果を出しているカードは金の太い枠と「効果」、効果の対象は赤の太い枠と「対象」、バトル中のカードは白の太い枠と「バトル」、選ぶ候補は金の太い枠と「選ぶ」の札が付きます。</p>
     <p><b>エンドフェイズ</b>：スライドステップ・エナドロー・エナリフレッシュを自動で行います。</p>
     <p><b>効果</b>：ヘッダーが「効果: 自動」のとき、確定している部分だけ自動で処理し、未確定の部分は聞くか手で処理してもらいます。</p>
     <p><b>「横向き」について</b>：エナでは「使用済み」、ホロビト・ハートでは「ダウン状態」と呼ばれますが（出典: 2026-08 公式ティザー）、この2つが同じ状態かは未確定のため、区別せず<b>向きだけ</b>を保持しています。</p>
@@ -926,7 +951,7 @@ var PART_FX = {
         var hs = [];
         P.line.forEach(function(st){ var t = st[st.length - 1]; if (t && t.up && isHolo(t)) hs.push(t.uid); });
         return startPick(hs, "自分のホロビトを" + a.n + "体選んでください（ラインの一番上のホロビトから。束の下のカードを選べるかは未確定なので候補に入れていません）",
-          function(uid){ x.sel = [findCard(uid).card]; fxLog(nm(x.sel[0]) + " を選んだ"); next(); },
+          function(uid){ x.sel = [findCard(uid).card]; focusTgt(uid); fxLog(nm(x.sel[0]) + " を選んだ"); next(); },
           function(){ x.sel = null; fxLog("選ぶ処理は手で行う"); next(); }, "手で処理する");
       }
       if (a.what !== "エナ") return fxManual(a, "select_own", next);
@@ -934,7 +959,7 @@ var PART_FX = {
       startPick(cands.map(function(c){ return c.uid; }),
         "自分の" + (a.color ? a.color + "の" : "") + "エナを" + a.n + "枚選んでください" +
         (a.color ? "（色が未確定のエナは候補に入れていません）" : ""),
-        function(uid){ x.sel = [findCard(uid).card]; fxLog(nm(x.sel[0]) + " を選んだ"); next(); }, stop); } },
+        function(uid){ x.sel = [findCard(uid).card]; focusTgt(uid); fxLog(nm(x.sel[0]) + " を選んだ"); next(); }, stop); } },
   make_unused:             { how:"自動", why:"未使用＝縦向き（§8 §9-2）",
     run:function(x, a, next){
       if (a.target !== "それ" || !x.sel) return fxManual(a, "make_unused", next);
@@ -955,6 +980,7 @@ var PART_FX = {
       startPick(state.players[o].hand.map(function(c){ return c.uid; }),
         SIDE_NAME[o] + "が捨てる手札を" + a.n + "枚選んでください（選ぶのは" + SIDE_NAME[o] + "）",
         function(uid){
+          focusTgt(uid);
           fxLog("捨てるカード: " + nm(findCard(uid).card) + "。捨てる先は未確定なので、開いたメニューから置き場所を選んでください");
           // メニューを閉じてから続きを処理する（続きの質問がメニューを上書きしないように）
           openCardSheet(uid, o, true, next); }, stop); } },
@@ -1116,15 +1142,15 @@ function frontOf(x){
   return { idx:base.loc.idx, card: st.length ? st[st.length - 1] : null };
 }
 function needFront(x, cb, stop, none){
-  if (x.front) return cb();
+  if (x.front){ focusTgt(x.front.uid); return cb(); }
   var f = frontOf(x);
-  if (f && f.card){ x.front = f.card; fxLog("正面のホロビト: " + nm(f.card) + "（相手の第" + (f.idx + 1) + "ライン）"); return cb(); }
+  if (f && f.card){ x.front = f.card; focusTgt(f.card.uid); fxLog("正面のホロビト: " + nm(f.card) + "（相手の第" + (f.idx + 1) + "ライン）"); return cb(); }
   if (f){ fxLog("正面（相手の第" + (f.idx + 1) + "ライン）にホロビトがいない"); return (none || stop)(); }
   // ラインにいないカードには正面がない。ここに来るのは想定外なので、選ばせて続ける
   var o = 1 - x.pi, cands = [];
   state.players[o].line.forEach(function(st){ if (st.length) cands.push(st[st.length - 1].uid); });
   startPick(cands, "このカードはラインにいないため、正面のホロビトを決められません。正面として扱うホロビトを選んでください",
-    function(uid){ x.front = findCard(uid).card; fxLog("正面のホロビト: " + nm(x.front)); cb(); }, stop);
+    function(uid){ x.front = findCard(uid).card; focusTgt(uid); fxLog("正面のホロビト: " + nm(x.front)); cb(); }, stop);
 }
 function resolveAb(x, ab, done){
   var stop = function(){ fxLog("処理を中断した"); done(); };
@@ -1172,7 +1198,8 @@ function resolveAb(x, ab, done){
 }
 function fire(t, done){
   fxLog("【" + nm(t.card) + "】" + t.why);
-  resolveAb(t.ctx || ctxOf(t.card), t.ab, function(){ render(); if (done) done(); });
+  fxFocus = { src:t.card.uid, tgt:[] };
+  resolveAb(t.ctx || ctxOf(t.card), t.ab, function(){ focusReset(); render(); if (done) done(); });
 }
 // 同時に複数発動するときの順番は未確定なので、プレイヤーに選ばせる
 function runQueue(q, done){
@@ -1551,7 +1578,7 @@ function battler(p){
   return t && t.uid === uid ? t : null;
 }
 function bTitle(){ return state.battle ? "第" + (state.battle.line + 1) + "ラインのバトル" : "バトル"; }
-function battlePause(){ fxLog("バトルを中断した（上部の「バトルを続ける」で再開できます）"); render(); }
+function battlePause(){ focusReset(); fxLog("バトルを中断した（上部の「バトルを続ける」で再開できます）"); render(); }
 function sideBrief(p){
   var c = battler(p);
   if (!c) return SIDE_NAME[p] + "：ホロビトなし";
@@ -1580,7 +1607,7 @@ function bStart(){
   var b = state.battle, i = b.line, t = [lineTop(0, i), lineTop(1, i)], L = "第" + (i + 1) + "ライン";
   b.users = [t[0] ? t[0].uid : null, t[1] ? t[1].uid : null];
   b.used = [[], []]; b.boosts = [[], []]; b.ask = {}; b.done = {}; b.turn = state.first;
-  delete b.winner; delete b.order; delete b.noBarrier; delete b.pw; delete b.dmg; delete b.dmgHits;
+  delete b.winner; delete b.order; delete b.noBarrier; delete b.pw; delete b.dmg; delete b.dmgHits; delete b.shown;
   if (!t[0] && !t[1]){
     fxLog(L + "：両者ともホロビトがいないので、バトルはない");
     var skip = function(){ state.battle.line++; battleRun(); };
@@ -1714,14 +1741,15 @@ function powerOf(p, cb){
 function resultText(w){ return w === -1 ? "引き分け" : SIDE_NAME[w] + "の勝ち"; }
 function bJudge(){
   var b = state.battle, c = [battler(0), battler(1)];
-  var go = function(w){ var B = state.battle; B.winner = w; B.stage = "after"; battleRun(); };
+  // manual: プレイヤーが結果を選んだとき（結果の画面は出さない）
+  var go = function(w, manual){ var B = state.battle; B.winner = w; if (manual) B.shown = true; B.stage = "after"; battleRun(); };
   if (b.users[0] && b.users[1] && (!c[0] || !c[1]))
     return fxChoose("バトルの途中で、" + [0, 1].filter(function(p){ return !c[p]; }).map(function(p){ return SIDE_NAME[p]; }).join("と") +
       "のホロビトがラインの一番上からいなくなりました。このときのバトルの結果は手引書に書かれていません。結果を選んでください。",
       [SIDE_NAME[0] + "の勝ち", SIDE_NAME[1] + "の勝ち", "引き分け", "バトルなし（ダメージなし）"], function(k){
         snap(); fxLog("結果：" + (k === 3 ? "バトルなし" : resultText(k === 2 ? -1 : k)) + "（プレイヤーが選んだ）");
         if (k === 3){ state.battle.stage = "end"; return battleRun(); }
-        go(k === 2 ? -1 : k); }, battlePause, bTitle());
+        go(k === 2 ? -1 : k, true); }, battlePause, bTitle());
   if (!c[0] && !c[1]){ fxLog("バトルするホロビトがいない"); b.stage = "end"; return battleRun(); }
   if (!c[0] || !c[1]){ var w = c[0] ? 0 : 1; fxLog("結果：" + SIDE_NAME[w] + "の勝ち（不戦勝）"); return go(w); }
   powerOf(0, function(p0, d0, why0){ powerOf(1, function(p1, d1, why1){
@@ -1729,7 +1757,7 @@ function bJudge(){
     if (p0 === null || p1 === null)
       return fxChoose("パワーを計算できません（" + [why0, why1].filter(Boolean).join("／") + "）。このバトルの結果を選んでください。",
         [SIDE_NAME[0] + "の勝ち", SIDE_NAME[1] + "の勝ち", "引き分け"], function(k){
-          snap(); fxLog("結果：" + resultText(k === 2 ? -1 : k) + "（プレイヤーが選んだ）"); go(k === 2 ? -1 : k); }, battlePause, bTitle());
+          snap(); fxLog("結果：" + resultText(k === 2 ? -1 : k) + "（プレイヤーが選んだ）"); go(k === 2 ? -1 : k, true); }, battlePause, bTitle());
     var w = p0 > p1 ? 0 : p1 > p0 ? 1 : -1;
     fxLog("パワー：" + SIDE_NAME[0] + " " + p0 + "（" + d0 + "） 対 " + SIDE_NAME[1] + " " + p1 + "（" + d1 + "）→ " + resultText(w));
     go(w);
@@ -1748,9 +1776,27 @@ function winTriggers(){
   });
   return q;
 }
+// バトルの結果を、両者のカードの画像と並べて見せる（依頼者の指示 2026-10-16「各バトル時、そのカードの画像を並べて出して」）
+function resultMsg(){
+  var b = state.battle, w = b.winner, c = [cardByUid(b.users[0]), cardByUid(b.users[1])], L = "第" + (b.line + 1) + "ライン：";
+  if (!b.users[0] || !b.users[1])
+    return L + SIDE_NAME[w] + "の「" + nm(c[w]) + "」だけがいるので、不戦勝（勝ち）。" + SIDE_NAME[1 - w] + "のハート（重なりの一番上）にダメージ。";
+  var pw = b.pw && typeof b.pw[0] === "number" && typeof b.pw[1] === "number" ? "パワー " + SIDE_NAME[0] + " " + b.pw[0] + " 対 " + SIDE_NAME[1] + " " + b.pw[1] + " → " : "";
+  if (w === -1) return L + pw + "引き分け。お互いのホロビトがダメージを受け、ハートはダメージを受けない。";
+  return L + pw + SIDE_NAME[w] + "の勝ち。" + SIDE_NAME[1 - w] + "の「" + nm(c[1 - w]) + "」と、" + SIDE_NAME[1 - w] + "のハート（重なりの一番上）にダメージ。";
+}
 function bAfter(){
   var b = state.battle;
   if (b.winner === undefined){ b.stage = "end"; return battleRun(); }
+  if (!b.shown){
+    var q0 = winTriggers(), T = bTitle() + "の結果", head = battleHeadHTML(true);
+    // 勝ったときの効果があれば、ダメージとどちらを先に処理するかも同じ画面で聞く
+    if (q0.length)
+      return fxChoose(resultMsg() + "勝ったときの効果（" + q0.map(function(t){ return nm(t.card); }).join("・") +
+        "）と、負けた側へのダメージのどちらを先に処理するかは、手引書に書かれていません。どちらを先に処理しますか？",
+        ["勝ったときの効果を先に", "ダメージを先に"], function(k){ snap(); var B = state.battle; B.shown = true; B.order = k; battleRun(); }, battlePause, T, head);
+    return fxChoose(resultMsg(), ["続ける"], function(){ var B = state.battle; B.shown = true; B.order = 1; battleRun(); }, battlePause, T, head, "result");
+  }
   if (b.order === undefined){
     var q = winTriggers();
     if (!q.length) b.order = 1;
@@ -1939,9 +1985,14 @@ function heartDamage(p, next, mark){
   heartBreak(p, h, next, mark);
 }
 // ダウンしているハートが破壊された: 手札に加わる。その際、加える代わりにトリガーを使える（任意。手引書）
-function heartBreak(p, h, next, mark){
+// トリガーチェックの画面に出す、そのハートのカードの画像（表にして見せる）
+function heartHead(p, h){ return '<div class="fxcards">' + picHTML(h, '<b>' + SIDE_NAME[p] + 'のハート</b>トリガーチェック', "tgt", true) + '</div>'; }
+function heartBreak(p, h, next0, mark){
   var d = cardDef(h), kw = d && d.trigger && d.trigger !== "unknown" ? d.trigger.keyword : null, P = state.players[p];
   var commit = function(){ if (state.battle) mark(); };
+  // 盤面でも、破壊されたハートを「対象」として示す。処理を終えたら印を消す
+  fxFocus = { src:null, tgt:[h.uid] };
+  var next = function(){ focusReset(); render(); next0(); };
   var toHand = function(){
     commit(); moveCard(h.uid, p, "hand"); h.up = true; h.turned = false;
     fxLog(SIDE_NAME[p] + "のハートが破壊され、「" + nm(h) + "」を手札に加えた"); render(); next(); };
@@ -1958,7 +2009,7 @@ function heartBreak(p, h, next, mark){
            : trig && !trig.can(p, h) ? "（" + kw + " は、いまは使えません：" + trig.cant(p, h) + "）"
            : !trig ? "（このカードのトリガーはシミュレーターでは処理できません。使うなら手で処理してください）" : "";
   fxChoose(SIDE_NAME[p] + "のハート（重なりの一番上）はダウンしていたので、ダメージで破壊されました。カードは「" + nm(h) + "」です。" +
-    "手札に加わります。その際、加える代わりにトリガーを使えます（使用は任意。手引書）。" + note, labels, function(i){ acts[i](); }, battlePause, "ハートが破壊された（トリガーチェック）");
+    "手札に加わります。その際、加える代わりにトリガーを使えます（使用は任意。手引書）。" + note, labels, function(i){ acts[i](); }, battlePause, "ハートが破壊された（トリガーチェック）", heartHead(p, h));
 }
 // オーバービートの下にできる、自分のラインの一番上のホロビト（コストが小さいもの。手引書 メインステップ）
 function overTargets(p, h){
@@ -1994,7 +2045,7 @@ var HEART_TRIGGERS = {
       if (fe >= 0){ labels.push("空いているラインの1番前（第" + (fe + 1) + "ライン）に出す"); acts.push(function(){ triggerToLine(p, h, fe, commit, next); }); }
       if (overTargets(p, h).length){ labels.push("オーバービートで出す（下にするホロビトを選ぶ）"); acts.push(function(){ pickOver(p, h, commit, next); }); }
       if (acts.length === 1) return acts[0]();
-      fxChoose("エントリートリガー：「" + nm(h) + "」をどう出しますか？（コストは支払わない）", labels, function(i){ acts[i](); }, battlePause, "ハートが破壊された");
+      fxChoose("エントリートリガー：「" + nm(h) + "」をどう出しますか？（コストは支払わない）", labels, function(i){ acts[i](); }, battlePause, "ハートが破壊された（トリガー）", heartHead(p, h));
     } },
   // オーバートリガー: 既に出ているホロビトの上にオーバービートで出す（コストは支払わない）
   "オーバーT": {
@@ -2017,7 +2068,7 @@ var HEART_TRIGGERS = {
         ["オーバービートで出す（下にするホロビトを選ぶ）", "出さない"], function(i){
           if (i === 1){ fxLog("オーバービートでは出さなかった"); return next(); }
           pickOver(p, h, function(){}, next, function(){ fxLog("オーバービートでは出さなかった"); next(); });
-        }, function(){ fxLog("オーバービートでは出さなかった"); next(); }, "ハートが破壊された");
+        }, function(){ fxLog("オーバービートでは出さなかった"); next(); }, "ハートが破壊された（トリガー）", heartHead(p, h));
     } },
   // ドロートリガー: そのカードを墓地へ置き、山札からカードを3枚引く
   "ドローT": {
@@ -2083,6 +2134,53 @@ function fxShowLog(){
   el.classList.add("on");
   var ls = el.querySelector(".fxlines"); if (ls) ls.scrollTop = ls.scrollHeight;
 }
+// ---- 効果を出しているカードと、その対象（盤面の印と、質問の上の画像に使う）----
+var fxFocus = { src:null, tgt:[] };
+function focusReset(){ fxFocus = { src:null, tgt:[] }; }
+function focusTgt(uid){ if (uid && fxFocus.tgt.indexOf(uid) < 0) fxFocus.tgt.push(uid); }
+// カード1枚の画像。画像がない・読み込めないときは文字で出す。reveal: 裏向きでも表として見せる（トリガーチェック）
+function picHTML(c, cap, cls, reveal){
+  var d = c && cardDef(c), up = c && (c.up || reveal);
+  var src = up && c.key ? CARD_IMAGES[c.key] : null;
+  var txt = !c ? "ホロビトなし" : !up ? "裏向き" : d ? esc(d.name) + (d.type === "ホロビト" ? "<br>" + fmt(d.power) : "<br>" + esc(d.type)) : "未確定カード";
+  return '<div class="fxcard ' + (cls || "") + '"' + (c ? ' data-cid="' + esc(c.uid) + '"' : "") + '><div class="fxpic"><div class="fxtxt">' + txt + '</div>' +
+    (src ? '<img src="' + esc(src) + '" alt="' + esc(nm(c)) + '" decoding="async" onerror="this.remove()">' : "") + '</div>' + (cap || "") + '</div>';
+}
+function cardByUid(uid){ var f = uid && findCard(uid); return f ? f.card : null; }
+function focusHeadHTML(){
+  var s = cardByUid(fxFocus.src), ts = fxFocus.tgt.map(cardByUid).filter(Boolean);
+  var h = s ? picHTML(s, '<b>効果</b>' + esc(nm(s)), "src") : "";
+  if (s && ts.length) h += '<div class="fxvs">→</div>';
+  ts.slice(0, 2).forEach(function(c){ h += picHTML(c, '<b>対象</b>' + esc(nm(c)), "tgt", false); });
+  return h ? '<div class="fxcards">' + h + '</div>' : "";
+}
+function powerHint(c){
+  var d = c && cardDef(c); if (!d) return "";
+  var s = "印字のパワー " + (typeof d.power === "number" ? d.power : "?");
+  wazaUsesOf(c).forEach(function(u){ s += "＋ワザ" + u.mod; });
+  boostUsesOf(c).forEach(function(u){ s += "＋ブースト" + u.mod; });
+  return s;
+}
+// バトルしている両者のカード（自分・相手の順）。result: 勝ち負けを出す
+function battleHeadHTML(result){
+  var b = state.battle; if (!b || b.line >= LINE_COUNT || (!b.users[0] && !b.users[1])) return "";
+  var one = function(p){
+    var c = cardByUid(b.users[p]), cls = "", tag = "";
+    if (result && b.winner !== undefined){
+      if (b.winner === -1) tag = '<span class="res">引き分け</span>';
+      else if (b.winner === p){ cls = "win"; tag = '<span class="res">勝ち</span>'; }
+      else { cls = "lose"; tag = '<span class="res lose">負け</span>'; }
+    }
+    var pw = b.pw && typeof b.pw[p] === "number" ? "パワー " + b.pw[p] : powerHint(c);
+    return picHTML(c, '<b>' + SIDE_NAME[p] + '</b>' + (c ? esc(nm(c)) + (pw ? '<br>' + pw : "") : "ホロビトなし") + (tag ? '<br>' + tag : ""), cls);
+  };
+  return '<div class="fxcards">' + one(0) + '<div class="fxvs">VS</div>' + one(1) + '</div>';
+}
+function autoHead(){
+  if (fxFocus.src || fxFocus.tgt.length) return focusHeadHTML();
+  if (state.battle && state.phase === 2) return battleHeadHTML(false);
+  return "";
+}
 // declineLabel を渡すと任意の選択になる。ボタンはその文言になり、押すと onCancel で処理を続ける
 function startPick(uids, prompt, onPick, onCancel, declineLabel){
   if (!uids.length){ fxLog("選べる候補がない"); return onCancel(); }
@@ -2092,9 +2190,12 @@ function startPick(uids, prompt, onPick, onCancel, declineLabel){
   var el = document.querySelector("#side-0 .card.pickable, #side-1 .card.pickable");
   if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
 }
-function fxChoose(question, labels, cb, cancel, title){
+// head: 質問の上に出すカードの画像（HTML）。省くと、効果の処理中ならそのカードと対象、バトル中なら両者のカードを出す
+// kind: "result" … バトルの結果だけを見せる画面（「続ける」だけ）
+function fxChoose(question, labels, cb, cancel, title, head, kind){
   fxAsk = { cb:cb, cancel:cancel };
-  var h = '<h3>' + esc(title || "効果の処理") + '</h3><div class="fxq">' + esc(question) + '</div><div class="sgrid c1">';
+  if (head === undefined || head === null) head = autoHead();
+  var h = '<h3>' + esc(title || "効果の処理") + '</h3>' + head + '<div class="fxq">' + esc(question) + '</div><div class="sgrid c1"' + (kind ? ' data-kind="' + kind + '"' : "") + '>';
   labels.forEach(function(l, i){ h += '<button data-fxa="' + i + '">' + esc(l) + '</button>'; });
   h += '<button data-fxa="-1">中断する</button></div>';
   render(); openSheet(h);
@@ -2146,9 +2247,20 @@ function fxSectionHTML(c){
 }
 
 /* ---------------- 描画 ---------------- */
+// 盤面の印: 選ぶ候補 > 効果の対象 > 効果を出しているカード > バトル中
+function markOf(c){
+  if (picking && picking.set[c.uid]) return { cls:"pickable", t:"選ぶ" };
+  if (fxFocus.tgt.indexOf(c.uid) >= 0) return { cls:"fx-tgt", t:"対象" };
+  if (fxFocus.src === c.uid) return { cls:"fx-src", t:"効果" };
+  var b = state.battle;
+  if (b && b.stage !== "start" && (b.users[0] === c.uid || b.users[1] === c.uid)){
+    var loc = locOf(c); if (loc && loc.zone === "line" && loc.top) return { cls:"fx-bat", t:"バトル" };
+  }
+  return null;
+}
 function cardHTML(c, tag){
-  var d = cardDef(c);
-  var cls = "card" + (c.turned ? " turned" : "") + (picking && picking.set[c.uid] ? " pickable" : "") + (tag ? " cantuse" : "");
+  var d = cardDef(c), mk = markOf(c);
+  var cls = "card" + (c.turned ? " turned" : "") + (mk ? " " + mk.cls : "") + (tag ? " cantuse" : "");
   var color = d ? d.color_mark : "";
   var inner;
   if (!c.up){
@@ -2169,7 +2281,8 @@ function cardHTML(c, tag){
               (c.note ? '<div class="cnote">' + esc(c.note) + '</div>' : "") +
             '</div>';
   }
-  return '<div class="' + cls + '" data-cid="' + esc(c.uid) + '" data-owner="' + c.owner + '" data-color="' + esc(color) + '">' + inner + (tag || "") + '</div>';
+  return '<div class="' + cls + '" data-cid="' + esc(c.uid) + '" data-owner="' + c.owner + '" data-color="' + esc(color) + '">' + inner + (tag || "") +
+         (mk ? '<span class="fxtag">' + mk.t + '</span>' : "") + '</div>';
 }
 // 常時の効果の印。カードの印字を隠さないよう、ラインの枠の中で束の下に出す
 function fxRowHTML(c){
@@ -2625,12 +2738,12 @@ document.addEventListener("click", function(e){
   if (t.dataset.prep === "mull"){ snap(); prepMull(+t.dataset.pi, t.dataset.redraw === "1"); render(); return; }
   if (t.dataset.flow === "resume"){ if (fxAsk || picking) return; fxClear(); battleRun(); return; }
 });
-document.getElementById("btnUndo").addEventListener("click", function(){ picking = null; fxClear(); undo(); });
+document.getElementById("btnUndo").addEventListener("click", function(){ picking = null; focusReset(); fxClear(); undo(); });
 document.getElementById("btnFx").addEventListener("click", function(){ snap(); state.fxAuto = !fxOn(); picking = null; fxClear(); render(); });
 document.getElementById("pickCancel").addEventListener("click", function(){ var p = picking; picking = null; render(); if (p) p.cancel(); });
 document.getElementById("fxlog").addEventListener("click", function(e){
   var b = e.target.closest("button[data-fxlog]"); if (!b) return;
-  if (b.dataset.fxlog === "undo"){ picking = null; fxClear(); undo(); } else fxClear();
+  if (b.dataset.fxlog === "undo"){ picking = null; focusReset(); fxClear(); undo(); } else fxClear();
 });
 document.querySelector("header").addEventListener("click", function(e){
   var t = e.target.closest("button[data-jump]"); if (!t) return;

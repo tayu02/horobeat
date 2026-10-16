@@ -18,7 +18,10 @@ async function run(label, viewport, touch){
   const log=()=>p.evaluate(()=>fxLines.join(' / '));
   const q=()=>p.evaluate(()=>document.querySelector('#sheet .fxq')?.textContent||'');
   const opts=()=>p.evaluate(()=>[...document.querySelectorAll('#sheet button[data-fxa]')].map(b=>b.textContent));
-  const choose=async text=>{ await wait(450); await p.locator('#sheet button[data-fxa]',{hasText:text}).first().click(); await wait(150); };
+  // バトルの結果の画面（「続ける」だけ）は押して進める（2026-10-16〜 バトルごとに結果をカードの画像と並べて見せる）
+  const settle=async()=>{ for(let i=0;i<10;i++){ await wait(60); if(!(await p.$('#sheet [data-kind="result"]'))) return; await wait(450); await p.click('#sheet [data-kind="result"] button[data-fxa="0"]'); await wait(150); } };
+  const choose0=async text=>{ await wait(450); await p.locator('#sheet button[data-fxa]',{hasText:text}).first().click(); await wait(150); };
+  const choose=async text=>{ await choose0(text); await settle(); };
   const picks=()=>p.evaluate(()=>[...document.querySelectorAll('.card.pickable')].map(e=>e.dataset.cid));
   const tap=async uid=>{ const el=p.locator(`.card[data-cid="${uid}"]`); await el.evaluate(e=>e.scrollIntoView({block:'center'})); if(touch) await el.tap(); else await el.click(); await wait(460); };
   const top=(s,pi,li)=>{ const st=s.players[pi].line[li]; return st[st.length-1]; };
@@ -40,7 +43,8 @@ async function run(label, viewport, touch){
     },[me,opp,ex||{}]);
   };
   // 召喚フェイズ（後手）からフェイズ送りでバトルフェイズへ
-  const battle=async()=>{ await p.click('#btnPhase'); await wait(200); };
+  const battle0=async()=>{ await p.click('#btnPhase'); await wait(200); };
+  const battle=async()=>{ await battle0(); await settle(); };
 
   // ---- 1. 勝ち負け: 負けたホロビトとハート（列の一番上）がダウン。次の先手 ----
   await setup({line:[['HB01-001']]},{line:[['HD01-001']]},{first:1});
@@ -264,6 +268,40 @@ async function run(label, viewport, touch){
     'エンドフェイズのスライドステップで、第3ラインのホロビトが空いた第2ラインへ移る');
   ok(s.players[1].line.slice(0,3).every(st=>st.length===1),'相手のラインは空いていないので動かない（詰めるのはプレイヤーごと）');
   ok((await log()).includes('スライドステップ'),'記録にスライドステップが出る');
+
+  // ---- 13c. 画面: バトルのカードを画像で並べる・結果・トリガーチェックの画像・盤面の印（依頼者の指示 2026-10-16）----
+  await setup({hand:['PR-013'], ena:['HD01-001','HD01-001'], line:[['HB01-001']]},{line:[['HD02-009']], heart:['HD01-001',{k:'PR-013',turned:true}]});
+  await battle0();
+  s=await S();
+  const head=()=>p.evaluate(()=>[...document.querySelectorAll('#sheet .fxcards .fxcard')].map(e=>({cid:e.dataset.cid||'', cls:e.className, t:e.textContent})));
+  let hd=await head();
+  ok(hd.length===2 && hd[0].cid===top(s,0,0).uid && hd[1].cid===top(s,1,0).uid && hd[0].t.includes('自分') && hd[0].t.includes('雷獣 レオ') && hd[1].t.includes('相手') && hd[1].t.includes('すやすやジャンボ'),
+    'ワザの手番の画面に、バトルしている両者のカードを並べて出す（自分・相手） '+JSON.stringify(hd.map(h=>h.t)));
+  ok(await p.evaluate(u=>picHTML(findCard(u).card,'','').includes('images/cards/HB01-001.webp'),top(s,0,0).uid),'カードの画像は images/cards/<番号>.webp を使う（画像がなければ名前とパワーを文字で出す）');
+  ok(await p.evaluate(([a,b])=>[a,b].every(u=>{ const e=document.querySelector('.card[data-cid="'+u+'"]'); return e && e.classList.contains('fx-bat') && e.querySelector('.fxtag').textContent==='バトル'; }),[top(s,0,0).uid,top(s,1,0).uid]),
+    '盤面でも、バトルしている2枚に太い枠と「バトル」の札を付ける');
+  await choose0('ワザの使用を終えて');
+  hd=await head();
+  ok(!!(await p.$('#sheet [data-kind="result"]')) && (await p.textContent('#sheet h3')).includes('結果') && (await q()).includes('パワー 自分 4000 対 相手 2000 → 自分の勝ち'),'パワーを比べたら、結果の画面を出す');
+  ok(hd.length===2 && hd[0].cls.includes('win') && hd[0].t.includes('勝ち') && hd[0].t.includes('パワー 4000') && hd[1].cls.includes('lose') && hd[1].t.includes('負け'),'結果の画面: 両者のカードを並べ、勝ち・負けとパワーを出す');
+  await choose0('続ける');
+  hd=await head();
+  ok((await p.textContent('#sheet h3')).includes('トリガーチェック') && hd.length===1 && hd[0].cls.includes('tgt') && hd[0].t.includes('トリガーチェック') && hd[0].cid===s.players[1].heart[1].uid,
+    'ハートが破壊されたら、そのカードの画像を出してトリガーチェックする');
+  ok(await p.evaluate(u=>{ const e=document.querySelector('.card[data-cid="'+u+'"]'); return e && e.classList.contains('fx-tgt') && e.querySelector('.fxtag').textContent==='対象'; },s.players[1].heart[1].uid),
+    '盤面でも、破壊されたハートに赤い太い枠と「対象」の札を付ける');
+  await choose('使わずに手札に');
+  ok(!(await p.$('.card.fx-tgt')) && !(await p.$('.card.fx-bat')),'処理が終わったら、盤面の印は消える');
+  // 不戦勝の結果の画面
+  await setup({line:[['HB01-001']]},{});
+  await battle0();
+  hd=await head();
+  ok(!!(await p.$('#sheet [data-kind="result"]')) && hd.length===2 && hd[1].t.includes('ホロビトなし') && (await q()).includes('不戦勝'),'不戦勝も結果の画面を出す（相手側は「ホロビトなし」）');
+  await settle();
+  // 選ぶ候補は太い枠と「選ぶ」の札
+  await setup({line:[['HB01-001']]},{line:[['HD01-001'],['HB01-001']], heart:['HD01-001',{k:'HB01-033',turned:true}]});
+  await battle(); await choose('トリガーを使う');
+  ok(await p.evaluate(()=>{ const e=[...document.querySelectorAll('.card.pickable')]; return e.length===2 && e.every(x=>x.querySelector('.fxtag').textContent==='選ぶ'); }),'選ぶ候補のカードには、太い枠と「選ぶ」の札を付ける');
 
   // ---- 14. 召喚フェイズ: エナチャージ・新しいライン・番 ----
   await setup({hand:['HD01-001','HB01-001','HD01-010','PR-013'], ena:['HD01-001','HD01-001','HD01-001','HD01-001']},{hand:['HD02-001']},{phase:0});

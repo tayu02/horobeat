@@ -316,8 +316,10 @@ async function run(label, viewport, touch){
   // 13l. ワザ（2026-10-12〜 バトルフェイズの中で使う）: 先手から交互に1枚ずつ。使わないこともできる。終えるのはプレイヤー
   const fxq=()=>p.evaluate(()=>document.querySelector('#sheet .fxq')?.textContent||'');
   const fxopts=()=>p.evaluate(()=>[...document.querySelectorAll('#sheet button[data-fxa]')].map(b=>b.textContent));
-  const pickOpt=async text=>{ await wait(450); await p.locator('#sheet button[data-fxa]',{hasText:text}).first().click(); await wait(150); };
-  const battle=async()=>{ await p.evaluate(()=>{ state.phase=1; render(); }); await p.click('#btnPhase'); await wait(200); };
+  // バトルの結果の画面（「続ける」だけ）は押して進める（2026-10-16〜）
+  const settle=async()=>{ for(let i=0;i<10;i++){ await wait(60); if(!(await p.$('#sheet [data-kind="result"]'))) return; await wait(450); await p.click('#sheet [data-kind="result"] button[data-fxa="0"]'); await wait(150); } };
+  const pickOpt=async text=>{ await wait(450); await p.locator('#sheet button[data-fxa]',{hasText:text}).first().click(); await wait(150); await settle(); };
+  const battle=async()=>{ await p.evaluate(()=>{ state.phase=1; render(); }); await p.click('#btnPhase'); await wait(200); await settle(); };
   const H5=[1,2,3,4,5].map(()=>({k:null,up:false}));
   await setup({hand:['PR-013'], line:[['HB01-001']], ena:['HD01-001','HD01-001'], heart:H5},{hand:['HD02-008'], line:[['HD01-001']], ena:['HD02-001','HD02-001'], heart:H5});
   await battle();
