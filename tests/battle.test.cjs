@@ -107,7 +107,7 @@ async function run(label, viewport, touch){
   ok(s.players[1].heart.length===3 && s.players[1].heart[2].turned && s.players[1].heart.slice(0,2).every(c=>!c.turned) && s.players[1].hand.some(c=>c.key==='PR-013'),
     'ダブルダメージ: 2回目で、次のハートがダウンする（依頼者の説明どおり）');
   ok(s.battle===null && (await log()).includes('2 回目'),'2回目まで入れて、残りのラインを処理して終わる');
-  // ハートがすべて縦向きなら: 1回目で一番上がダウン、2回目でそのハートが破壊（1ダメージを2回）
+  // ハートがすべて縦向きなら: 1回目で一番上がダウン、2回目でそのハートが破壊（動画にない場面。依頼者の判断 2026-10-16「2回とも同じハートにダメージが入る」）
   await setup({line:[['HD02-006']]},{line:[['HB01-001']]});
   await battle();
   ok((await q()).includes('破壊されました') && (await S()).players[1].heart.length===5,'すべて縦向き: 1回目で一番上がダウンし、2回目でそのハートが破壊される');
