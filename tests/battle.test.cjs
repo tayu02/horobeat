@@ -183,6 +183,32 @@ async function run(label, viewport, touch){
   await battle(); await choose('トリガーを使う');
   ok((await log()).includes('1枚以下ではない') && (await S()).players[1].hand.length===2,'ラストオーバートリガー: ハートが2枚残っていれば、手札に加えて1枚引くだけ');
 
+  // エントリーT でオーバービートで出す: 下のホロビトのダウンが解除され、下の「オーバービートされるとき」も発動する
+  await setup({line:[['HB01-001']]},{line:[['HD01-001'],[{k:'HD02-009',turned:true}]], heart:['HD01-001',{k:'HD01-010',turned:true}]});
+  await battle(); await choose('トリガーを使う'); await choose('オーバービートで出す');
+  s8=await S(); pk=await picks();
+  ok(pk.length===2 && pk.includes(s8.players[1].line[1][0].uid),'エントリートリガー（オーバービート）: 下にできるのは、コストが小さい（3より小さい）ラインの一番上のホロビト');
+  await tap(s8.players[1].line[1][0].uid);
+  ok((await q()).includes('同時に 2 つの効果'),'出たとき（アカナー）とオーバービートされるとき（すやすやジャンボ）が同時に発動し、順番を選ぶ');
+  await choose('すやすやジャンボ');
+  s8=await S();
+  ok(s8.players[1].line[1].length===2 && top(s8,1,1).key==='HD01-010' && !s8.players[1].line[1][0].turned && s8.players[1].hand.length===1,
+    'エントリートリガー（オーバービート）: 重ねて出し、下のダウンを解除。すやすやジャンボで1枚引き、アカナーは下にカードがあるので引かない');
+  // トリガーを使えないとき（空いたラインがなく、コストが小さいホロビトもいない）は、手札に加えるだけ
+  await setup({line:[['HB01-001']]},{line:[['HD01-001'],['HB01-001'],['HB01-001'],['HB01-001'],['HB01-001']], heart:['HD01-001',{k:'HD01-001',turned:true}]});
+  await battle();
+  ok((await q()).includes('いまは使えません') && !(await opts()).some(t=>t.includes('トリガーを使う')) && (await opts()).some(t=>t.includes('使わずに手札に')),
+    'エントリートリガーを使えない（空いたラインがなく、重ねられるホロビトもいない）ときは理由を示し、手札に加えるだけ');
+  await choose('使わずに手札に');
+  // 「効果: 手動」でも、トリガーはルールなので選べる（出たときの効果は処理しない）
+  await setup({line:[['HB01-001']]},{line:[['HD01-001']], heart:['HD01-001',{k:'HD01-001',turned:true}]});
+  await p.evaluate(()=>{ state.fxAuto=false; render(); });
+  await battle();
+  ok((await opts()).some(t=>t.includes('トリガーを使う')) && (await p.textContent('#sheet h3')).includes('トリガーチェック'),'「効果: 手動」のときも、ハートが破壊されたらトリガーを使うか聞く（トリガーチェック）');
+  await choose('トリガーを使う');
+  s8=await S();
+  ok(s8.players[1].line[1].length===1 && s8.players[1].line[1][0].key==='HD01-001' && !s8.players[1].hand.length,'「効果: 手動」: エントリートリガーでラインに出る。レオまるの「出たとき」は手動なので引かない');
+
   // ---- 9. バトルのダメージでダウン → 「ダウンしたとき」（HD02-016） ----
   await setup({line:[['HD01-016']]},{line:[['HD02-016']]});
   await battle(); s=await S();

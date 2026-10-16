@@ -1946,7 +1946,9 @@ function heartBreak(p, h, next, mark){
     commit(); moveCard(h.uid, p, "hand"); h.up = true; h.turned = false;
     fxLog(SIDE_NAME[p] + "のハートが破壊され、「" + nm(h) + "」を手札に加えた"); render(); next(); };
   var trig = HEART_TRIGGERS[kw], labels = [], acts = [];
-  if (fxOn() && trig && trig.can(p, h)){
+  // トリガーはハートが破壊されたときのルール（手引書 用語解説）なので、「効果: 手動」のときも選べる。
+  // 出たカードの「出たとき」などの能力欄の効果は、いつもどおり「効果: 自動」のときだけ処理する
+  if (trig && trig.can(p, h)){
     labels.push("トリガーを使う：" + kw + "「" + d.trigger.text + "」");
     acts.push(function(){ fxLog(SIDE_NAME[p] + "：ハートの「" + nm(h) + "」の " + kw + " を使う"); trig.run(p, h, commit, next); });
   }
@@ -1956,7 +1958,7 @@ function heartBreak(p, h, next, mark){
            : trig && !trig.can(p, h) ? "（" + kw + " は、いまは使えません：" + trig.cant(p, h) + "）"
            : !trig ? "（このカードのトリガーはシミュレーターでは処理できません。使うなら手で処理してください）" : "";
   fxChoose(SIDE_NAME[p] + "のハート（重なりの一番上）はダウンしていたので、ダメージで破壊されました。カードは「" + nm(h) + "」です。" +
-    "手札に加わります。その際、加える代わりにトリガーを使えます（使用は任意。手引書）。" + note, labels, function(i){ acts[i](); }, battlePause, "ハートが破壊された");
+    "手札に加わります。その際、加える代わりにトリガーを使えます（使用は任意。手引書）。" + note, labels, function(i){ acts[i](); }, battlePause, "ハートが破壊された（トリガーチェック）");
 }
 // オーバービートの下にできる、自分のラインの一番上のホロビト（コストが小さいもの。手引書 メインステップ）
 function overTargets(p, h){
