@@ -23,7 +23,12 @@ function launch() {
 
 let pass = 0, fail = 0, page = null, label = "";
 const pending = [];
-function watch(p, l) { page = p; if (l !== undefined) label = l; }
+function watch(p, l) {
+  page = p; if (l !== undefined) label = l;
+  // 公開先（アーティファクト）の画面ではブラウザの確認窓（confirm・alert・prompt）が出ず、confirm は押さずに「いいえ」になる。
+  // 使っていたら、ここで失敗にする（2026-10-19「スターターを選択しても何も出ない」の原因）
+  if (!p.__dialogWatch) { p.__dialogWatch = true; p.on("dialog", d => { ok(false, "ブラウザの確認窓を使っている（公開先では出ない）: " + d.message()); d.dismiss().catch(() => {}); }); }
+}
 function ok(cond, msg) {
   // PC と iPhone の両方で同じ確認をするので、どちらで起きたかを頭に付ける
   const m = (label ? `(${label}) ` : "") + msg;
@@ -50,4 +55,17 @@ async function prep(p, first) {
   await p.click('#flow button[data-prep="mull"][data-pi="1"][data-redraw="0"]');
 }
 
-module.exports = { chromium, devices, launch, ok, watch, finish, out, prep, ROOT, URL };
+// 画面内の確認のシートで「はい」（組み直す・やり直す など）を押す。
+// シートは開いてから 0.4 秒は押しても効かない（誤タップ防止）ので、その分待つ
+async function confirmYes(p) {
+  await p.waitForSelector("#sheet button[data-cfm]");
+  await p.waitForTimeout(450);
+  await p.click("#sheet button[data-cfm]");
+}
+async function confirmNo(p) {
+  await p.waitForSelector("#sheet button[data-cfm]");
+  await p.waitForTimeout(450);
+  await p.click('#sheet button[data-close="1"]');
+}
+
+module.exports = { chromium, devices, launch, ok, watch, finish, out, prep, confirmYes, confirmNo, ROOT, URL };

@@ -170,8 +170,9 @@ async function run(label, viewport, touch){
   ok((await p.textContent('#viewDeck .dknow')).includes('HB-SD01'),'いまのデッキがスタートデッキそのままだと出る');
   ok(await noHScroll(),'デッキの画面で横にはみ出さない');
   // 組み直す（盤面が空なら山札だけ作り直す）
-  p.once('dialog',d=>d.accept());
-  await p.click('#viewDeck button[data-act="rebuild"][data-pi="0"]'); await wait(80);
+  await p.click('#viewDeck button[data-act="rebuild"][data-pi="0"]');
+  ok(await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on'))&&(await p.textContent('#sheet')).includes('このデッキで組み直します'),'組み直す前に、画面の中で確かめる（ブラウザの確認窓は使わない）');
+  await H.confirmYes(p); await wait(80);
   s=await S();
   const m={}; s.players[0].deck.forEach(c=>m[c.key]=(m[c.key]||0)+1);
   ok(s.players[0].deck.length===50&&sd.cards.every(c=>m[c.key]===c.count),'「このデッキで自分の盤面を組み直す」で山札がこのデッキの50枚になる');
@@ -190,15 +191,32 @@ async function run(label, viewport, touch){
   // --- 試遊に戻る ---
   await p.click('.navbtn[data-view="play"]');
   ok(await vis('#viewPlay')&&await vis('#btnPhase')&&!await vis('#viewCards'),'「🎮 試遊」で盤面に戻る');
-  await H.prep(p);
+  // 盤面にカードがあるときに配り直すと、画面の中で確かめる
+  await p.evaluate(()=>{ const P=state.players[0]; P.hand.push(P.deck.pop()); render(); });
+  await p.click('#flow button[data-prep="deal"][data-first="0"]');
+  ok((await p.textContent('#sheet')).includes('準備からやり直します'),'盤面にカードがあるときに配ると、画面の中で確かめる');
+  await H.confirmYes(p); await wait(60);
+  await p.click('#flow button[data-prep="mull"][data-pi="0"][data-redraw="0"]');
+  await p.click('#flow button[data-prep="mull"][data-pi="1"][data-redraw="0"]');
   s=await S();
   const m2={}; s.players[0].hand.concat(s.players[0].deck,s.players[0].heart,s.players[0].ena).forEach(c=>m2[c.key]=(m2[c.key]||0)+1);
   ok(s.phase===0&&sd.cards.every(c=>m2[c.key]===c.count),'作ったデッキで準備して遊べる');
   ok(await noHScroll(),'試遊でも横にはみ出さない');
+  ok(await vis('#fxlog'),'試遊では効果のログが出る');
+  await p.click('.navbtn[data-view="deck"]');
+  ok(!await vis('#fxlog')&&!await vis('#pickbar'),'デッキの画面では効果のログ・選ぶ案内を出さない（画面の下を覆わない）');
+  await p.click('#viewDeck button[data-act="rebuild"]');   // 覆われていれば押せずに止まる
+  await H.confirmNo(p);
+  await p.click('.navbtn[data-view="play"]');
+  ok(await vis('#fxlog'),'試遊に戻ると効果のログがまた出る');
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));
   await b.close();
 }
 (async()=>{
+  // 公開先（アーティファクト）の画面ではブラウザの確認窓が出ない（confirm は押さずに「いいえ」）。どこにも使っていないこと
+  const src=require('fs').readFileSync(H.ROOT+'/simulator.html','utf8');
+  const used=src.match(/\b(confirm|alert|prompt)\s*\(/g);
+  ok(!used,'ブラウザの確認窓（confirm・alert・prompt）を使っていない '+(used||[]).join(' '));
   await run('pc',{width:1280,height:900},false);
   await run('iphone',{width:390,height:844},true);
   await H.finish();

@@ -29,24 +29,41 @@ async function run(label, viewport, touch){
   // ＋で変えると「自分で組んだデッキ」になる
   await p.evaluate(()=>{ const dl=state.players[0].decklist; dl['HD01-016']=2; render(); });
   ok((await p.evaluate(()=>document.querySelector('#viewDeck .dknow').textContent)).includes('自分で組んだ'),'枚数を変えると「自分で組んだデッキ」になる');
-  // 盤面にカードがあるときは確かめる（いいえ → 変えない）
+  // 盤面にカードがあるとき: タブはデッキ（登録）だけを変え、盤面は消さない（−／＋ と同じ）。
+  // 以前はブラウザの確認窓で聞いていたが、公開先では確認窓が出ずに「いいえ」になり、押しても何も起きなかった（2026-10-19 依頼者の報告）
   await p.evaluate(()=>{ runAction('setupAll',2); render(); });
-  let asked=''; p.once('dialog',d=>{ asked=d.message(); d.dismiss(); });
+  const pile0=JSON.stringify((await S()).players[0].deck.map(c=>c.key));
   await p.click('#viewDeck button[data-starter="HB-SD02"][data-pi="0"]'); await wait(80);
   s=await S();
-  ok(asked.includes('盤面を消して') && s.players[0].hand.length===6,'盤面にカードがあるときは確かめ、「いいえ」なら何も変えない');
-  p.once('dialog',d=>d.accept());
-  await p.click('#viewDeck button[data-starter="HB-SD02"][data-pi="0"]'); await wait(80);
+  ok(!await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on')),'盤面にカードがあっても、タブを押すと確かめずにすぐ切り替わる');
+  ok(same(s.players[0].decklist,SD[1]),'デッキ（登録）が不死火翔（緑）の構成になる');
+  ok(s.players[0].hand.length===6&&JSON.stringify(s.players[0].deck.map(c=>c.key))===pile0,'盤面（手札・山札）はそのまま');
+  ok(await p.evaluate(()=>document.querySelector('#viewDeck .dktabs button.on').dataset.starter)==='HB-SD02'&&(await p.textContent('#viewDeck .dknow')).includes('HB-SD02'),'選んだタブが選択中になり、「いまのデッキ」に出る');
+  ok(await p.evaluate(()=>{ const c=document.querySelectorAll('#viewDeck .ctile'); return c.length>0&&[...c].every(e=>e.dataset.color==='緑'); }),'デッキの画面に不死火翔（緑）のカードが並ぶ');
+  ok((await p.textContent('#viewDeck .dkold')).includes('まだ前のデッキのまま'),'盤面がまだ前のデッキだと知らせる');
+  // 組み直す: 画面の中で確かめる（やめる → 変えない／組み直す → 盤面を消して組み直す）
+  await p.click('#viewDeck button[data-act="rebuild"][data-pi="0"]');
+  ok((await p.textContent('#sheet')).includes('盤面を消して'),'「組み直す」は画面の中のシートで確かめる');
+  await H.confirmNo(p); await wait(80);
   s=await S();
-  ok(s.players[0].hand.length===0 && same(count(s.players[0].deck),SD[1]),'「はい」なら盤面を消して不死火翔（緑）で組み直す');
+  ok(s.players[0].hand.length===6,'「やめる」なら何も変えない');
+  await p.click('#viewDeck button[data-act="rebuild"][data-pi="0"]');
+  await H.confirmYes(p); await wait(80);
+  s=await S();
+  ok(s.players[0].hand.length===0 && same(count(s.players[0].deck),SD[1]),'「組み直す」なら盤面を消して不死火翔（緑）で組み直す');
+  ok(!await p.$('#viewDeck .dkold'),'組み直したら「前のデッキのまま」の知らせは消える');
   await p.click('#btnUndo2'); await wait(60);
   s=await S();
   ok(s.players[0].hand.length===6,'「戻す」で取り消せる');
-  // 空から組む
-  p.once('dialog',d=>d.accept());
+  // 空から組む（盤面はそのまま）
   await p.click('#viewDeck button[data-starter=""][data-pi="0"]'); await wait(80);
   s=await S();
-  ok(Object.keys(s.players[0].decklist).length===0 && s.players[0].deck.every(c=>c.key===null),'「空から組む」で登録なし（すべて未確定カード）になる');
+  ok(Object.keys(s.players[0].decklist).length===0 && s.players[0].hand.length===6,'「空から組む」で登録なしになる（盤面はそのまま）');
+  // 盤面が空なら、タブを押すとそのまま山札も組み直す
+  await p.evaluate(()=>{ runAction('reset',2); render(); });
+  await p.click('#viewDeck button[data-starter="HB-SD01"][data-pi="0"]'); await wait(80);
+  s=await S();
+  ok(same(count(s.players[0].deck),SD[0])&&!await p.$('#viewDeck .dkold'),'盤面が空なら、タブで山札もレオジン（赤）の50枚になる');
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));
   await b.close();
 }

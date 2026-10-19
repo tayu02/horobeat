@@ -11,7 +11,6 @@ async function run(label, viewport, touch){
   const b=await H.launch();
   const ctx=await b.newContext({...(touch?devices['iPhone 13']:{}),viewport,hasTouch:!!touch,isMobile:!!touch});
   const p=await ctx.newPage(); H.watch(p, label); const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
-  p.on('dialog',d=>d.accept());
   await p.goto(H.URL);
   const S=()=>p.evaluate(()=>state);
   const log=()=>p.evaluate(()=>fxLines.join(' / '));
@@ -51,7 +50,8 @@ async function run(label, viewport, touch){
 
   // ---- フェイズの順 ----
   const ph=[];
-  for(let i=0;i<4;i++){ await p.click('#btnPhase'); await wait(60); await closeSheet(); ph.push(await phase()); }
+  // バトルの途中で送るときは画面の中で確かめる（「エンドフェイズへ進む」を押す）
+  for(let i=0;i<4;i++){ await p.click('#btnPhase'); await wait(60); if(await p.$('#sheet button[data-cfm]')) await H.confirmYes(p); await wait(60); await closeSheet(); ph.push(await phase()); }
   ok(ph.join()==='召喚フェイズ（後手）,バトルフェイズ,エンドフェイズ,召喚フェイズ（先手）' && (await S()).round===2,'フェイズ: 召喚（先手）→召喚（後手）→バトル→エンド→次のラウンドの召喚（先手） '+ph.join());
 
   // ---- ドローステップ: 自分の召喚フェイズの初めに1枚（2ラウンド目から） ----

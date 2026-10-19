@@ -12,7 +12,6 @@ async function run(label, viewport, touch){
   const b=await H.launch();
   const ctx=await b.newContext({...(touch?devices['iPhone 13']:{}),viewport,hasTouch:!!touch,isMobile:!!touch});
   const p=await ctx.newPage(); H.watch(p, label); const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
-  p.on('dialog',d=>d.accept());
   await p.goto(H.URL);
   const S=()=>p.evaluate(()=>state);
   const log=()=>p.evaluate(()=>fxLines.join(' / '));
@@ -254,7 +253,11 @@ async function run(label, viewport, touch){
   ok((await q()).includes('次のラウンドの先手') && (await q()).includes('B-1'),'第1ラインにバトルがないときの次の先手は手引書にないので聞く');
   await choose('中断する');
   await p.click('#btnPhase'); await wait(100);
-  ok((await S()).phase===3 && (await log()).includes('残りのバトルを行わずに'),'バトルの途中でフェイズ送り → 確かめてからエンドフェイズへ');
+  ok((await p.textContent('#sheet')).includes('バトルの途中です'),'バトルの途中でフェイズ送り → 画面の中で確かめる（ブラウザの確認窓は公開先で出ないので使わない）');
+  await H.confirmNo(p); await wait(60);
+  ok((await S()).phase===2 && !!(await S()).battle,'「やめる」ならバトルフェイズのまま');
+  await p.click('#btnPhase'); await H.confirmYes(p); await wait(100);
+  ok((await S()).phase===3 && (await log()).includes('残りのバトルを行わずに'),'「エンドフェイズへ進む」で残りのバトルを行わずにエンドフェイズへ');
 
   // ---- 13b. バトルで第2ラインが破壊されたら、エンドフェイズのスライドステップで第3ラインを第2ラインへ詰める（手引書・ルール動画）----
   await setup({line:[['HB01-001'],[{k:'HD01-001',turned:true}],['HB01-001']]},{line:[['HD01-001'],['HB01-001'],['HD02-003']]});

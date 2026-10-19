@@ -218,6 +218,8 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 .view{display:none}
 body.view-play #viewPlay, body.view-cards #viewCards, body.view-deck #viewDeck{display:block}
 body.view-play .buildonly, body:not(.view-play) .playonly{display:none !important}
+/* 効果のログ・選ぶ案内は盤面のもの。カード・デッキの画面では出さない（画面の下を覆って「組み直す」などを押せなくしていた） */
+body:not(.view-play) #fxlog, body:not(.view-play) #pickbar{display:none !important}
 .seg{display:flex;gap:4px;margin:2px 0 8px}
 .seg button{flex:1;font-size:12px}
 /* 絞り込み */
@@ -256,6 +258,7 @@ body.view-play .buildonly, body:not(.view-play) .playonly{display:none !importan
 .dktabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 4px}
 .dktabs button{flex:1 1 auto}
 .dknow{font-size:11px;color:var(--sub);margin:0 0 6px}
+.dkold{font-size:11px;color:var(--gold);border:1px dashed #5a4a2a;border-radius:7px;padding:5px 8px;margin:0 0 8px;line-height:1.6}
 .starterrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0}
 .starterrow .who{font-size:12px;font-weight:700;min-width:2.5em}
 
@@ -473,7 +476,7 @@ body.view-play .buildonly, body:not(.view-play) .playonly{display:none !importan
 
   <details class="doc">
     <summary>このシミュレーターについて / 操作方法</summary>
-    <p><b>画面</b>：上部の<b>「🔍 カード」</b>でカードの画像の一覧から −／＋ でデッキに入れ（名前・効果テキスト・色・コストなどで絞り込めます。選べる値は印字にあるものだけで、読めない値は「unknown（読めない）」）、<b>「📋 デッキ」</b>でいまのデッキの枚数・種別・色・コスト別の枚数を確かめ、<b>「🎮 試遊」</b>で盤面に戻ります。同名のカードは番号が違っても合計4枚、デッキは50枚までです。</p>
+    <p><b>画面</b>：上部の<b>「🔍 カード」</b>でカードの画像の一覧から −／＋ でデッキに入れ（名前・効果テキスト・色・コストなどで絞り込めます。選べる値は印字にあるものだけで、読めない値は「unknown（読めない）」）、<b>「📋 デッキ」</b>でいまのデッキの枚数・種別・色・コスト別の枚数を確かめ、<b>「🎮 試遊」</b>で盤面に戻ります。同名のカードは番号が違っても合計4枚、デッキは50枚までです。デッキを変えても遊んでいる途中の盤面は消えません（試遊で配るか、デッキの画面の「このデッキで盤面を組み直す」で反映）。</p>
     <p><b>操作</b>：カードを<b>タップ</b>＝印字内容とメニュー（移動・向き・表裏・メモ）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
     <p><b>進行</b>（公式の手引書のラウンドの進行どおり）：準備 → 召喚フェイズ（先手）→ 召喚フェイズ（後手）→ バトルフェイズ → エンドフェイズ → 次のラウンド。準備は、先手を選んで配り、両者が引き直すかを決めると自動で終わります。上部の欄に、いまのフェイズと誰の番かが出ます。</p>
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ）。<b>エナが足りないときは使えません</b>。</p>
@@ -2424,27 +2427,40 @@ function sideIsEmpty(pi){
   return !P.hand.length && !P.heart.length && !P.ena.length && !P.waza.length && !P.grave.length &&
          P.line.every(function(l){ return !l.length; });
 }
-// その陣地のデッキをスタートデッキ（id が空なら空のデッキ）にして組み直す
-function loadStarter(pi, id){
+// その陣地のデッキをスタートデッキ（id が空なら空のデッキ）にして組み直す。
+// keep のときは、盤面が空なら組み直し、カードがあればデッキ（登録）だけ変える
+function loadStarter(pi, id, keep){
   var dl = {}, S = id ? starterById(id) : null;
   if (id && !S) return;
   if (S) S.cards.forEach(function(c){ dl[c.key] = c.count; });
   state.players[pi].decklist = dl;
-  rebuildPlayer(pi);
+  if (!keep || sideIsEmpty(pi)) rebuildPlayer(pi);
 }
-function starterButtonHTML(pi, id, label, on){
+// keep: 「📋 デッキ」の画面のタブ。デッキ（登録）だけを変え、盤面にカードがあっても消さない（−／＋ と同じ）
+function starterButtonHTML(pi, id, label, on, keep){
   var what = id ? starterLabel(starterById(id)) + "・50枚" : "空のデッキ";
   return '<button class="mini' + (on ? " on" : "") + '" data-starter="' + esc(id) + '" data-pi="' + pi + '"' +
-         (sideIsEmpty(pi) ? "" : ' data-confirm="' + SIDE_NAME[pi] + 'の盤面を消して、' + what + 'で組み直します。よろしいですか？"') + '>' + label + '</button>';
+         (keep ? ' data-keep="1"' : sideIsEmpty(pi) ? "" : ' data-confirm="' + SIDE_NAME[pi] + 'の盤面を消して、' + what + 'で組み直します。よろしいですか？"') + '>' + label + '</button>';
+}
+// 盤面にあるその陣地のカード（すべてのゾーン）が、いまのデッキの登録どおりか
+function boardMatchesDeck(pi){
+  var m = {}, dl = state.players[pi].decklist, add = function(c){ if (c.owner === pi && c.key) m[c.key] = (m[c.key] || 0) + 1; };
+  state.players.forEach(function(P){
+    ["deck", "hand", "heart", "ena", "waza", "grave"].forEach(function(z){ P[z].forEach(add); });
+    P.line.forEach(function(l){ l.forEach(add); });
+  });
+  var ks = Object.keys(dl).filter(function(k){ return (dl[k] | 0) > 0; });
+  return ks.length === Object.keys(m).length && ks.every(function(k){ return m[k] === (dl[k] | 0); });
 }
 function starterTabsHTML(pi){
   var dl = state.players[pi].decklist, cur = starterOf(dl), n = 0;
   Object.keys(dl).forEach(function(k){ n += dl[k] | 0; });
   return '<div class="dktabs">' +
-    STARTERS.map(function(S){ return starterButtonHTML(pi, S.id, starterLabel(S), cur === S); }).join("") +
-    starterButtonHTML(pi, "", "空から組む", !cur && !n) + '</div>' +
+    STARTERS.map(function(S){ return starterButtonHTML(pi, S.id, starterLabel(S), cur === S, true); }).join("") +
+    starterButtonHTML(pi, "", "空から組む", !cur && !n, true) + '</div>' +
     '<div class="dknow">いまのデッキ: ' + (cur ? "スタートデッキ " + esc(starterLabel(cur)) + "（" + esc(cur.id) + "）そのまま"
-      : (n ? "自分で組んだデッキ（登録 " + n + " 枚）" : "空（すべて未確定カード）")) + '</div>';
+      : (n ? "自分で組んだデッキ（登録 " + n + " 枚）" : "空（すべて未確定カード）")) + '</div>' +
+    (boardMatchesDeck(pi) ? "" : '<div class="dkold">' + SIDE_NAME[pi] + 'の盤面は、まだ前のデッキのままです。「🎮 試遊」で先手を選んで配るか、下の「このデッキで' + SIDE_NAME[pi] + 'の盤面を組み直す」で反映されます。</div>');
 }
 // ---- デッキを作る（依頼者の指示 2026-10-16「こういうデッキを作るのが欲しい」）----
 // 上部で「カード」（一覧から −／＋ で入れる）・「デッキ」（いまのデッキと集計）・「試遊」（盤面）を切り替える。
@@ -2666,9 +2682,18 @@ var sheetEl   = document.getElementById("sheet");
 var sheetGuardUntil = 0, sheetPi = 0, sheetForce = false, sheetAfter = null;
 
 function guarded(){ return performance.now() < sheetGuardUntil; }
+// 確かめる画面（はい／やめる）。公開先（アーティファクト）の画面ではブラウザの確認窓（confirm）が出ず、
+// 押すと何もせずに「いいえ」になるため、確認はすべてこのシートで聞く（2026-10-19 依頼者の報告「スターターを選択しても何も出ない」）
+var sheetYes = null;
+function askConfirm(msg, yesLabel, onYes){
+  if (!msg) return onYes();
+  openSheet('<h3>確認</h3><div class="fxq">' + esc(msg) + '</div>' +
+    '<div class="sgrid c2"><button class="primary" data-cfm="1">' + esc(yesLabel || "はい") + '</button><button data-close="1">やめる</button></div>');
+  sheetYes = onYes;
+}
 function openSheet(html){ sheetEl.innerHTML = html; sheetWrap.classList.add("on"); sheetGuardUntil = performance.now() + 400; sheetEl.scrollTop = 0; }
 function closeSheet(){
-  sheetWrap.classList.remove("on"); sheetEl.innerHTML = ""; sheetForce = false;
+  sheetWrap.classList.remove("on"); sheetEl.innerHTML = ""; sheetForce = false; sheetYes = null;
   // 効果の途中で開いたメニューなら、閉じたあとに続きを処理する（いまの操作を終えてから）
   var a = sheetAfter; sheetAfter = null; if (a) setTimeout(a, 0);
 }
@@ -2826,6 +2851,7 @@ sheetEl.addEventListener("click", function(e){
   var t = e.target.closest("button"); if (!t) return;
   var ds = t.dataset;
   if (ds.close){ closeSheet(); if (fxAsk){ var a0 = fxAsk; fxAsk = null; a0.cancel(); } return; }
+  if (ds.cfm){ var yes = sheetYes; closeSheet(); if (yes) yes(); return; }
   if (ds.fxa !== undefined && ds.fxa !== ""){
     var a1 = fxAsk; fxAsk = null; closeSheet();
     if (a1){ if (+ds.fxa < 0) a1.cancel(); else a1.cb(+ds.fxa); }
@@ -2887,9 +2913,10 @@ sheetEl.addEventListener("keydown", function(e){
 document.querySelector("main").addEventListener("click", function(e){
   var t = e.target.closest("button[data-act], button[data-dk], button[data-starter], button[data-deckpi], [data-detail], .zlabel[data-zsheet]");
   if (!t) return;
+  var tpi = +t.dataset.pi;
   if (t.dataset.starter !== undefined){
-    if (t.dataset.confirm && !window.confirm(t.dataset.confirm)) return;
-    snap(); loadStarter(+t.dataset.pi, t.dataset.starter); render(); return;
+    var sid = t.dataset.starter, keep = t.dataset.keep === "1";
+    askConfirm(t.dataset.confirm, "組み直す", function(){ snap(); loadStarter(tpi, sid, keep); render(); }); return;
   }
   if (t.dataset.zsheet){
     var zl = lockOf(+t.dataset.pi);
@@ -2901,20 +2928,22 @@ document.querySelector("main").addEventListener("click", function(e){
   if (t.dataset.dk){ deckAdjust(+t.dataset.pi, t.dataset.key, t.dataset.dk); return; }
   if (t.dataset.deckpi !== undefined){ ui.deckPi = +t.dataset.deckpi; saveUI(); render(); return; }
   if (t.dataset.detail){ openCatalogSheet(t.dataset.detail); return; }
-  if (t.dataset.confirm && !window.confirm(t.dataset.confirm)) return;
-  snap(); runAction(t.dataset.act, +t.dataset.pi); render();
+  var act = t.dataset.act;
+  askConfirm(t.dataset.confirm, "組み直す", function(){ snap(); runAction(act, tpi); render(); });
 });
 document.getElementById("btnPhase").addEventListener("click", function(){
-  if (state.phase === 2 && state.battle && !window.confirm("第" + (state.battle.line + 1) + "ラインのバトルの途中です。残りのバトルを行わずにエンドフェイズへ進みますか？")) return;
-  snap(); nextPhase(); render();
-  if (state.phase === 2 && state.battle) battleRun();
+  askConfirm(state.phase === 2 && state.battle ? "第" + (state.battle.line + 1) + "ラインのバトルの途中です。残りのバトルを行わずにエンドフェイズへ進みますか？" : "",
+    "エンドフェイズへ進む", function(){
+      snap(); nextPhase(); render();
+      if (state.phase === 2 && state.battle) battleRun();
+    });
 });
 // 準備（先手を決めて配る・引き直すか決める）と、バトルの再開。ヘッダーとガイドのボタン
 document.addEventListener("click", function(e){
   var t = e.target.closest("button[data-prep], button[data-flow]"); if (!t) return;
   if (t.dataset.prep === "deal"){
-    if (!boardIsEmpty() && !window.confirm("盤面を消して、準備からやり直します。よろしいですか？")) return;
-    snap(); prepDeal(+t.dataset.first); render(); return;
+    var first = +t.dataset.first;
+    askConfirm(boardIsEmpty() ? "" : "盤面を消して、準備からやり直します。よろしいですか？", "やり直す", function(){ snap(); prepDeal(first); render(); }); return;
   }
   if (t.dataset.prep === "mull"){ snap(); prepMull(+t.dataset.pi, t.dataset.redraw === "1"); render(); return; }
   if (t.dataset.flow === "resume"){ if (fxAsk || picking) return; fxClear(); battleRun(); return; }

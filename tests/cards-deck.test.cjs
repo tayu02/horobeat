@@ -25,8 +25,8 @@ async function run(label, viewport, touch){
   await p.click('button[data-dk="+"][data-pi="0"][data-key="HB01-097"]');
   await p.click('button[data-dk="+"][data-pi="0"][data-key="UNKNOWN-utsushimi"]');
   await p.click('.navbtn[data-view="deck"]');
-  p.once('dialog',d=>d.accept());
   await p.click('button[data-act="rebuild"][data-pi="0"]');
+  await H.confirmYes(p);
   let s=await S();
   const keys=s.players[0].deck.map(c=>c.key);
   ok(s.players[0].deck.length===50,'初期化後も50枚');
