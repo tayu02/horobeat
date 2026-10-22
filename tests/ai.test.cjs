@@ -2,7 +2,8 @@
 // AI が決めるのは、プレイヤーが選ぶことだけ（引き直す・エナチャージ・どのホロビトをどこへ・ワザ／ブースト・トリガー・効果で選ぶカード）。
 // ルールが未確定でシミュレーターが聞くことは、AI の番でも人に聞く。
 // 強さは2つ（2026-10-22「3です」= トークンを使わずに強くする）: 「かんたん」（その場でいちばん伸びる出し方）と「ふつう」（バトルの結果を見通す）。
-// 2〜8 は「かんたん」の考え方を、11 は「ふつう」の考え方を確かめる。強さの比較は tools/ai-bench.cjs（AI どうしの対戦の勝率）
+// 2〜8 は「かんたん」の考え方を、11 は「ふつう」の考え方（引き分け狙い・ワザの配分・負けラインへの重ね・トドメ）を確かめる。
+// 強さの比較は tools/ai-bench.cjs（AI どうしの対戦の勝率）、重みの探索は tools/ai-tune.cjs
 const H = require('./harness.cjs');
 const { devices, ok } = H;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -178,6 +179,14 @@ async function run(label, viewport, touch, full){
   s=await S();
   ok((await log()).includes('引き分けにする') && !s.players[1].hand.some(c=>c.key==='HD02-009'),'「ふつう」: 勝てなくても、ブーストで引き分けにできるなら使う');
   ok(s.players[1].heart.every(c=>!c.turned) && top(s,0,0).turned && top(s,1,0).turned,'引き分けなので AI のハートはダメージを受けず、お互いのホロビトがダウンする');
+  // ワザ・ブーストの配分: 1枚しかないブースト（+2000）を、引き分けにしかならない第1ライン（4000 対 6000）ではなく、
+  // 勝ちに変えられる第2ライン（4000 対 5000）に回す
+  await setup({line:[['HD02-007'],['HD02-004']]},{line:[['HD02-003'],['HD02-003']], hand:['HD02-009'], ena:['HD02-001']},{phase:1,first:1});
+  await p.click('#btnPhase'); await settle();
+  s=await S();
+  ok((await log()).includes('あとのラインに回す'),'「ふつう」: 第1ラインでは使わず、あとのラインに回す');
+  ok(!s.players[1].hand.some(c=>c.key==='HD02-009') && top(s,0,1).turned && !top(s,1,1).turned,'第2ラインでブーストを使って勝つ（相手の第2ラインのホロビトがダウン）');
+  ok(top(s,1,0).turned && s.players[0].heart.filter(c=>c.turned).length===1,'第1ラインは負け、第2ラインの勝ちで相手のハートにダメージ');
   // 出し方: 負けているラインに重ねて勝ちに変える（不戦勝のラインに重ねるより伸びる）
   await setup({line:[['HB01-001']]},{hand:['HD02-004'], ena:['HD02-001'], line:[['HD02-001'],['HD02-003']], flags:{enaCharged:true}},{phase:1,first:0});
   ok(await until(()=>state.phase===2,6000),'AI が召喚フェイズを終える');

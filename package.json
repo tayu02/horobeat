@@ -13,6 +13,7 @@
     "test": "node tests/run.mjs",
     "test:repeat": "node tests/run.mjs --repeat 5",
     "ai:bench": "node tools/ai-bench.cjs",
+    "ai:tune": "node tools/ai-tune.cjs",
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "devDependencies": {
