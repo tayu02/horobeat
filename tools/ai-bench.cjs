@@ -24,6 +24,7 @@ const PINNED = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 // ページの中で、渡された番号の局をすべて行う
 async function pageGames(idx, A, B, WA, WB){
   render = function(){ aiKick(); };        // 速くするため、画面の描き直しをやめ、AI を進めるところだけ残す
+  REC_ON = false;                          // 対戦の記録も取らない
   fxShowLog = function(){};
   save = function(){};
   var origOpen = openCardSheet;

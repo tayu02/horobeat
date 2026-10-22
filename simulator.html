@@ -220,6 +220,23 @@ body.view-play #viewPlay, body.view-cards #viewCards, body.view-deck #viewDeck{d
 body.view-play .buildonly, body:not(.view-play) .playonly{display:none !important}
 /* 効果のログ・選ぶ案内は盤面のもの。カード・デッキの画面では出さない（画面の下を覆って「組み直す」などを押せなくしていた） */
 body:not(.view-play) #fxlog, body:not(.view-play) #pickbar{display:none !important}
+/* 対戦の記録を見返す（依頼者の指示 2026-10-22）。見返している間は盤面と操作のボタンを触れない */
+#replaybar{position:fixed;left:8px;right:8px;bottom:8px;z-index:92;display:none;background:#1b1414;border:2px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:0 4px 18px rgba(0,0,0,.6)}
+#replaybar.on{display:block}
+body:not(.view-play) #replaybar{display:none !important}
+.rbtop{display:flex;align-items:center;gap:8px}
+.rbtop b{color:var(--gold)}
+.rbpos{font-variant-numeric:tabular-nums;color:var(--txt)}
+.rbtop button{margin-left:auto}
+.rbwhen{color:var(--sub);margin:3px 0}
+#rbrange{width:100%;margin:4px 0}
+.rbbtns{display:flex;gap:6px}
+.rbbtns button{flex:1;font-size:16px;min-height:36px}
+.rblog{max-height:22vh;overflow-y:auto;margin-top:6px;color:var(--txt)}
+.rblog div{padding:1px 0;border-bottom:1px dashed #3a2b2b}
+body.replaying #viewPlay{pointer-events:none}
+body.replaying #fxlog, body.replaying #pickbar, body.replaying #guide{display:none !important}
+body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.replaying #btnAi, body.replaying #btnRec{pointer-events:none;opacity:.45}
 .seg{display:flex;gap:4px;margin:2px 0 8px}
 .seg button{flex:1;font-size:12px}
 /* 絞り込み */
@@ -426,6 +443,7 @@ body:not(.view-play) #fxlog, body:not(.view-play) #pickbar{display:none !importa
     <button id="btnUndo" disabled>戻す</button>
     <button id="btnFx" class="mini">効果: 自動</button>
     <button id="btnAi" class="mini">相手: 人</button>
+    <button id="btnRec" class="mini">📼 記録</button>
     <span class="spacer"></span>
     <span class="jumpbar">
       <button class="mini" data-jump="1">相手へ</button>
@@ -496,6 +514,7 @@ body:not(.view-play) #fxlog, body:not(.view-play) #pickbar{display:none !importa
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ。同じコストには重ねられません。重ねるラインは、条件を満たしていればどのラインでも選べます）。<b>エナが足りないときは使えません</b>。</p>
     <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。ダウンしているホロビトも通常どおりバトルし、勝てば通常どおりダメージを与えます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、負けたホロビトとハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ダブルダメージの2ダメージは、1ダメージを2回、上から順に入れます。引き分けは、お互いのホロビトにそれぞれ1ダメージ（ダウンしていなければダウン、すでにダウンしていれば破壊）で、ハートはダメージを受けません。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。バトルのたびに両者のカードの画像を並べて出し、パワーを比べたら結果（勝ち・負け）を見せます（「続ける」で次へ）。ハートが破壊されたときは、そのカードの画像を出してトリガーチェックします。</p>
     <p><b>相手をAIにする</b>：上部の「相手: 人」を押して「AI ふつう」か「AI かんたん」を選ぶと、相手の番に AI が自動で動きます（引き直すか、エナチャージ、どのホロビトをどのラインに出すか、ワザ・ブーストを使うか、ハートのトリガー、効果で選ぶカード）。<b>ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます</b>（AI にルールを決めさせないため）。AI が何をしたかは下の記録に残ります。「戻す」で AI の番に戻ったときは AI が止まるので、「AIを進める」で続けます。「かんたん」は、その場でいちばん強くなる出し方をします。「ふつう」は、第1ラインから順にバトルの結果（どのラインで勝ち負けし、ハートに何回ダメージが入るか、トドメになるか）を見通し、エナを使うと次のエナドローで引ける枚数が減ることやカードの効果も数えて、出し方・ワザ・ブースト（5つのラインへの配り方）・トリガーを選びます（AI どうしで800回対戦させると、「ふつう」が「かんたん」に約86%勝ちます）。AI はあなたの手札の中身を見ません（盤面と枚数だけを見ます）。AI の手札も裏向きで表示します（相手を選ぶシートで「見せる」にもできます。勝敗が決まったら見せます）。</p>
+    <p><b>対戦の記録</b>：上部の「📼 記録」で、配った直後からの盤面を1手ずつ見返せます（⏮ ◀ ▶ ⏭・つまみ・PC は矢印キー）。見返している間は盤面を触れず、「閉じる」でいまの盤面に戻ります。記録はこの端末のブラウザに、いまのゲームと1つ前のゲームの2つまで残ります。</p>
     <p><b>盤面の印</b>：効果を出しているカードは金の太い枠と「効果」、効果の対象は赤の太い枠と「対象」、バトル中のカードは白の太い枠と「バトル」、選ぶ候補は金の太い枠と「選ぶ」の札が付きます。</p>
     <p><b>エンドフェイズ</b>：スライドステップ・エナドロー・エナリフレッシュを自動で行います。</p>
     <p><b>効果</b>：ヘッダーが「効果: 自動」のとき、確定している部分だけ自動で処理し、未確定の部分は聞くか手で処理してもらいます。</p>
@@ -531,6 +550,7 @@ body:not(.view-play) #fxlog, body:not(.view-play) #pickbar{display:none !importa
 <div id="sheetwrap"><div id="sheetbg"></div><div id="sheet"></div></div>
 <div id="pickbar"><span id="pickmsg"></span><button class="mini" id="pickCancel">やめる</button></div>
 <div id="fxlog"></div>
+<div id="replaybar"></div>
 
 <script>
 "use strict";
@@ -621,6 +641,7 @@ function newState(decklists){
 
 /* ---------------- 保存 ---------------- */
 function save(){
+  if (replay) return;   // 記録を見返している間は、いまの盤面の保存を書き換えない
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
 }
 function load(){
@@ -642,8 +663,8 @@ function load(){
 function clearSaved(){ try { localStorage.removeItem(STORE_KEY); } catch(e){} }
 
 /* ---------------- undo ---------------- */
-function snap(){ undoStack.push(JSON.stringify(state)); if (undoStack.length > 300) undoStack.shift(); aiEpoch++; }
-function undo(){ if (!undoStack.length) return; state = JSON.parse(undoStack.pop()); aiStop(); render(); }
+function snap(){ var j = JSON.stringify(state); undoStack.push(j); if (undoStack.length > 300) undoStack.shift(); aiEpoch++; recPush(j); }
+function undo(){ if (!undoStack.length || replay) return; state = JSON.parse(undoStack.pop()); recPop(); aiStop(); render(); }
 
 /* ---------------- 探索・移動 ---------------- */
 function allLists(){
@@ -732,7 +753,7 @@ var ACTIONS = {
   ena1:     function(pi){ drawTo(pi, 1, "ena", true); },
   setupAll: function(pi){ ACTIONS.shuffle(pi); ACTIONS.draw6(pi); ACTIONS.heart5(pi); ACTIONS.ena1(pi); },
   rebuild:  function(pi){ rebuildPlayer(pi); },
-  reset:    function(){ var d = state.players.map(function(P){ return P.decklist; }), fx = state.fxAuto; state = newState(d); state.fxAuto = fx; clearSaved(); }
+  reset:    function(){ var d = state.players.map(function(P){ return P.decklist; }), fx = state.fxAuto; state = newState(d); state.fxAuto = fx; clearSaved(); recStop(); }
 };
 function runAction(name, pi, arg){
   if (pi === 2){ if (name === "reset") ACTIONS.reset(); else { ACTIONS[name](0, arg); ACTIONS[name](1, arg); } }
@@ -772,6 +793,7 @@ function prepDeal(first){
   [0, 1].forEach(function(pi){ shuffleDeck(pi); drawTo(pi, 6, "hand", true); });
   fxClear();
   fxLog("準備：先手は" + SIDE_NAME[first] + "。①山札を混ぜ、③6枚引いた。④それぞれ「引き直す」か「このまま」を選んでください");
+  recStart();
 }
 // 準備④: 引き直すか決める。両者が決めたら⑤⑥を行い、召喚フェイズ（先手）へ
 function prepMull(pi, redraw){
@@ -2402,7 +2424,10 @@ function stripHTML(arr, tagFn){
 function lockCls(pi){ return lockOf(pi) ? " locked" : ""; }
 // AI の手札を伏せる（依頼者の指示 2026-10-22。2「AIの手札を裏向きにする」）。表示だけを伏せ、カードの向き（state）は変えない。
 // 伏せたカードは触れない（タップで中身を見られない・動かせない）。勝敗が決まったら見せる
-function aiHideHand(pi){ return isAI(pi) && !aiForce && ui.aiHide !== false && state.winner === undefined; }
+function aiHideHand(pi){
+  if (replay) return isAI(pi) && ui.aiHide !== false && !replay.ended;   // 見返している間も、終わっていないゲームなら伏せる
+  return isAI(pi) && !aiForce && ui.aiHide !== false && state.winner === undefined;
+}
 function hiddenStripHTML(arr){
   if (!arr.length) return '<div class="empty">（なし）</div>';
   return arr.map(function(c){ return '<div class="card hid" data-owner="' + c.owner + '"><div class="ci down"><div class="mark">AI</div></div></div>'; }).join("");
@@ -2805,7 +2830,7 @@ function libSheetClick(ds){
   }
 }
 function renderBuilder(){
-  document.body.className = "view-" + ui.view;
+  document.body.className = "view-" + ui.view + (replay ? " replaying" : "");
   document.querySelectorAll(".navbtn").forEach(function(b){ b.classList.toggle("on", b.dataset.view === ui.view); });
   document.getElementById("deckCount").textContent = SIDE_NAME[ui.deckPi] + " " + deckTotal(ui.deckPi) + "枚";
   document.getElementById("btnUndo2").disabled = !undoStack.length;
@@ -2849,6 +2874,7 @@ function boardIsEmpty(){
 // ヘッダーの2段目: いまの進行と、次にすること
 function flowHTML(){
   var who = function(pi){ return '<span class="who ' + (pi ? "opp" : "me") + '">' + SIDE_NAME[pi] + '</span>'; };
+  if (replay) return '<span>📼 記録を見ています（' + (replay.i + 1) + ' / ' + replay.steps.length + '）。盤面は触れません。下の「閉じる」でいまの盤面に戻ります</span>';
   if (state.winner !== undefined) return '<span class="win">★ ' + SIDE_NAME[state.winner] + 'の勝利</span><span>' + esc(state.winWhy || "") + '</span>';
   if (state.phase < 0){
     if (state.prep !== "mull")
@@ -2896,9 +2922,11 @@ function render(){
   document.getElementById("guide").style.display = boardIsEmpty() ? "" : "none";
   document.getElementById("roundLbl").textContent = "ラウンド " + state.round;
   document.getElementById("phaseLbl").textContent = state.phase < 0 ? "準備" : PHASES[state.phase];
-  document.getElementById("btnUndo").disabled = !undoStack.length;
+  document.getElementById("btnUndo").disabled = !undoStack.length || !!replay;
   // AI の召喚フェイズの間は押せない（止めているときは押せる）
-  document.getElementById("btnPhase").disabled = state.phase < 0 || state.winner !== undefined || (isAI(activeOf()) && !aiPaused);
+  document.getElementById("btnPhase").disabled = !!replay || state.phase < 0 || state.winner !== undefined || (isAI(activeOf()) && !aiPaused);
+  var rb = document.getElementById("replaybar");
+  rb.innerHTML = replay ? replayBarHTML() : ""; rb.className = replay ? "on" : "";
   document.getElementById("btnAi").textContent = isAI(AI_SIDE) ? "相手: AI " + AI_LEVELS[aiLevel(AI_SIDE)] : "相手: 人";
   document.getElementById("btnAi").className = "mini" + (isAI(AI_SIDE) ? " on" : "");
   document.getElementById("flow").innerHTML = flowHTML();
@@ -2970,7 +2998,7 @@ function aiIdle(){ return !aiBusy && !picking && !fxAsk && !sheetWrap.classList.
 // 待っている間に盤面が変わってもよい（動く時点の盤面で、もう一度すべきことを確かめる）。
 // 動けなかったとき（質問が開いた など）は、その処理が終わったときの render でまた呼ばれる
 function aiKick(){
-  if (aiTimer || aiPaused || (!aiForce && ui.view !== "play") || !aiWants() || !aiIdle()) return;
+  if (replay || aiTimer || aiPaused || (!aiForce && ui.view !== "play") || !aiWants() || !aiIdle()) return;
   aiTimer = setTimeout(function(){
     aiTimer = null;
     if (aiPaused || (!aiForce && ui.view !== "play") || !aiIdle()) return;
@@ -3354,6 +3382,123 @@ function aiPickDiscard(uids){
   return cs.sort(function(a, b){ return cost(a) - cost(b); })[0].uid;
 }
 
+/* ---------------- 対戦の記録と見返し（依頼者の指示 2026-10-22。2「対戦の記録を見返す」）---------------- */
+// 配った直後の盤面（base）から、操作の前ごとの盤面を「前と変わったところ」だけで残す（「戻す」の記録 undoStack と同じ間隔）。
+// 「戻す」で取り消した操作は記録からも消す。記録はこの端末のブラウザに保存する（localStorage の "horobeat-rec"。いまのゲームと、1つ前のゲーム）。
+// 見返している間は、盤面を触れず、AI も動かない。閉じるといまの盤面に戻る
+var REC_KEY = "horobeat-rec", REC_ON = true;
+var rec = null, recPrev = null, recLast = null, replay = null;
+(function(){
+  try { var s = JSON.parse(localStorage.getItem(REC_KEY) || "null"); if (s){ rec = s.cur || null; recPrev = s.prev || null; } } catch (e){}
+})();
+function recStore(){
+  if (!REC_ON) return;
+  try { localStorage.setItem(REC_KEY, JSON.stringify({ cur:rec, prev:recPrev })); }
+  catch (e){ recPrev = null; try { localStorage.setItem(REC_KEY, JSON.stringify({ cur:rec, prev:null })); } catch (e2){} }   // 入りきらなければ前のゲームを捨てる
+}
+// 前の盤面 a から今の盤面 b への差分（上の段の項目と、陣地ごとのゾーン単位）
+function recDiff(a, b){
+  var d = { p:[{}, {}] }, del = [];
+  Object.keys(b).forEach(function(k){ if (k !== "players" && JSON.stringify(b[k]) !== JSON.stringify(a[k])) d[k] = b[k]; });
+  Object.keys(a).forEach(function(k){ if (!(k in b)) del.push(k); });
+  if (del.length) d.$del = del;
+  b.players.forEach(function(P, i){
+    var A = a.players[i] || {}, pd = d.p[i], pdel = [];
+    Object.keys(P).forEach(function(z){ if (JSON.stringify(P[z]) !== JSON.stringify(A[z])) pd[z] = P[z]; });
+    Object.keys(A).forEach(function(z){ if (!(z in P)) pdel.push(z); });
+    if (pdel.length) pd.$del = pdel;
+  });
+  return d;
+}
+function recApply(a, d){
+  var s = JSON.parse(JSON.stringify(a));
+  Object.keys(d).forEach(function(k){ if (k !== "p" && k !== "$del") s[k] = JSON.parse(JSON.stringify(d[k])); });
+  (d.$del || []).forEach(function(k){ delete s[k]; });
+  (d.p || []).forEach(function(pd, i){
+    Object.keys(pd).forEach(function(z){ if (z !== "$del") s.players[i][z] = JSON.parse(JSON.stringify(pd[z])); });
+    (pd.$del || []).forEach(function(z){ delete s.players[i][z]; });
+  });
+  return s;
+}
+function recStates(r){ var out = [r.base], s = r.base; r.d.forEach(function(d){ s = recApply(s, d); out.push(s); }); return out; }
+// 配った直後に呼ぶ: 前のゲームの記録を「1つ前のゲーム」にして、新しく記録を始める
+function recStart(){
+  if (!REC_ON) return;
+  if (rec && rec.d.length) recPrev = rec;
+  rec = { at:Date.now(), base:JSON.parse(JSON.stringify(state)), d:[], log:[], decks:state.players.map(function(P){ return libSummary(P.decklist); }) };
+  recLast = rec.base; recStore();
+}
+// 全部リセットしたとき: 記録を「1つ前のゲーム」にして止める
+function recStop(){
+  if (!REC_ON) return;
+  if (rec && rec.d.length) recPrev = rec;
+  rec = null; recLast = null; recStore();
+}
+function recLastState(){ if (!recLast && rec){ var st = recStates(rec); recLast = st[st.length - 1]; } return recLast; }
+// snap のたびに: 操作の前の盤面と、そのときの記録（前の操作で何が起きたか）を残す
+function recPush(json){
+  if (!REC_ON || !rec || replay) return;
+  var cur = JSON.parse(json), last = recLastState();
+  rec.d.push(recDiff(last, cur)); rec.log.push(fxLines.slice(-6));
+  recLast = cur; recStore();
+}
+// 「戻す」: 最後の記録を消す（取り消した操作は記録に残さない）
+function recPop(){
+  if (!REC_ON || !rec || !rec.d.length || replay) return;
+  rec.d.pop(); rec.log.pop(); recLast = null; recStore();
+}
+// 見返す: 盤面を記録のものに差し替えて描く（いまの盤面は live に取っておき、閉じたら戻す）
+function replayOpen(which){
+  var r = which === "prev" ? recPrev : rec; if (!r) return;
+  var st = recStates(r), logs = [[]].concat(r.log);
+  if (which !== "prev"){ st.push(JSON.parse(JSON.stringify(state))); logs.push(fxLines.slice(-6)); }
+  // 同じ盤面が続くところは1つにまとめる（何も変えずに次の操作をしたとき）
+  var steps = [];
+  st.forEach(function(s, i){
+    var j = JSON.stringify(s);
+    if (steps.length && steps[steps.length - 1].j === j){ steps[steps.length - 1].log = logs[i]; return; }
+    steps.push({ s:s, j:j, log:logs[i] });
+  });
+  aiStop(); aiPaused = false;
+  replay = { which:which || "cur", steps:steps, i:steps.length - 1, live:state, liveLines:fxLines.slice(), ended: which === "prev" || state.winner !== undefined };
+  picking = null; fxAsk = null; closeSheet();
+  replayShow();
+}
+function replayShow(){
+  var R = replay; if (!R) return;
+  state = JSON.parse(R.steps[R.i].j);
+  render();
+}
+function replayGo(i){ if (!replay) return; replay.i = Math.max(0, Math.min(replay.steps.length - 1, i)); replayShow(); }
+function replayClose(){
+  if (!replay) return;
+  var R = replay; replay = null;
+  state = R.live; fxLines = R.liveLines; fxShowLog();
+  render();
+}
+function replayBarHTML(){
+  var R = replay, n = R.steps.length, s = R.steps[R.i].s;
+  var when = s.phase < 0 ? "準備" : "ラウンド " + s.round + "・" + PHASES[s.phase] + (s.battle ? "（第" + (s.battle.line + 1) + "ラインのバトル）" : "");
+  return '<div class="rbtop"><b>📼 ' + (R.which === "prev" ? "1つ前のゲーム" : "このゲーム") + 'の記録</b><span class="rbpos">' + (R.i + 1) + ' / ' + n + '</span>' +
+    '<button class="mini" data-rb="close">閉じる</button></div>' +
+    '<div class="rbwhen">' + esc(when) + (s.winner !== undefined ? '　★ ' + SIDE_NAME[s.winner] + 'の勝利' : "") + '</div>' +
+    '<input type="range" id="rbrange" min="0" max="' + (n - 1) + '" value="' + R.i + '" aria-label="記録の位置">' +
+    '<div class="rbbtns"><button data-rb="first" aria-label="最初">⏮</button><button data-rb="prev" aria-label="1つ戻る">◀</button>' +
+    '<button data-rb="next" aria-label="1つ進む">▶</button><button data-rb="last" aria-label="最後">⏭</button></div>' +
+    '<div class="rblog">' + (R.steps[R.i].log.length ? R.steps[R.i].log.map(function(t){ return '<div>' + esc(t) + '</div>'; }).join("") : '<div>（配った直後）</div>') + '</div>';
+}
+function recSheet(){
+  var row = function(which, r, label){
+    if (!r) return "";
+    var n = r.d.length + 1, d = new Date(r.at);
+    return '<button data-recopen="' + which + '"><b>' + label + '</b><br><small>' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + ("0" + d.getHours()).slice(-2) + ':' + ("0" + d.getMinutes()).slice(-2) +
+      ' から・' + n + ' 手</small></button>';
+  };
+  var h = '<h3>📼 対戦の記録</h3><div class="fxq">操作のたびの盤面を、配った直後から順に見返せます（見返している間は盤面を触れません）。記録はこの端末のブラウザに、いまのゲームと1つ前のゲームの2つまで残ります。</div>';
+  if (!rec && !recPrev) h += '<div class="cres">まだ記録がありません。「試遊」で先手を選んで配ると、記録を始めます。</div>';
+  h += '<div class="sgrid c1">' + row("cur", rec, "このゲーム") + row("prev", recPrev, "1つ前のゲーム") + '<button data-close="1">閉じる</button></div>';
+  openSheet(h);
+}
 /* ---------------- シート ---------------- */
 var sheetWrap = document.getElementById("sheetwrap");
 var sheetEl   = document.getElementById("sheet");
@@ -3536,6 +3681,7 @@ sheetEl.addEventListener("click", function(e){
     fxClear(); fxLog(ui.aiHide ? "AI の手札を伏せる（裏向きで表示。勝敗が決まったら見せる）" : "AI の手札を見せる"); render(); return;
   }
   if (ds.lib){ libSheetClick(ds); return; }
+  if (ds.recopen){ closeSheet(); replayOpen(ds.recopen); return; }
   if (ds.fxa !== undefined && ds.fxa !== ""){
     var a1 = fxAsk; fxAsk = null; closeSheet();
     if (a1){ if (+ds.fxa < 0) a1.cancel(); else a1.cb(+ds.fxa); }
@@ -3642,6 +3788,7 @@ document.getElementById("btnUndo2").addEventListener("click", function(){ pickin
 // 画面の切り替え（カード／デッキ／試遊）と、絞り込み
 document.querySelector(".navrow").addEventListener("click", function(e){
   var b = e.target.closest("button[data-view]"); if (!b) return;
+  if (replay) replayClose();
   ui.view = b.dataset.view; saveUI(); render(); window.scrollTo(0, 0);
 });
 ["fQ", "fFx"].forEach(function(id){
@@ -3652,6 +3799,21 @@ document.querySelectorAll(".filters select").forEach(function(sel){
   sel.addEventListener("change", function(){ ui.f[sel.dataset.f] = sel.value; saveUI(); syncFilterInputs(); renderBuilder(); });
 });
 document.getElementById("fClear").addEventListener("click", function(){ ui.f = {}; saveUI(); syncFilterInputs(); renderBuilder(); });
+// 対戦の記録を見返す
+document.getElementById("btnRec").addEventListener("click", function(){ recSheet(); });
+document.getElementById("replaybar").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-rb]"); if (!b || !replay) return;
+  var a = b.dataset.rb;
+  if (a === "close") return replayClose();
+  replayGo(a === "first" ? 0 : a === "last" ? replay.steps.length - 1 : replay.i + (a === "next" ? 1 : -1));
+});
+document.getElementById("replaybar").addEventListener("input", function(e){ if (e.target.id === "rbrange") replayGo(+e.target.value); });
+document.addEventListener("keydown", function(e){
+  if (!replay || /^(INPUT|TEXTAREA)$/.test((e.target || {}).tagName || "") && e.target.id !== "rbrange") return;
+  if (e.key === "ArrowLeft"){ e.preventDefault(); replayGo(replay.i - 1); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); replayGo(replay.i + 1); }
+  else if (e.key === "Escape") replayClose();
+});
 // 相手を AI にする／人に戻す（この端末の設定。盤面の「戻す」には含めない）
 document.getElementById("btnAi").addEventListener("click", function(){
   var cur = aiLevel(AI_SIDE) || "", row = function(v, t, d){
