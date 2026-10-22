@@ -3013,8 +3013,8 @@ function aiCost(c){ var d = cardDef(c); return c.up && d && typeof d.cost === "n
 // ---- 準備④: 引き直すか ----
 // 考え方: 最初のラウンドに出せる（コスト2以下の）ホロビトが手札になければ引き直す
 function aiMull(p){
-  var P = state.players[p];
-  var ok = P.hand.some(function(c){ var d = cardDef(c); return aiKnown(c) && d.type === "ホロビト" && typeof d.cost === "number" && d.cost <= 2; });
+  var P = state.players[p], need = aiNormal(p) ? aiW(p).mull : 1;
+  var ok = P.hand.filter(function(c){ var d = cardDef(c); return aiKnown(c) && d.type === "ホロビト" && typeof d.cost === "number" && d.cost <= 2; }).length >= need;
   aiSay(p, ok ? "手札にコスト2以下のホロビトがあるので、引き直さない" : "手札にコスト2以下のホロビトがないので、引き直す");
   snap(); prepMull(p, !ok); render();
 }
@@ -3051,7 +3051,7 @@ function aiSummonStep(pi){
 // エナにするカード。考え方: 内容が分からないカード → 遠い先まで出せない高いカード → 安いカード（このラウンドに出したいカードは残す）
 function aiChargePick(pi){
   var P = state.players[pi];
-  if (P.hand.length <= 1) return null;
+  if (P.hand.length < (aiNormal(pi) ? aiW(pi).chargeMin : 2)) return null;
   var unk = P.hand.filter(function(c){ return !aiKnown(c); });
   if (unk.length) return { c:unk[0], why:"内容が分からないカード" };
   var ena = P.ena.length + 1;
@@ -3114,7 +3114,12 @@ function aiBestPlay(pi){
 // 重み。draw: カード1枚の値打ち。使わずに残したエナは、エンドフェイズのエナドローで1枚ずつ引けるので（確定。手引書）、
 // エナを1枚使うのはカードを1枚引けなくなるのと同じに見る。plan: バトルフェイズのワザ・ブーストを5つのラインで配分する（0で切る）。
 // fx: カードの効果（引く・捨てさせる・破壊する・回復する・未使用にする）を数える（0で切る）
-var AI_W = { hit:10, kill:1000, down:1, destroy:4, cost:0.5, board:0.5, draw:2, card:2, plan:1, fx:1 };
+// resp: 自分が先手の召喚フェイズで、相手が空いているラインの不戦勝をどれだけに見るか（相手がこのあと出せる）。
+// opp: 1 なら、相手がこのあと空いているラインの前から順にホロビト（パワー oppPow）を出すと見る（出せる数は、相手の手札の枚数と
+// エナの枚数から見積もる。手札の中身は見ない）。mull: 引き直さない条件（コスト2以下のホロビトがこの枚数以上）。
+// chargeMin: 手札がこの枚数以上ならエナチャージする。drawT: 山札がこの枚数以上ならドロートリガーを使う
+var AI_W = { hit:10, kill:1000, down:1, destroy:4, cost:0.5, board:0.5, draw:2, card:2, plan:1, fx:1,
+             resp:0.5, opp:0, oppPow:4000, mull:1, chargeMin:2, drawT:4 };
 var aiWSide = null;   // 強さの測定用: 側ごとに重みを変える（{ 0:{…}, 1:{…} }。画面からは使わない）
 function aiW(p){ return aiWSide && aiWSide[p] || AI_W; }
 function aiHearts(p){ var H = state.players[p].heart; return { n:H.length, down: H.length ? !!H[H.length - 1].turned : false }; }
@@ -3168,17 +3173,21 @@ function aiLinePow(p, i, c){
   var t = 0; parts.forEach(function(q){ t += q.n; }); return t;
 }
 // 見通しの下ごしらえ: from から第5ラインまで、両者の一番上のカードのパワー・ダブルダメージ・バリア・ダメージを受けたときの損・効果の値打ち
-function aiLines(pi, from, W){
-  var o = 1 - pi, out = [];
+function aiLines(pi, from, W, resp){
+  var o = 1 - pi, out = [], O = state.players[o];
+  // 相手がこのあと出すと見るホロビトの数（W.opp のとき）。新しいホロビトは空いているラインの前から順に出る（確定。手引書）
+  var virt = resp && W.opp ? Math.min(O.hand.length, Math.floor((untappedEna(o).length + 1) / 2)) : 0;
+  var vside = function(){ return { c:null, pw:W.oppPow, dd:1, bar:0, loss:W.down + 0.2, won:0, end:0, virt:true }; };
   var side = function(p, i, c){
     if (!c) return null;
     return { c:c, pw:aiLinePow(p, i, c), dd:aiDD(c), bar:aiBar(c),
              loss: aiHoloLoss(c, W) - (c.turned ? 0 : aiFxVal(c, "downed", W)),   // ダウンしたときの効果（HD02-016 など）は損を減らす
              won: aiFxVal(c, "won_battle", W), end: aiFxVal(c, "ended", W) };
   };
-  for (var i = from || 0; i < LINE_COUNT; i++){
+  for (var i = 0; i < LINE_COUNT; i++){
     var a = side(pi, i, lineTop(pi, i)), b = side(o, i, lineTop(o, i));
-    if (a || b) out.push({ i:i, a:a, b:b });
+    if (!b && virt > 0){ b = vside(); virt--; }
+    if (i >= (from || 0) && (a || b)) out.push({ i:i, a:a, b:b });
   }
   return out;
 }
@@ -3197,7 +3206,7 @@ function aiEval(pi, lines, resp, bonus, W){
       var n = Math.max(0, a.dd - (b ? b.bar : 0));
       if (b) sc += b.loss;
       sc += a.won;
-      if (!b && resp){ sc += n * W.hit * 0.5; continue; }
+      if (!b && resp){ sc += n * W.hit * W.resp; continue; }
       if (aiHit(op, n)) return sc + W.kill;
       sc += n * W.hit;
     } else {
@@ -3210,7 +3219,7 @@ function aiEval(pi, lines, resp, bonus, W){
   }
   return sc;
 }
-function aiForecast(pi, from, resp){ var W = aiW(pi); return aiEval(pi, aiLines(pi, from, W), resp, null, W); }
+function aiForecast(pi, from, resp){ var W = aiW(pi); return aiEval(pi, aiLines(pi, from, W, resp), resp, null, W); }
 // 盤面に残るホロビトの値打ち（次のラウンド以降も戦い、オーバービートの土台になる）
 function aiBoard(pi){
   var v = 0;
@@ -3336,7 +3345,7 @@ function aiWazaChoice(p, acts, oppCan){
 // ただしドロートリガーは、山札が少ない（3枚以下）ときは使わない
 function aiTrigChoice(p, h, kw, can){
   if (!can){ aiSay(p, "ハートの「" + nm(h) + "」を手札に加える"); return 0; }
-  if (kw === "ドローT" && state.players[p].deck.length <= 3){ aiSay(p, "山札が少ないので、ドロートリガーは使わずに手札に加える"); return 1; }
+  if (kw === "ドローT" && state.players[p].deck.length < (aiNormal(p) ? aiW(p).drawT : 4)){ aiSay(p, "山札が少ないので、ドロートリガーは使わずに手札に加える"); return 1; }
   return 0;
 }
 // トリガーでラインに出すとき、このあとのバトル（まだバトルしていないライン）を見通した点数
