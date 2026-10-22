@@ -253,6 +253,18 @@ body:not(.view-play) #fxlog, body:not(.view-play) #pickbar{display:none !importa
 .cv small{color:var(--sub)}
 .dbtns{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .dbtns button{flex:1 1 auto}
+/* 保存したデッキ（依頼者の指示 2026-10-22） */
+.libbar{margin:0 0 8px}
+.libbar button{font-size:12px}
+.librow{display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:3px;width:100%;margin:0 0 6px;padding:8px 10px}
+.librow small{color:var(--sub);font-size:11px;font-weight:400}
+.libths{display:flex;gap:3px;overflow:hidden}
+.libth{flex:0 0 34px;height:47px;border-radius:4px;overflow:hidden;background:#241c1c;display:flex;align-items:center;justify-content:center}
+.libth img{width:100%;height:100%;object-fit:cover}
+.libth i{font-size:8px;font-style:normal;color:var(--sub);text-align:center;line-height:1.2}
+.libin{font:inherit;font-size:14px;width:100%;box-sizing:border-box;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:#120e0e;color:var(--txt)}
+.libcode{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;resize:vertical;word-break:break-all}
+.ctile.ro{border-color:var(--line)}
 .dkshare{background:#3a2f1a;color:var(--gold);border:1px solid #5a4a2a;border-radius:3px;font-size:9px;padding:0 3px;white-space:nowrap}
 /* スタートデッキを選ぶタブ */
 .dktabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 4px}
@@ -478,7 +490,7 @@ body:not(.view-play) #fxlog, body:not(.view-play) #pickbar{display:none !importa
 
   <details class="doc">
     <summary>このシミュレーターについて / 操作方法</summary>
-    <p><b>画面</b>：上部の<b>「🔍 カード」</b>でカードの画像の一覧から −／＋ でデッキに入れ（名前・効果テキスト・色・コストなどで絞り込めます。選べる値は印字にあるものだけで、読めない値は「unknown（読めない）」）、<b>「📋 デッキ」</b>でいまのデッキの枚数・種別・色・コスト別の枚数を確かめ、<b>「🎮 試遊」</b>で盤面に戻ります。同名のカードは番号が違っても合計4枚、デッキは50枚までです。デッキを変えても遊んでいる途中の盤面は消えません（試遊で配るか、デッキの画面の「このデッキで盤面を組み直す」で反映）。</p>
+    <p><b>画面</b>：上部の<b>「🔍 カード」</b>でカードの画像の一覧から −／＋ でデッキに入れ（名前・効果テキスト・色・コストなどで絞り込めます。選べる値は印字にあるものだけで、読めない値は「unknown（読めない）」）、<b>「📋 デッキ」</b>でいまのデッキの枚数・種別・色・コスト別の枚数を確かめ、<b>「🎮 試遊」</b>で盤面に戻ります。同名のカードは番号が違っても合計4枚、デッキは50枚までです。「📋 デッキ」の「💾 保存」でデッキに名前を付けて保存でき、「📂 保存したデッキ」で開くとデッキリストがカードの画像で並びます。「コード」を送ると、相手も「📥 コードから読み込む」で同じデッキを使えます（保存はこの端末のブラウザなので、大事なデッキはコードを控えてください）。デッキを変えても遊んでいる途中の盤面は消えません（試遊で配るか、デッキの画面の「このデッキで盤面を組み直す」で反映）。</p>
     <p><b>操作</b>：カードを<b>タップ</b>＝印字内容とメニュー（移動・向き・表裏・メモ）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
     <p><b>進行</b>（公式の手引書のラウンドの進行どおり）：準備 → 召喚フェイズ（先手）→ 召喚フェイズ（後手）→ バトルフェイズ → エンドフェイズ → 次のラウンド。準備は、先手を選んで配り、両者が引き直すかを決めると自動で終わります。上部の欄に、いまのフェイズと誰の番かが出ます。</p>
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ。同じコストには重ねられません。重ねるラインは、条件を満たしていればどのラインでも選べます）。<b>エナが足りないときは使えません</b>。</p>
@@ -2597,7 +2609,7 @@ function deckViewHTML(){
   var mx = Math.max.apply(null, [1].concat(ck.map(function(k){ return costs[k]; })));
   var curve = ck.length ? '<div class="curve">' + ck.map(function(k){
     return '<div class="cv"><span>' + costs[k] + '</span><div class="cvbar" style="height:' + Math.round(costs[k] / mx * 48) + 'px"></div><small>' + (k === "unknown" ? "?" : k) + '</small></div>'; }).join("") + '</div><div style="text-align:center;font-size:10px">コスト別の枚数</div>' : "";
-  var h = starterTabsHTML(pi);
+  var h = libBarHTML() + starterTabsHTML(pi);
   h += '<div class="dsum"><b>' + total + '</b> 枚 ＋ 未確定カード ' + Math.max(0, DECK_SIZE - total) + ' 枚 ＝ ' + DECK_SIZE + ' 枚' +
        '<br>種別: ' + list(types) + '<br>色: ' + list(colors) + curve + '</div>';
   ds.sort(function(a, b){ return (typeof a.cost === "number" ? a.cost : 99) - (typeof b.cost === "number" ? b.cost : 99) || (idRank(a) < idRank(b) ? -1 : 1); });
@@ -2606,6 +2618,184 @@ function deckViewHTML(){
   h += '<div class="dbtns"><button data-act="rebuild" data-pi="' + pi + '" data-confirm="' + SIDE_NAME[pi] + 'の盤面を消して、このデッキで組み直します。よろしいですか？">このデッキで' + SIDE_NAME[pi] + 'の盤面を組み直す</button></div>' +
        '<p class="cres">デッキを変えても、盤面はすぐには変わりません。「🎮 試遊」で先手を選んで配るか、上のボタンで組み直すと反映されます。同名のカード（<span class="dkshare">同名</span>）は、番号が違っても合計4枚までです。</p>';
   return h;
+}
+// ---- デッキを保存する・共有する（依頼者の指示 2026-10-22「デッキの保存も共有は欲しい。呼び起こしに画像でデッキリストも見れるように」）----
+// 保存先はこの端末のブラウザ（localStorage の "horobeat-decks"）。ブラウザのデータを消すと消えるので、デッキコードを控えにできる。
+// デッキコード: 「HBD1|名前|番号x枚数,番号x枚数,…」。番号は data/cards.json の key（印字の番号。番号が読めないカードは UNKNOWN-…）
+var LIB_KEY = "horobeat-decks";
+function libLoad(){
+  try { var s = JSON.parse(localStorage.getItem(LIB_KEY) || "null"); if (s && Array.isArray(s.decks)) return s.decks; } catch (e){}
+  return [];
+}
+function libStore(){ try { localStorage.setItem(LIB_KEY, JSON.stringify({ v:1, decks:lib })); return true; } catch (e){ return false; } }
+var lib = libLoad(), libPending = null;
+function libTotal(cards){ var n = 0; for (var k in cards) n += cards[k] | 0; return n; }
+function libClean(name){ return String(name || "").replace(/[|\r\n]/g, "／").trim().slice(0, 40); }
+function libSorted(cards){
+  return Object.keys(cards).filter(function(k){ return (cards[k] | 0) > 0 && CARDS[k]; }).map(function(k){ return CARDS[k]; })
+    .sort(function(a, b){ return (typeof a.cost === "number" ? a.cost : 99) - (typeof b.cost === "number" ? b.cost : 99) || (idRank(a) < idRank(b) ? -1 : 1); });
+}
+function deckCode(name, cards){
+  return "HBD1|" + libClean(name) + "|" + libSorted(cards).map(function(d){ return d.key + "x" + (cards[d.key] | 0); }).join(",");
+}
+// デッキコードを読む。errs があれば読み込まない。unknown: このシミュレーターのカードデータにない番号（読み込むときは外し、空きは未確定カードになる）
+function parseDeckCode(text){
+  var m = /^HBD1\|([^|]*)\|([^|]*)$/.exec(String(text || "").trim());
+  if (!m) return { errs:["デッキコードの形ではありません（「HBD1|名前|…」の形です）"], unknown:[] };
+  var cards = {}, errs = [], unknown = [];
+  m[2].split(",").map(function(x){ return x.trim(); }).filter(Boolean).forEach(function(part){
+    var mm = /^(.+)x(\d+)$/.exec(part);
+    if (!mm || +mm[2] < 1){ errs.push("読めない部分があります: " + part); return; }
+    if (!CARDS[mm[1]]){ unknown.push(mm[1] + " ×" + mm[2]); return; }
+    cards[mm[1]] = (cards[mm[1]] || 0) + (+mm[2]);
+  });
+  var total = libTotal(cards), byName = {};
+  if (total > DECK_SIZE) errs.push("合計が " + total + " 枚です（デッキは50枚）");
+  Object.keys(cards).forEach(function(k){ var n = nameOf(k); byName[n] = (byName[n] || 0) + cards[k]; });
+  Object.keys(byName).forEach(function(n){ if (byName[n] > SAME_NAME_MAX) errs.push("「" + n + "」が " + byName[n] + " 枚あります（同名は4枚まで）"); });
+  return { name:libClean(m[1]), cards:cards, errs:errs, unknown:unknown };
+}
+// 枚数・種別・色のまとめ（1行）
+function libSummary(cards){
+  var total = libTotal(cards), col = {}, typ = {};
+  libSorted(cards).forEach(function(d){ var n = cards[d.key] | 0; col[d.color_mark] = (col[d.color_mark] || 0) + n; typ[d.type] = (typ[d.type] || 0) + n; });
+  var j = function(m){ return Object.keys(m).map(function(k){ return esc(k) + " " + m[k]; }).join("・"); };
+  return total + " 枚" + (total < DECK_SIZE ? "（残り " + (DECK_SIZE - total) + " 枚は未確定カード）" : "") + (total ? "　" + j(col) + "　" + j(typ) : "");
+}
+// デッキリストを画像で並べる（読むだけ。枚数の札つき）
+function libImagesHTML(cards){
+  var ds = libSorted(cards);
+  if (!ds.length) return '<div class="cres">カードが入っていません（すべて未確定カード）</div>';
+  return '<div class="cgrid libimgs">' + ds.map(function(d){
+    var src = CARD_IMAGES[d.key];
+    var txt = esc(d.name) + '<br>' + (d.type === "ワザ" ? "ワザ" : "コスト " + fmt(d.cost) + " / " + fmt(d.power));
+    return '<div class="ctile in ro" data-key="' + esc(d.key) + '"><div class="ctimg"><div class="cttxt">' + txt + '</div>' +
+      (src ? '<img src="' + esc(src) + '" alt="' + esc(d.name) + '" loading="lazy" decoding="async" onerror="this.remove()">' : "") +
+      '<span class="ctn">' + (cards[d.key] | 0) + '</span></div><div class="ctname">' + esc(d.name) + '</div></div>';
+  }).join("") + '</div>';
+}
+function libBarHTML(){
+  return '<div class="dbtns libbar"><button data-lib="save">💾 このデッキを保存</button><button data-lib="list">📂 保存したデッキ（' + lib.length + '）</button>' +
+         '<button data-lib="import">📥 コードから読み込む</button></div>';
+}
+function libById(id){ return lib.filter(function(d){ return d.id === id; })[0] || null; }
+function libDefaultName(dl){
+  var S = starterOf(dl); if (S) return "スタートデッキ " + starterLabel(S);
+  for (var i = 1; ; i++){ var n = "デッキ " + i; if (!lib.some(function(d){ return d.name === n; })) return n; }
+}
+// 保存する（同じ名前があれば確かめて上書き）
+function libSaveSheet(){
+  var dl = state.players[ui.deckPi].decklist;
+  openSheet('<h3>このデッキを保存</h3><div class="fxq">' + SIDE_NAME[ui.deckPi] + 'のデッキ：' + libSummary(dl) + '</div>' +
+    '<input id="libName" class="libin" maxlength="40" value="' + esc(libDefaultName(dl)) + '" aria-label="デッキの名前">' +
+    '<div class="sgrid c2" style="margin-top:8px"><button class="primary" data-lib="dosave">保存する</button><button data-close="1">やめる</button></div>' +
+    '<p class="cres">この端末のブラウザに保存します。ブラウザのデータを消すと消えるので、大事なデッキは「コード」を控えておいてください。</p>');
+}
+function libDoSave(name, cards){
+  name = libClean(name) || libDefaultName(cards);
+  var same = lib.filter(function(d){ return d.name === name; })[0];
+  var put = function(){
+    var rec = { id: same ? same.id : Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name:name, cards:JSON.parse(JSON.stringify(cards)), at:Date.now() };
+    if (same) lib[lib.indexOf(same)] = rec; else lib.unshift(rec);
+    var ok = libStore();
+    fxClear(); fxLog(ok ? "デッキ「" + name + "」を保存した（" + libTotal(cards) + " 枚）" : "保存できませんでした（このブラウザでは保存できない設定のようです）。コードを控えてください");
+    render(); libOpen(rec.id);
+  };
+  if (same) return askConfirm("「" + name + "」はもう保存されています。いまのデッキで上書きしますか？", "上書きする", put);
+  put();
+}
+// 保存したデッキの一覧（各デッキの画像を少し並べる）
+function libListSheet(){
+  var h = '<h3>保存したデッキ（' + lib.length + '）</h3>';
+  if (!lib.length) h += '<div class="cres">まだありません。「💾 このデッキを保存」で保存するか、「📥 コードから読み込む」で読み込みます。</div>';
+  h += lib.map(function(d){
+    var th = libSorted(d.cards).slice(0, 8).map(function(c){ var src = CARD_IMAGES[c.key];
+      return '<span class="libth">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy" onerror="this.remove()">' : '<i>' + esc(c.name.slice(0, 4)) + '</i>') + '</span>'; }).join("");
+    return '<button class="librow" data-lib="open" data-id="' + esc(d.id) + '"><b>' + esc(d.name) + '</b><small>' + libSummary(d.cards) + '</small><span class="libths">' + th + '</span></button>';
+  }).join("");
+  h += '<div class="sgrid c2" style="margin-top:8px"><button data-lib="import">📥 コードから読み込む</button><button data-close="1">閉じる</button></div>';
+  openSheet(h);
+}
+// 1つのデッキ: 画像のデッキリストと、使う・コード・名前・削除
+function libOpen(id){
+  var d = libById(id); if (!d) return libListSheet();
+  // 押すボタンは上に（デッキリストの画像は長いので、下まで送らなくても押せるように）
+  openSheet('<h3>' + esc(d.name) + '</h3><div class="fxq">' + libSummary(d.cards) + '</div>' +
+    '<div class="sgrid c2" style="margin-bottom:8px"><button class="primary" data-lib="use" data-pi="0" data-id="' + esc(d.id) + '">自分のデッキにする</button>' +
+    '<button class="primary" data-lib="use" data-pi="1" data-id="' + esc(d.id) + '">相手のデッキにする</button>' +
+    '<button data-lib="code" data-id="' + esc(d.id) + '">コードを見る・コピー</button><button data-lib="rename" data-id="' + esc(d.id) + '">名前を変える</button>' +
+    '<button data-lib="del" data-id="' + esc(d.id) + '">削除する</button><button data-lib="list">一覧に戻る</button></div>' +
+    '<div class="sect">デッキリスト</div>' + libImagesHTML(d.cards));
+}
+function libCodeSheet(id){
+  var d = libById(id); if (!d) return;
+  openSheet('<h3>デッキコード：' + esc(d.name) + '</h3><div class="fxq">このコードを相手に送ると、相手のシミュレーターの「📥 コードから読み込む」で同じデッキを読み込めます。</div>' +
+    '<textarea id="libCode" class="libin libcode" readonly rows="4">' + esc(deckCode(d.name, d.cards)) + '</textarea>' +
+    '<div class="sgrid c2" style="margin-top:8px"><button class="primary" data-lib="copy">コピーする</button><button data-lib="open" data-id="' + esc(d.id) + '">戻る</button></div>' +
+    '<p class="cres" id="libMsg"></p>');
+}
+function libCopy(){
+  var ta = document.getElementById("libCode"), msg = document.getElementById("libMsg"); if (!ta) return;
+  var fallback = function(){ ta.focus(); ta.select(); if (msg) msg.textContent = "コピーできなかったので、文字を選んであります。長押し（PC は Ctrl+C）でコピーしてください"; };
+  try {
+    navigator.clipboard.writeText(ta.value).then(function(){ if (msg) msg.textContent = "コピーしました"; }, fallback);
+  } catch (e){ fallback(); }
+}
+function libRenameSheet(id){
+  var d = libById(id); if (!d) return;
+  openSheet('<h3>名前を変える</h3><input id="libName" class="libin" maxlength="40" value="' + esc(d.name) + '" aria-label="デッキの名前">' +
+    '<div class="sgrid c2" style="margin-top:8px"><button class="primary" data-lib="dorename" data-id="' + esc(d.id) + '">変える</button><button data-lib="open" data-id="' + esc(d.id) + '">やめる</button></div>');
+}
+function libImportSheet(text, res){
+  var h = '<h3>コードから読み込む</h3><textarea id="libCode" class="libin libcode" rows="4" placeholder="HBD1|名前|HB01-001x4,…">' + esc(text || "") + '</textarea>' +
+    '<div class="sgrid c2" style="margin-top:8px"><button class="primary" data-lib="doimport">読む</button><button data-close="1">やめる</button></div>';
+  if (res){
+    if (res.errs.length) h += '<div class="fxst off">読み込めません：' + res.errs.map(esc).join("／") + '</div>';
+    else {
+      if (res.unknown.length) h += '<div class="fxst q">このシミュレーターのカードデータにない番号があります（外して読み込み、空きは未確定カードになります）：' + res.unknown.map(esc).join("、") + '</div>';
+      h += '<div class="sect">' + esc(res.name || "（名前なし）") + '</div><div class="fxq">' + libSummary(res.cards) + '</div>' +
+        '<div class="sgrid c2" style="margin-bottom:8px"><button class="primary" data-lib="usepending" data-pi="0">自分のデッキにする</button>' +
+        '<button class="primary" data-lib="usepending" data-pi="1">相手のデッキにする</button><button data-lib="savepending">保存する</button></div>' + libImagesHTML(res.cards);
+    }
+  }
+  openSheet(h);
+}
+// そのデッキを使う（デッキの登録だけを変える。−／＋ と同じく、盤面にカードがあれば消さない。盤面が空なら山札も組み直す）
+function libUse(pi, name, cards){
+  snap();
+  state.players[pi].decklist = JSON.parse(JSON.stringify(cards));
+  if (sideIsEmpty(pi)) rebuildPlayer(pi);
+  ui.deckPi = pi; saveUI();
+  fxClear(); fxLog("「" + name + "」を" + SIDE_NAME[pi] + "のデッキにした（" + libTotal(cards) + " 枚）" + (sideIsEmpty(pi) ? "" : "。盤面には、配るか組み直すと反映されます"));
+  closeSheet(); render();
+}
+// シートのボタン
+function libSheetClick(ds){
+  var d = ds.id ? libById(ds.id) : null;
+  switch (ds.lib){
+    case "list": return libListSheet();
+    case "open": return libOpen(ds.id);
+    case "import": return libImportSheet("", null);
+    case "dosave": var inp = document.getElementById("libName"); return libDoSave(inp ? inp.value : "", state.players[ui.deckPi].decklist);
+    case "use": if (d) libUse(+ds.pi, d.name, d.cards); return;
+    case "code": return libCodeSheet(ds.id);
+    case "copy": return libCopy();
+    case "rename": return libRenameSheet(ds.id);
+    case "dorename":
+      var nn = libClean((document.getElementById("libName") || {}).value);
+      if (d && nn){ d.name = nn; libStore(); render(); }
+      return libOpen(ds.id);
+    case "del":
+      if (!d) return;
+      return askConfirm("デッキ「" + d.name + "」を削除しますか？（もとに戻せません）", "削除する", function(){
+        lib = lib.filter(function(x){ return x.id !== d.id; }); libStore(); fxClear(); fxLog("デッキ「" + d.name + "」を削除した"); render(); libListSheet(); });
+    case "doimport":
+      var t = (document.getElementById("libCode") || {}).value || "", r = parseDeckCode(t);
+      libPending = r.errs.length ? null : r;
+      return libImportSheet(t, r);
+    case "usepending": if (libPending) libUse(+ds.pi, libPending.name || "読み込んだデッキ", libPending.cards); return;
+    case "savepending": if (libPending) libDoSave(libPending.name || "読み込んだデッキ", libPending.cards); return;
+  }
 }
 function renderBuilder(){
   document.body.className = "view-" + ui.view;
@@ -3334,6 +3524,7 @@ sheetEl.addEventListener("click", function(e){
   if (ds.close){ closeSheet(); if (fxAsk){ var a0 = fxAsk; fxAsk = null; a0.cancel(); } return; }
   if (ds.cfm){ var yes = sheetYes; closeSheet(); if (yes) yes(); return; }
   if (ds.ailv !== undefined){ closeSheet(); setAi(ds.ailv); return; }
+  if (ds.lib){ libSheetClick(ds); return; }
   if (ds.fxa !== undefined && ds.fxa !== ""){
     var a1 = fxAsk; fxAsk = null; closeSheet();
     if (a1){ if (+ds.fxa < 0) a1.cancel(); else a1.cb(+ds.fxa); }
@@ -3393,8 +3584,12 @@ sheetEl.addEventListener("keydown", function(e){
 
 /* ---------------- 準備手順・デッキ編集・ヘッダー ---------------- */
 document.querySelector("main").addEventListener("click", function(e){
-  var t = e.target.closest("button[data-act], button[data-dk], button[data-starter], button[data-deckpi], [data-detail], .zlabel[data-zsheet]");
+  var t = e.target.closest("button[data-act], button[data-dk], button[data-starter], button[data-deckpi], button[data-lib], [data-detail], .zlabel[data-zsheet]");
   if (!t) return;
+  if (t.dataset.lib){
+    if (t.dataset.lib === "save") libSaveSheet(); else if (t.dataset.lib === "list") libListSheet(); else if (t.dataset.lib === "import") libImportSheet("", null);
+    return;
+  }
   var tpi = +t.dataset.pi;
   if (t.dataset.starter !== undefined){
     var sid = t.dataset.starter, keep = t.dataset.keep === "1";
