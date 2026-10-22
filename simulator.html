@@ -279,6 +279,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
 .libth{flex:0 0 34px;height:47px;border-radius:4px;overflow:hidden;background:#241c1c;display:flex;align-items:center;justify-content:center}
 .libth img{width:100%;height:100%;object-fit:cover}
 .libth i{font-size:8px;font-style:normal;color:var(--sub);text-align:center;line-height:1.2}
+.olcode{font-size:20px;letter-spacing:.15em;color:var(--gold)}
 .libin{font:inherit;font-size:14px;width:100%;box-sizing:border-box;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:#120e0e;color:var(--txt)}
 .libcode{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;resize:vertical;word-break:break-all}
 .ctile.ro{border-color:var(--line)}
@@ -444,6 +445,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
     <button id="btnFx" class="mini">効果: 自動</button>
     <button id="btnAi" class="mini">相手: 人</button>
     <button id="btnRec" class="mini">📼 記録</button>
+    <button id="btnOnline" class="mini">🌐 対戦</button>
     <span class="spacer"></span>
     <span class="jumpbar">
       <button class="mini" data-jump="1">相手へ</button>
@@ -514,6 +516,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ。同じコストには重ねられません。重ねるラインは、条件を満たしていればどのラインでも選べます）。<b>エナが足りないときは使えません</b>。</p>
     <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。ダウンしているホロビトも通常どおりバトルし、勝てば通常どおりダメージを与えます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、負けたホロビトとハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ダブルダメージの2ダメージは、1ダメージを2回、上から順に入れます。引き分けは、お互いのホロビトにそれぞれ1ダメージ（ダウンしていなければダウン、すでにダウンしていれば破壊）で、ハートはダメージを受けません。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。バトルのたびに両者のカードの画像を並べて出し、パワーを比べたら結果（勝ち・負け）を見せます（「続ける」で次へ）。ハートが破壊されたときは、そのカードの画像を出してトリガーチェックします。</p>
     <p><b>相手をAIにする</b>：上部の「相手: 人」を押して「AI ふつう」か「AI かんたん」を選ぶと、相手の番に AI が自動で動きます（引き直すか、エナチャージ、どのホロビトをどのラインに出すか、ワザ・ブーストを使うか、ハートのトリガー、効果で選ぶカード）。<b>ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます</b>（AI にルールを決めさせないため）。AI が何をしたかは下の記録に残ります。「戻す」で AI の番に戻ったときは AI が止まるので、「AIを進める」で続けます。「かんたん」は、その場でいちばん強くなる出し方をします。「ふつう」は、第1ラインから順にバトルの結果（どのラインで勝ち負けし、ハートに何回ダメージが入るか、トドメになるか）を見通し、エナを使うと次のエナドローで引ける枚数が減ることやカードの効果も数えて、出し方・ワザ・ブースト（5つのラインへの配り方）・トリガーを選びます（AI どうしで800回対戦させると、「ふつう」が「かんたん」に約86%勝ちます）。AI はあなたの手札の中身を見ません（盤面と枚数だけを見ます）。AI の手札も裏向きで表示します（相手を選ぶシートで「見せる」にもできます。勝敗が決まったら見せます）。</p>
+    <p><b>オンライン対戦</b>：上部の「🌐 対戦」で部屋を作り、出た6文字のコードを相手に伝えます。相手は同じシミュレーターを開いて「部屋に入る」にコードを入れます。作った人が先手を選んで始めます。デッキは、それぞれのいまの「自分のデッキ」です。あなたの手札・山札・ハートの中身は相手の端末には送りません（場に出たカード・表になったカードだけが届きます）。相手が決めること（引き直す・ワザ・ブースト・ハートのトリガー・効果で選ぶカードなど）は、相手の画面に出ます。自分の番でないときは、自分の側も操作できません。「戻す」と AI は使えません。読み込み直すと、同じ部屋の続きに戻ります。使えるのは、claude.ai で公開したシミュレーターを、ログインして開いたときだけです。相手は、このシミュレーターに「編集者」としてメールで招待されている必要があります（リンクで共有していないとき）。</p>
     <p><b>対戦の記録</b>：上部の「📼 記録」で、配った直後からの盤面を1手ずつ見返せます（⏮ ◀ ▶ ⏭・つまみ・PC は矢印キー）。見返している間は盤面を触れず、「閉じる」でいまの盤面に戻ります。記録はこの端末のブラウザに、いまのゲームと1つ前のゲームの2つまで残ります。</p>
     <p><b>盤面の印</b>：効果を出しているカードは金の太い枠と「効果」、効果の対象は赤の太い枠と「対象」、バトル中のカードは白の太い枠と「バトル」、選ぶ候補は金の太い枠と「選ぶ」の札が付きます。</p>
     <p><b>エンドフェイズ</b>：スライドステップ・エナドロー・エナリフレッシュを自動で行います。</p>
@@ -641,7 +644,7 @@ function newState(decklists){
 
 /* ---------------- 保存 ---------------- */
 function save(){
-  if (replay) return;   // 記録を見返している間は、いまの盤面の保存を書き換えない
+  if (replay || ol.on) return;   // 記録を見返している間・オンライン対戦の間は、1人で遊ぶ盤面の保存を書き換えない（オンライン対戦の盤面は共有の盤面に書く）
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
 }
 function load(){
@@ -664,7 +667,7 @@ function clearSaved(){ try { localStorage.removeItem(STORE_KEY); } catch(e){} }
 
 /* ---------------- undo ---------------- */
 function snap(){ var j = JSON.stringify(state); undoStack.push(j); if (undoStack.length > 300) undoStack.shift(); aiEpoch++; recPush(j); }
-function undo(){ if (!undoStack.length || replay) return; state = JSON.parse(undoStack.pop()); recPop(); aiStop(); render(); }
+function undo(){ if (!undoStack.length || replay || ol.on) return; state = JSON.parse(undoStack.pop()); recPop(); aiStop(); render(); }
 
 /* ---------------- 探索・移動 ---------------- */
 function allLists(){
@@ -777,6 +780,8 @@ function redrawBlocked(pi){
 function activeOf(){ return state.phase === 0 ? state.first : state.phase === 1 ? 1 - state.first : null; }
 // その側を操作できない理由（召喚フェイズ中の、番でない側）。操作できるなら ""
 function lockOf(pi){
+  if (ol.on && olLocked()) return olLockMsg();
+  if (ol.on && pi === 1) return "相手の側は操作できません（オンライン対戦。相手のカードは相手の端末で動かします）";
   var a = activeOf();
   if (a === null || a === pi || state.winner !== undefined) return "";
   return SIDE_NAME[a] + "の召喚フェイズ中は、" + SIDE_NAME[pi] + "の側は操作できません（見るだけ）";
@@ -1051,12 +1056,18 @@ var PART_FX = {
         P.line.forEach(function(st){ var t = st[st.length - 1]; if (t && t.up && isHolo(t)) hs.push(t.uid); });
         var pickH = function(uid){ x.sel = [findCard(uid).card]; focusTgt(uid); fxLog(nm(x.sel[0]) + " を選んだ"); next(); };
         if (isAI(x.pi) && hs.length) return aiLater(function(){ aiSay(x.pi, "効果で選ぶホロビト（ダウンしているもの → パワーが大きいもの）"); pickH(aiPickOwnHolo(hs)); });
+        if (isRemote(x.pi) && hs.length) return olAsk("pick", { what:"ホロビト", uids:hs, prompt:"あなたのカードの効果：自分のホロビトを" + a.n + "体選んでください", optional:true }, function(r){
+          if (r.cancel || !findCard(r.uid)){ x.sel = null; fxLog("選ぶ処理は手で行う"); return next(); }
+          pickH(r.uid); });
         return startPick(hs, "自分のホロビトを" + a.n + "体選んでください（ラインの一番上のホロビトから。束の下のカードを選べるかは未確定なので候補に入れていません）",
           pickH,
           function(){ x.sel = null; fxLog("選ぶ処理は手で行う"); next(); }, "手で処理する");
       }
       if (a.what !== "エナ") return fxManual(a, "select_own", next);
       var cands = P.ena.filter(function(c){ var d = cardDef(c); return !a.color || (d && d.color_mark === a.color); });
+      if (isRemote(x.pi) && cands.length) return olAsk("pick", { what:"エナ", uids:cands.map(function(c){ return c.uid; }), prompt:"あなたのカードの効果：自分の" + (a.color ? a.color + "の" : "") + "エナを" + a.n + "枚選んでください" }, function(r){
+        if (r.cancel || !findCard(r.uid)) return stop();
+        x.sel = [findCard(r.uid).card]; focusTgt(r.uid); fxLog(nm(x.sel[0]) + " を選んだ"); next(); });
       if (isAI(x.pi) && cands.length) return aiLater(function(){
         var u = aiPickOwnEna(cands.map(function(c){ return c.uid; })); x.sel = [findCard(u).card]; focusTgt(u);
         aiSay(x.pi, "効果で選ぶエナ（使用済みのもの）"); fxLog(nm(x.sel[0]) + " を選んだ"); next(); });
@@ -1089,10 +1100,21 @@ var PART_FX = {
       var hs = state.players[o].hand.map(function(c){ return c.uid; });
       // AI が捨てるカードを選ぶ。捨てる先は未確定なので、いつもどおり人に聞く
       if (isAI(o) && hs.length) return aiLater(function(){ aiSay(o, "捨てる手札を選んだ（内容が分からないカード → コストが小さいもの）"); discard(aiPickDiscard(hs)); });
+      // オンライン対戦: 捨てる手札は、相手の端末で相手が選ぶ（捨てたカードは表になる）
+      if (isRemote(o) && hs.length) return olAsk("discard", { n:a.n }, function(r){
+        var f = r.uid && findCard(r.uid); if (r.cancel || !f) return next();
+        if (!f.card.key && CARDS[r.key]) f.card.key = r.key;
+        f.card.up = true; discard(r.uid); });
       startPick(hs, SIDE_NAME[o] + "が捨てる手札を" + a.n + "枚選んでください（選ぶのは" + SIDE_NAME[o] + "）", discard, stop); } },
   may_reveal_from_hand:    { how:"選択", why:"任意なので見せないことも選べる。候補は手札の印字のコストで絞る（コストの増減は計算しない）。見せたカードは手札に残る",
     run:function(x, a, next){
       var P = state.players[x.pi];
+      // オンライン対戦: 相手の手札は分からないので、見せるかは相手の端末で相手が選ぶ
+      if (isRemote(x.pi)) return olAsk("show", { n:a.n, m:a.m }, function(r){
+        var f = r.uid && findCard(r.uid); x.didSo = false;
+        if (r.none || !f){ fxLog("見せなかった"); return next(); }
+        if (!f.card.key && CARDS[r.key]) f.card.key = r.key;
+        x.didSo = true; fxLog(nm(f.card) + " を見せた（手札に残る）"); next(); });
       var unk = P.hand.filter(function(c){ var d = cardDef(c); return !d || typeof d.cost !== "number"; }).length;
       var cands = P.hand.filter(function(c){ var d = cardDef(c); return d && d.type === "ホロビト" && typeof d.cost === "number" && d.cost >= a.n; });
       var note = unk ? "（コストが分からないカード " + unk + " 枚は候補に入れていない）" : "";
@@ -1537,6 +1559,16 @@ function enaCharge(uid, pi){
 // （未確定。B-3）に関係なく条件を満たすので、そのときは同じ色のエナで自動で払う。足りなければ払うエナを選ばせる。
 // paid: 払えた / stop: やめた / cant: 未使用のエナが足りない
 function payEna(pi, cost, col, title, paid, stop, cant){
+  // オンライン対戦: 相手が使ったワザ・ブーストのエナは、相手の端末で決めたものを払う
+  if (olPayPreset && olPayPreset.pi === pi){
+    var pre = olPayPreset.uids.map(function(u){ var f = findCard(u); return f && f.card; })
+      .filter(function(c){ return c && c.owner === pi && !c.turned && state.players[pi].ena.indexOf(c) >= 0; });
+    if (typeof cost !== "number" || pre.length === cost){
+      pre.forEach(function(c){ c.turned = true; });
+      fxLog("エナ " + pre.map(nm).join("・") + " を使用済みにした");
+      return paid();
+    }
+  }
   if (typeof cost !== "number")
     return fxChoose("コストが印字から読めていません（" + cost + "）。エナの支払いは手で行ってください。",
       ["支払いは手で行って使う", "使わない"], function(i){ if (i === 0) paid(); else stop(); }, stop, title);
@@ -1756,6 +1788,7 @@ function actLabel(a){
   return "「" + d.name + "」を使う（ワザ・コスト " + d.cost + "・ワザのパワー " + (d.left_edge && d.left_edge !== "unknown" ? d.left_edge.modifier : "unknown") + "）";
 }
 function bWaza(){
+  if (ol.on) return olWaza();   // オンライン対戦: 相手の手札は分からないので、相手の番は相手の端末に聞く
   var b = state.battle, can = [battleActs(0), battleActs(1)];
   if (!can[0].length && !can[1].length){
     fxLog("ワザ・ブースト：両者とも使えるものがない（手札にない・エナが足りない・バトルしているホロビトがいない）");
@@ -2114,8 +2147,17 @@ function heartBreak(p, h, next0, mark){
     commit(); moveCard(h.uid, p, "hand"); h.up = true; h.turned = false;
     // トリガーを使えない・使わないときは、相手に見せずに手札に加える（依頼者の判断 2026-10-22。rules_guess.md B-2）。
     // AI の手札を伏せているときは、記録にもカードの名前を出さない
-    fxLog(SIDE_NAME[p] + "のハートが破壊され、" + (aiHideHand(p) ? "カードを1枚" : "「" + nm(h) + "」を") + "手札に加えた（トリガーは使わない。相手には見せない）");
+    fxLog(SIDE_NAME[p] + "のハートが破壊され、" + (aiHideHand(p) || isRemote(p) ? "カードを1枚" : "「" + nm(h) + "」を") + "手札に加えた（トリガーは使わない。相手には見せない）",
+          SIDE_NAME[p] + "のハートが破壊され、カードを1枚手札に加えた（トリガーは使わない）");
     render(); next(); };
+  // オンライン対戦: 相手のハートは中身が分からないので、トリガーを使うか（とその出し先）を相手の端末に聞く
+  if (isRemote(p)) return olAsk("heart", { uid:h.uid }, function(r){
+    if (!r.use) return toHand();
+    if (CARDS[r.key]) h.key = r.key;
+    h.up = true;
+    fxLog(SIDE_NAME[p] + "：ハートの「" + nm(h) + "」の " + r.kw + " を使う");
+    olTrig(p, h, r, commit, next);
+  });
   var trig = HEART_TRIGGERS[kw], labels = [], acts = [];
   // トリガーはハートが破壊されたときのルール（手引書 用語解説）なので、「効果: 手動」のときも選べる。
   // 出たカードの「出たとき」などの能力欄の効果は、いつもどおり「効果: 自動」のときだけ処理する
@@ -2255,7 +2297,8 @@ function bEnd(){
 // ---- 画面：記録・選択・質問 ----
 var fxLines = [], picking = null, fxAsk = null;
 // バトルは記録が長くなるので、多めに残す（記録欄はスクロールでき、いつも最新の行を見せる）
-function fxLog(s){ fxLines.push(s); if (fxLines.length > 80) fxLines.shift(); fxShowLog(); }
+// pub: オンライン対戦で相手に送る文（false なら送らない。省くと同じ文）
+function fxLog(s, pub){ fxLines.push(s); if (fxLines.length > 80) fxLines.shift(); olLogPub(s, pub); fxShowLog(); }
 function fxClear(){ if (aiActing) return; fxLines = []; fxShowLog(); }
 function fxShowLog(){
   var el = document.getElementById("fxlog");
@@ -2428,6 +2471,7 @@ function lockCls(pi){ return lockOf(pi) ? " locked" : ""; }
 // AI の手札を伏せる（依頼者の指示 2026-10-22。2「AIの手札を裏向きにする」）。表示だけを伏せ、カードの向き（state）は変えない。
 // 伏せたカードは触れない（タップで中身を見られない・動かせない）。勝敗が決まったら見せる
 function aiHideHand(pi){
+  if (ol.on) return pi === 1 && state.winner === undefined;   // オンライン対戦: 相手の手札はいつも伏せる（中身もこの端末には届かない）
   if (replay) return isAI(pi) && ui.aiHide !== false && !replay.ended;   // 見返している間も、終わっていないゲームなら伏せる
   return isAI(pi) && !aiForce && ui.aiHide !== false && state.winner === undefined;
 }
@@ -2877,6 +2921,15 @@ function boardIsEmpty(){
 // ヘッダーの2段目: いまの進行と、次にすること
 function flowHTML(){
   var who = function(pi){ return '<span class="who ' + (pi ? "opp" : "me") + '">' + SIDE_NAME[pi] + '</span>'; };
+  if (ol.on){
+    var code = '<span class="badge">🌐 ' + esc(ol.gid) + '</span>';
+    if (ol.loading) return code + '<span>部屋の盤面を読み込んでいます…</span>';
+    if (state.winner === undefined && ol.wait) return code + '<span>相手が選んでいます…（相手の画面に質問が出ています）</span>';
+    if (state.phase < 0 && state.prep !== "mull")
+      return code + (ol.host ? (ol.peer ? '<span>相手が入りました。</span><button class="mini primary" data-ol-lobby="1">先手を選んで始める</button>' : '<span>相手が部屋に入るのを待っています（コードを伝えてください）</span>')
+                             : '<span>相手が始めるのを待っています</span>');
+    if (state.winner === undefined && !olHolder()) return code + '<span>相手の番です（相手の端末で操作しています）</span>';
+  }
   if (replay) return '<span>📼 記録を見ています（' + (replay.i + 1) + ' / ' + replay.steps.length + '）。盤面は触れません。下の「閉じる」でいまの盤面に戻ります</span>';
   if (state.winner !== undefined) return '<span class="win">★ ' + SIDE_NAME[state.winner] + 'の勝利</span><span>' + esc(state.winWhy || "") + '</span>';
   if (state.phase < 0){
@@ -2887,6 +2940,8 @@ function flowHTML(){
       var P = state.players[pi];
       return '<span class="grp">' + who(pi) + (P.mull ? '<span>' + (P.mull === "redraw" ? "引き直した" : "このまま") + '</span>'
         : isAI(pi) ? aiFlowHTML()
+        : ol.on && pi === 1 ? '<span>相手が選んでいます…</span>'
+        : ol.on && !olHolder() ? '<span>（あなたの画面に質問が出ます）</span>'
         : '<button class="mini" data-prep="mull" data-pi="' + pi + '" data-redraw="1">引き直す</button>' +
           '<button class="mini" data-prep="mull" data-pi="' + pi + '" data-redraw="0">このまま</button>') + '</span>';
     }).join("");
@@ -2925,13 +2980,16 @@ function render(){
   document.getElementById("guide").style.display = boardIsEmpty() ? "" : "none";
   document.getElementById("roundLbl").textContent = "ラウンド " + state.round;
   document.getElementById("phaseLbl").textContent = state.phase < 0 ? "準備" : PHASES[state.phase];
-  document.getElementById("btnUndo").disabled = !undoStack.length || !!replay;
+  document.getElementById("btnUndo").disabled = !undoStack.length || !!replay || ol.on;
   // AI の召喚フェイズの間は押せない（止めているときは押せる）
-  document.getElementById("btnPhase").disabled = !!replay || state.phase < 0 || state.winner !== undefined || (isAI(activeOf()) && !aiPaused);
+  document.getElementById("btnPhase").disabled = !!replay || state.phase < 0 || state.winner !== undefined || (isAI(activeOf()) && !aiPaused) || olLocked();
   var rb = document.getElementById("replaybar");
   rb.innerHTML = replay ? replayBarHTML() : ""; rb.className = replay ? "on" : "";
-  document.getElementById("btnAi").textContent = isAI(AI_SIDE) ? "相手: AI " + AI_LEVELS[aiLevel(AI_SIDE)] : "相手: 人";
-  document.getElementById("btnAi").className = "mini" + (isAI(AI_SIDE) ? " on" : "");
+  document.getElementById("btnAi").textContent = ol.on ? "相手: オンライン" : isAI(AI_SIDE) ? "相手: AI " + AI_LEVELS[aiLevel(AI_SIDE)] : "相手: 人";
+  document.getElementById("btnAi").className = "mini" + (isAI(AI_SIDE) || ol.on ? " on" : "");
+  document.getElementById("btnAi").disabled = ol.on;
+  document.getElementById("btnOnline").textContent = ol.on ? "🌐 部屋 " + ol.gid : "🌐 対戦";
+  document.getElementById("btnOnline").className = "mini" + (ol.on ? " on" : "");
   document.getElementById("flow").innerHTML = flowHTML();
   document.getElementById("side-1").innerHTML = sideHTML(1);
   document.getElementById("side-0").innerHTML = sideHTML(0);
@@ -2943,6 +3001,7 @@ function render(){
   }).join('<span style="flex-basis:100%;height:0"></span>');
   save();
   aiKick();
+  olPublishSoon();
 }
 
 /* ---------------- AI（相手を自動で動かす）---------------- */
@@ -2960,6 +3019,7 @@ var aiForce = null;   // 試験・強さの測定用: { 0:"normal", 1:"easy" } �
 var aiTimer = null, aiBusy = false, aiPaused = false, aiEpoch = 0, aiActing = 0, aiMemo = {};
 function aiLevel(p){
   if (p !== 0 && p !== 1) return null;
+  if (ol.on && (p === 1 || !aiForce)) return null;   // オンライン対戦では AI を使わない（試験で自分の側を AI に任せるときだけ）
   if (aiForce) return aiForce[p] || null;
   return p === AI_SIDE && AI_LEVELS[ui.ai] ? ui.ai : null;
 }
@@ -3001,6 +3061,7 @@ function aiIdle(){ return !aiBusy && !picking && !fxAsk && !sheetWrap.classList.
 // 待っている間に盤面が変わってもよい（動く時点の盤面で、もう一度すべきことを確かめる）。
 // 動けなかったとき（質問が開いた など）は、その処理が終わったときの render でまた呼ばれる
 function aiKick(){
+  if (olLocked()) return;   // オンライン対戦: 番でない端末・相手の答えを待っている間は動かない
   if (replay || aiTimer || aiPaused || (!aiForce && ui.view !== "play") || !aiWants() || !aiIdle()) return;
   aiTimer = setTimeout(function(){
     aiTimer = null;
@@ -3512,6 +3573,500 @@ function recSheet(){
   h += '<div class="sgrid c1">' + row("cur", rec, "このゲーム") + row("prev", recPrev, "1つ前のゲーム") + '<button data-close="1">閉じる</button></div>';
   openSheet(h);
 }
+/* ---------------- オンライン対戦（依頼者の指示 2026-10-22。A: 公開したシミュレーターのまま。データからも手札を隠す）---------------- */
+// しくみ:
+// - 盤面は「共有の盤面」（相手から見えてよいことだけ）と「自分だけの控え」（自分のカードの番号→中身。手札・山札・ハートの中身）に分ける。
+//   共有の盤面では、手札・山札・ハートのカードと裏向きのカードの中身（key）を消して送る（olPublic）。自分の端末で、控えから中身を戻す（olMerge）。
+//   デッキの中身（decklist）も送らない。カードの番号（uid）は、ゲームごとにでたらめに付けるので、番号から中身は分からない。
+// - 盤面を変えるのは、いま番の端末だけ（olHolder）: 準備は部屋を作った人、召喚フェイズはその番の人、バトルフェイズとエンドフェイズは後手。
+// - 相手が決めること（引き直す・ワザ／ブースト・ハートのトリガー・効果で選ぶカード・捨てる手札・見せるカード）は、相手の端末に聞く（olAsk）。
+//   相手の端末は、自分のカードの中身を使って選び、答えと、表になるカードの中身だけを返す。ルールが未確定でシミュレーターが聞くことは、番の端末の人に聞く。
+// - 共有の盤面は「部屋を作った人」から見た向きで送る。部屋に入った人の端末では、左右を入れ替えて（olMirror）自分を下に描く。
+// - つなぐ部分（olNet）は差し替えられる: 公開したシミュレーターでは claude.ai のデータの保存（db）、試験では試験の中継。
+var OL_KEY = "horobeat-online";
+var ol = { on:false, host:false, gid:null, net:null, priv:{}, ver:0, mayPub:false, wait:null, seq:0, handled:0, logN:0, logSeen:{}, pub:[], peer:null, failed:{}, queued:null, closing:false };
+function olSide(){ return ol.host ? 0 : 1; }                 // 自分の、共有の盤面での側
+function isRemote(p){ return ol.on && p === 1; }             // 相手（端末の中では、相手はいつも 1）
+// いま盤面を変えてよい側（端末の中の向き）。勝敗が決まったら誰も変えない
+function olHolderSide(){
+  if (state.winner !== undefined) return -1;
+  if (state.phase < 0) return ol.host ? 0 : 1;
+  if (state.phase <= 1) return activeOf();
+  return 1 - state.first;
+}
+function olHolder(){ return ol.on && olHolderSide() === 0; }
+function olLocked(){ return ol.on && (ol.loading || !olHolder() || !!ol.wait); }
+function olLockMsg(){ return ol.loading ? "部屋の盤面を読み込んでいます…" : ol.wait ? "相手が選んでいます…" : "相手の番です（相手の端末で操作しています）"; }
+function olRand(n){ var s = "", a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; for (var i = 0; i < n; i++) s += a[Math.floor(Math.random() * a.length)]; return s; }
+function olEachCard(P, fn){
+  ["hand", "deck", "heart", "ena", "waza", "grave"].forEach(function(z){ P[z].forEach(function(c){ fn(c, z); }); });
+  P.line.forEach(function(st){ st.forEach(function(c){ fn(c, "line"); }); });
+}
+// 共有の盤面: 手札・山札・ハートと裏向きのカードの中身を消し、デッキの中身を消す
+function olPublic(st){
+  var S = JSON.parse(JSON.stringify(st));
+  S.players.forEach(function(P){
+    delete P.decklist;
+    olEachCard(P, function(c, z){ if (z === "hand" || z === "deck" || z === "heart" || !c.up) c.key = null; });
+  });
+  return S;
+}
+// 左右を入れ替える（部屋を作った人から見た向き ⇔ 部屋に入った人から見た向き）
+function olSwapWords(t){
+  // 「」の外の「自分」「相手」だけを入れ替える（カード名や能力の文はそのまま）
+  var out = "", depth = 0;
+  for (var i = 0; i < t.length; i++){
+    var ch = t[i];
+    if (ch === "「") depth++;
+    if (ch === "」" && depth) depth--;
+    if (!depth && t.substr(i, 2) === "自分"){ out += "相手"; i++; continue; }
+    if (!depth && t.substr(i, 2) === "相手"){ out += "自分"; i++; continue; }
+    out += ch;
+  }
+  return out;
+}
+function olMirror(S){
+  var M = JSON.parse(JSON.stringify(S)), flip = function(v){ return v === 0 || v === 1 ? 1 - v : v; };
+  M.players.reverse();
+  M.players.forEach(function(P){ olEachCard(P, function(c){ c.owner = flip(c.owner); }); });
+  M.first = flip(M.first); M.nextFirst = flip(M.nextFirst); M.winner = flip(M.winner);
+  if (M.winner === undefined) delete M.winner;
+  if (M.nextFirst === undefined) delete M.nextFirst;
+  if (M.winWhy) M.winWhy = olSwapWords(M.winWhy);
+  var b = M.battle;
+  if (b){
+    b.turn = flip(b.turn); b.winner = flip(b.winner); if (b.winner === undefined) delete b.winner;
+    ["users", "used", "boosts", "pw"].forEach(function(k){ if (Array.isArray(b[k])) b[k].reverse(); });
+    if (b.done){ var d = {}; Object.keys(b.done).forEach(function(k){ var m = /^h([01])$/.exec(k); d[m ? "h" + (1 - +m[1]) : k] = b.done[k]; }); b.done = d; }
+  }
+  return M;
+}
+function olToShared(st){ var S = olPublic(st); return ol.host ? S : olMirror(S); }
+function olFromShared(S){
+  var L = ol.host ? JSON.parse(JSON.stringify(S)) : olMirror(S);
+  L.players[0].decklist = JSON.parse(JSON.stringify(ol.mydl || {})); L.players[1].decklist = {};   // デッキの中身は送らないので、自分の分はこの端末の控えから
+  olMerge(L); return L;
+}
+// 自分のカードの中身を控えから戻す
+function olMerge(L){ olEachCard(L.players[0], function(c){ if (!c.key && ol.priv[c.uid] !== undefined) c.key = ol.priv[c.uid]; }); }
+
+// ---- 共有の盤面を書く（番の端末）・受け取る ----
+var olPubTimer = null;
+// 書いてよいのは、最後に送った・受け取った盤面で番だった端末だけ（番を渡す操作の盤面も、渡した側が書く）
+function olPublishSoon(){ if (!ol.on || !ol.mayPub || ol.closing) return; if (olPubTimer) return; olPubTimer = setTimeout(function(){ olPubTimer = null; olPublish(); }, 30); }
+function olPublish(){
+  if (!ol.on || ol.closing || !ol.mayPub) return;
+  if (olPubTimer){ clearTimeout(olPubTimer); olPubTimer = null; }
+  var S = olToShared(state), j = JSON.stringify(S);
+  if (j === ol.lastJ && !ol.forcePub) return;
+  ol.lastJ = j; ol.forcePub = false; ol.ver++;
+  ol.net.set("games/" + ol.gid, { v:ol.ver, by:olSide(), s:S, log:ol.pub.slice(-40) });
+  ol.mayPub = olHolderSide() === 0;
+  olRevealMissing();
+}
+function olOnState(doc){
+  if (ol.loading){ ol.loading = false; if (!doc) render(); }   // 読み込み直したとき: 盤面が届いた（まだ始めていなければ、届くものはない）
+  if (!doc || !doc.s || doc.v <= ol.ver) return;
+  ol.ver = doc.v;
+  state = olFromShared(doc.s); ol.lastJ = JSON.stringify(doc.s); ol.mayPub = olHolderSide() === 0;
+  // 相手の記録を、こちらの向きに直して足す
+  (doc.log || []).forEach(function(e){
+    var k = "s" + doc.by; if (e.n <= (ol.logSeen[k] || 0)) return;
+    ol.logSeen[k] = e.n; fxLines.push(olSwapWords(e.t)); if (fxLines.length > 80) fxLines.shift();
+  });
+  fxShowLog(); aiStop(); aiPaused = false;
+  render();
+  if (ol.queued){ var q = ol.queued; ol.queued = null; olOnReq(q); }
+  olKick(); olRevealMissing();   // 番が来たら、表向きなのに中身が分からない相手のカードを見せてもらう
+}
+// 記録（番の端末で書いたもの）。pub が false なら相手に送らない、文字なら相手にはその文を送る
+function olLogPub(s, pub){
+  if (!ol.on || !ol.mayPub || pub === false) return;
+  ol.pub.push({ n:++ol.logN, t: typeof pub === "string" ? pub : s });
+  if (ol.pub.length > 60) ol.pub.shift();
+}
+
+// ---- 相手に聞く（番の端末）・答える（相手の端末）----
+function olAsk(kind, data, cb){
+  ol.seq = Math.max(ol.seq + 1, Date.now());               // 読み込み直しても、前の質問より大きい番号にする
+  ol.wait = { seq:ol.seq, kind:kind, cb:cb };
+  ol.forcePub = true; olPublish();
+  ol.net.set("games/" + ol.gid + "/rpc/req" + olSide(), { seq:ol.seq, kind:kind, data:data || {}, v:ol.ver });
+  render();
+}
+function olOnRes(doc){
+  if (!doc || !ol.wait || doc.seq !== ol.wait.seq) return;
+  var w = ol.wait; ol.wait = null;
+  render(); w.cb(doc.data || {});
+}
+function olAnswer(req, data){
+  ol.handled = req.seq;
+  ol.net.set("games/" + ol.gid + "/rpc/res" + (1 - olSide()), { seq:req.seq, data:data });
+  closeSheet(); picking = null; render();
+}
+function olOnReq(doc){
+  if (!doc || doc.seq <= ol.handled) return;
+  if (doc.v > ol.ver){ ol.queued = doc; return; }          // 盤面が届いてから答える
+  if (doc.v < ol.ver){ ol.handled = doc.seq; return; }     // 盤面が先に進んでいる＝もう答えた質問（読み込み直したとき）
+  var h = OL_ANSWER[doc.kind]; if (!h) return olAnswer(doc, {});
+  h(doc, doc.data || {});
+}
+// 相手の端末で選ぶ。ui: 自分で選ぶ画面。AI に任せている側（試験）なら AI の考え方で選ぶ
+function olMyCardKeys(uids){ var k = {}; uids.forEach(function(u){ if (ol.priv[u] !== undefined) k[u] = ol.priv[u]; }); return k; }
+var OL_ANSWER = {
+  // 準備④: 引き直すか
+  mull: function(req){
+    if (isAI(0)){ var P = state.players[0];
+      var ok = P.hand.filter(function(c){ var d = cardDef(c); return aiKnown(c) && d.type === "ホロビト" && typeof d.cost === "number" && d.cost <= 2; }).length >= 1;
+      return olAnswer(req, { redraw:!ok }); }
+    fxChoose("④手札を引き直しますか？（一度だけ。手札を全て山札に戻して混ぜ、6枚引きます）", ["引き直す", "このまま"],
+      function(i){ olAnswer(req, { redraw: i === 0 }); }, function(){ olAnswer(req, { redraw:false }); }, "準備④（あなたの番）", "", null);
+  },
+  // 表になったカードの中身を見せる（自分のカードで、表向きに置かれたものだけ）
+  reveal: function(req, d){
+    var ok = (d.uids || []).filter(function(u){ var f = findCard(u); if (!f) return false; var z = zoneOfCard(f.card);
+      return f.card.owner === 0 && f.card.up && z && z.zone !== "hand" && z.zone !== "deck" && z.zone !== "heart"; });
+    olAnswer(req, { keys:olMyCardKeys(ok) });
+  },
+  // ワザ・ブーストの番
+  waza: function(req, d){
+    var acts = battleActs(0).filter(function(a){ return (d.failed || []).indexOf(a.c.uid) < 0; });
+    if (!acts.length) return olAnswer(req, { none:true });
+    var send = function(i){
+      if (i >= acts.length) return olAnswer(req, i === acts.length ? { pass:true } : { end:true });
+      var a = acts[i], cost = a.kind === "boost" ? boostOf(a.c).cost : cardDef(a.c).cost, col = cardDef(a.c).color_mark;
+      olPickPay(cost, col, function(uids){
+        if (!uids) return send(acts.length);
+        olAnswer(req, { use:{ uid:a.c.uid, key:a.c.key, kind:a.kind }, pay:uids });
+      });
+    };
+    if (isAI(0)) return send(aiWazaChoice(0, acts, true));
+    var labels = acts.map(actLabel).concat(["使わない（相手の番へ）", "ワザの使用を終えて、パワーを比べる"]);
+    fxChoose(sideBrief(0) + " 対 " + sideBrief(1) + "。あなたのワザ・ブーストの番です（先手から交互に1枚ずつ）。", labels, send,
+      function(){ send(acts.length); }, "バトル（あなたの番）");
+  },
+  // ハートが破壊された: トリガーを使うか（持ち主だけが中身を見る）
+  heart: function(req, d){
+    var f = findCard(d.uid); if (!f) return olAnswer(req, { use:false });
+    var h = f.card, df = cardDef(h), kw = df && df.trigger && df.trigger !== "unknown" ? df.trigger.keyword : null, trig = HEART_TRIGGERS[kw];
+    var can = !!(trig && trig.can(0, h));
+    var finish = function(useIt, extra){ olAnswer(req, useIt ? Object.assign({ use:true, key:h.key, kw:kw }, extra || {}) : { use:false }); };
+    // 使うときの出し先を決める
+    var place = function(){
+      if (kw === "ドローT") return finish(true);
+      var ov = overTargets(0, h), fe = firstEmptyLine(0);
+      if (kw === "ラストオーバーT"){
+        var n = state.players[0].heart.length - 1;
+        if (n > 1 || !ov.length) return finish(true, { over:null });
+        if (isAI(0)){ var t0 = aiOverTarget(0, h, ov); return finish(true, { over:t0.uid }); }
+        return fxChoose("自分のハートが " + n + " 枚（1枚以下）なので、「" + nm(h) + "」をオーバービートで出せます（コストは支払わない）。出しますか？",
+          ["オーバービートで出す（下にするホロビトを選ぶ）", "出さない"], function(i){
+            if (i === 1) return finish(true, { over:null });
+            startPick(ov.map(function(c){ return c.uid; }), "下にするホロビトを選んでください", function(u){ finish(true, { over:u }); }, function(){ finish(true, { over:null }); });
+          }, function(){ finish(true, { over:null }); }, "ハートが破壊された（トリガー）", heartHead(0, h));
+      }
+      var pickOv = function(){
+        if (isAI(0)) return finish(true, { over:aiOverTarget(0, h, ov).uid });
+        startPick(ov.map(function(c){ return c.uid; }), "「" + nm(h) + "」をオーバービートで出します。下にするホロビトを選んでください",
+          function(u){ finish(true, { over:u }); }, function(){ finish(false); });
+      };
+      if (kw === "オーバーT") return pickOv();
+      // エントリーT
+      if (fe >= 0 && !ov.length) return finish(true, { line:fe });
+      if (fe < 0) return pickOv();
+      if (isAI(0)){ var ch = aiEntryChoice(0, h, fe, ov); return ch.over ? finish(true, { over:ch.over.uid }) : finish(true, { line:fe }); }
+      fxChoose("エントリートリガー：「" + nm(h) + "」をどう出しますか？（コストは支払わない）", ["空いているラインの1番前（第" + (fe + 1) + "ライン）に出す", "オーバービートで出す（下にするホロビトを選ぶ）"],
+        function(i){ if (i === 0) finish(true, { line:fe }); else pickOv(); }, function(){ finish(false); }, "ハートが破壊された（トリガー）", heartHead(0, h));
+    };
+    if (isAI(0)){ var ai = can ? aiTrigChoice(0, h, kw, true) : 0; return (can && ai === 0) ? place() : finish(false); }
+    var labels = can ? ["トリガーを使う：" + kw + "「" + df.trigger.text + "」", "トリガーを使わずに手札に加える（相手には見せない）"] : ["手札に加える（相手には見せない）"];
+    fxChoose("あなたのハート（重なりの一番上）はダウンしていたので、ダメージで破壊されました。カードは「" + nm(h) + "」です（いまはあなたにだけ見えています）。" +
+      (can ? "手札に加える代わりにトリガーを使えます（任意）。使うと相手にも見せます。" : "このトリガーは、いまは使えません。"),
+      labels, function(i){ if (can && i === 0) place(); else finish(false); }, function(){ finish(false); }, "ハートが破壊された（トリガーチェック）", heartHead(0, h));
+  },
+  // 効果で自分のカードを選ぶ（相手の効果ではなく、自分のカードの効果。番の端末が処理している）
+  pick: function(req, d){
+    var uids = (d.uids || []).filter(function(u){ return !!findCard(u); });
+    if (!uids.length) return olAnswer(req, { cancel:true });
+    if (isAI(0)) return olAnswer(req, { uid: d.what === "エナ" ? aiPickOwnEna(uids) : aiPickOwnHolo(uids) });
+    startPick(uids, d.prompt || "選んでください", function(u){ olAnswer(req, { uid:u }); }, function(){ olAnswer(req, { cancel:true }); }, d.optional ? "選ばない" : "やめる");
+  },
+  // 相手の効果で、手札を捨てる（選ぶのは自分）
+  discard: function(req, d){
+    var hs = state.players[0].hand.map(function(c){ return c.uid; });
+    if (!hs.length) return olAnswer(req, { cancel:true });
+    var send = function(u){ olAnswer(req, { uid:u, key:ol.priv[u] }); };
+    if (isAI(0)) return send(aiPickDiscard(hs));
+    startPick(hs, "相手の効果で、手札を" + (d.n || 1) + "枚捨てます。捨てるカードを選んでください", send, function(){ send(hs[0]); }, "やめる");
+  },
+  // 自分のカードの効果で、手札からコスト N 以上のホロビトを見せる（任意）
+  show: function(req, d){
+    var cands = state.players[0].hand.filter(function(c){ var x = cardDef(c); return x && x.type === "ホロビト" && typeof x.cost === "number" && x.cost >= d.n; });
+    if (!cands.length) return olAnswer(req, { none:true });
+    if (isAI(0)) return olAnswer(req, { uid:cands[0].uid, key:cands[0].key });
+    startPick(cands.map(function(c){ return c.uid; }), "見せるホロビトを選んでください（コスト" + d.n + "以上。見せなくてもよい）",
+      function(u){ olAnswer(req, { uid:u, key:ol.priv[u] }); }, function(){ olAnswer(req, { none:true }); }, "見せない");
+  }
+};
+// 自分で払うエナを決める（同じ色だけで払えれば自動。色の決まりが未確定で選ぶときは、自分で選ぶ）
+function olPickPay(cost, col, cb){
+  if (typeof cost !== "number") return cb([]);
+  var free = untappedEna(0); if (free.length < cost) return cb(null);
+  var same = free.filter(function(c){ var e = cardDef(c); return e && e.color_mark === col; });
+  if (col !== "unknown" && same.length >= cost) return cb(same.slice(0, cost).map(function(c){ return c.uid; }));
+  if (isAI(0)) return cb(free.slice(0, cost).map(function(c){ return c.uid; }));
+  var chosen = [];
+  (function one(){
+    if (chosen.length === cost) return cb(chosen);
+    var rest = untappedEna(0).filter(function(e){ return chosen.indexOf(e.uid) < 0; });
+    startPick(rest.map(function(e){ return e.uid; }), "支払うエナを選んでください（" + (chosen.length + 1) + " / " + cost + " 枚目。何枚が" + col + "である必要があるかは未確定。→ B-3）",
+      function(u){ chosen.push(u); one(); }, function(){ cb(null); });
+  })();
+}
+// 表向きに置かれたのに中身が分からない相手のカード（準備⑥のエナなど）を、相手に見せてもらう
+function olRevealMissing(){
+  if (!ol.on || !olHolder() || ol.wait) return;
+  var miss = [];
+  olEachCard(state.players[1], function(c, z){ if (c.up && !c.key && z !== "hand" && z !== "deck" && z !== "heart") miss.push(c.uid); });
+  if (!miss.length) return;
+  olAsk("reveal", { uids:miss }, function(r){
+    Object.keys(r.keys || {}).forEach(function(u){ var f = findCard(u); if (f && !f.card.key && CARDS[r.keys[u]]) f.card.key = r.keys[u]; });
+    render();
+  });
+}
+// 番の端末で、相手に聞くこと（準備④の相手の引き直し）を進める
+function olKick(){
+  if (!ol.on || !olHolder() || ol.wait || !ol.peer) return;
+  if (state.phase < 0 && state.prep === "mull" && !state.players[1].mull){
+    olAsk("mull", {}, function(r){ snap(); prepMull(1, !!r.redraw); render(); });
+  }
+}
+// 相手が出したワザ・ブーストのエナ（相手の端末で決めた分）。payEna が使う
+var olPayPreset = null;
+
+// ---- 部屋 ----
+// 相手が部屋に入るときに送ってくる山札（中身なし）を、部屋を作った人が受け取る
+function olOnSeat(doc){
+  if (!ol.host || !doc || !doc.deck) return;
+  var first = !ol.peer; ol.peer = doc;
+  if (first && !ol.resumed){ fxClear(); fxLog("相手が部屋に入りました。先手を選んで始めます"); render(); olLobbySheet(); }
+  else { render(); olKick(); }
+}
+// 自分のデッキ（いまの「自分のデッキ」）から、この対戦の山札を作る（番号はでたらめ。中身は控えに入れる）
+function olBuildDeck(){
+  var deck = buildDeck(0, ol.mydl || {}), pre = ol.host ? "A" : "B";
+  shuffleArr(deck);
+  ol.priv = {};
+  deck.forEach(function(c){ c.uid = pre + "-" + olRand(6); ol.priv[c.uid] = c.key; });
+  ol.net.savePriv(ol.gid, ol.priv);
+  return deck;
+}
+function shuffleArr(a){ for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function olStoreSession(){ try { localStorage.setItem(OL_KEY, JSON.stringify(ol.on ? { gid:ol.gid, host:ol.host, dl:ol.mydl } : null)); } catch (e){} }
+function olWatch(){
+  var base = "games/" + ol.gid;
+  ol.unsub = [
+    ol.net.watch(base, olOnState),
+    ol.net.watch(base + "/rpc/req" + (1 - olSide()), olOnReq),
+    ol.net.watch(base + "/rpc/res" + olSide(), olOnRes)
+  ];
+  if (ol.host) ol.unsub.push(ol.net.watch(base + "/seat/guest", olOnSeat));
+}
+function olEnter(host, gid, dl){
+  ol.offline = JSON.stringify(state);                       // 1人で遊んでいた盤面は取っておき、やめたら戻す
+  ol.mydl = JSON.parse(JSON.stringify(dl || state.players[0].decklist || {}));   // この対戦で使う自分のデッキ
+  ol.on = true; ol.host = host; ol.gid = gid; ol.ver = 0; ol.mayPub = false; ol.resumed = false; ol.loading = false; ol.wait = null; ol.seq = 0; ol.handled = 0; ol.pub = []; ol.logN = 0; ol.logSeen = {}; ol.peer = null; ol.lastJ = null;
+  undoStack = []; aiStop(); aiPaused = false; picking = null; fxAsk = null;
+  olStoreSession(); olWatch();
+}
+function olCreate(){
+  if (!ol.net) return olNoNet();
+  olEnter(true, olRand(6));
+  fxClear(); fxLog("部屋を作りました（コード " + ol.gid + "）。相手に伝えて、「部屋に入る」で入ってもらってください");
+  render(); olLobbySheet();
+}
+function olJoin(code){
+  if (!ol.net) return olNoNet();
+  code = String(code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (code.length < 4) return;
+  olEnter(false, code);
+  var deck = olBuildDeck(), pub = deck.map(function(c){ return { uid:c.uid, owner:1, key:null, up:false, turned:false, note:"" }; });
+  ol.net.set("games/" + ol.gid + "/seat/guest", { deck:pub, at:Date.now() });
+  fxClear(); fxLog("部屋（コード " + ol.gid + "）に入りました。相手が先手を選んで始めるのを待っています");
+  closeSheet(); render();
+}
+// 部屋を作った人が、先手を選んで始める（①②③）
+function olStart(first){
+  if (!ol.on || !ol.host || !ol.peer) return;
+  var fx = state.fxAuto, mine = JSON.parse(JSON.stringify(state.players[0].decklist || {}));
+  ol.mydl = mine; olStoreSession();                          // 待っている間にデッキを変えたら、それを使う
+  var s = newState([mine, {}]);
+  state = s; state.fxAuto = fx;
+  state.players[0].deck = olBuildDeck();
+  state.players[1].deck = ol.peer.deck.map(function(c){ return { uid:c.uid, owner:1, key:null, up:false, turned:false, note:"" }; });
+  state.players[1].decklist = {};
+  if (first === "r") first = Math.random() < 0.5 ? 0 : 1;
+  state.first = first; state.prep = "mull"; ol.mayPub = true;
+  [0, 1].forEach(function(pi){ shuffleDeck(pi); drawTo(pi, 6, "hand", true); });
+  fxClear();
+  fxLog("準備：先手は" + SIDE_NAME[first] + "。①山札を混ぜ、③6枚引いた。④それぞれ「引き直す」か「このまま」を選んでください");
+  recStart();
+  closeSheet(); render(); olKick();
+}
+function olLeave(){
+  if (!ol.on) return;
+  ol.closing = true;
+  (ol.unsub || []).forEach(function(u){ try { u(); } catch (e){} });
+  ol.on = false; ol.closing = false; ol.wait = null; ol.peer = null;
+  olStoreSession();
+  try { state = ol.offline ? JSON.parse(ol.offline) : (load() || newState()); } catch (e){ state = load() || newState(); }
+  undoStack = []; fxClear(); fxLog("オンライン対戦をやめました（1人で遊んでいた盤面に戻りました）"); closeSheet(); render();
+}
+function olNoNet(){
+  openSheet('<h3>オンライン対戦</h3><div class="fxq">この画面ではオンライン対戦を使えません。claude.ai で公開したシミュレーターを、ログインして開いたときだけ使えます。</div>' +
+    '<div class="sgrid c1"><button data-close="1">閉じる</button></div>');
+}
+function olLobbySheet(){
+  var h = '<h3>🌐 オンライン対戦</h3>';
+  if (!ol.on){
+    h += '<div class="fxq">同じシミュレーターを開いた相手と対戦します。あなたの手札・山札・ハートの中身は、相手の端末には届きません（場に出たカードだけが届きます）。' +
+      '相手が決めること（引き直す・ワザ・トリガーなど）は、相手の画面に出ます。</div>' +
+      '<div class="fxst q">使うには: 相手も claude.ai にログインし、このシミュレーターを「編集者（Editor）」としてメールで招待されている必要があります（リンクでの共有をしていないとき）。' +
+      'デッキは、いまの「自分のデッキ」を使います。</div>' +
+      '<div class="sgrid c1"><button class="primary" data-ol="create">部屋を作る</button></div>' +
+      '<div class="sect">部屋に入る</div><input id="olCode" class="libin" maxlength="8" placeholder="相手から聞いたコード（6文字）" autocapitalize="characters">' +
+      '<div class="sgrid c2" style="margin-top:8px"><button class="primary" data-ol="join">部屋に入る</button><button data-close="1">閉じる</button></div>';
+  } else {
+    h += '<div class="fxq">部屋のコード：<b class="olcode">' + esc(ol.gid) + '</b>（' + (ol.host ? "あなたが作った部屋" : "あなたは部屋に入った側") + '）</div>';
+    if (ol.host && !ol.peer) h += '<div class="cres">相手が入るのを待っています。相手に、このコードを伝えてください。</div>';
+    if (ol.host && ol.peer && !ol.loading && state.phase < 0 && state.prep !== "mull")
+      h += '<div class="sect">相手が入りました。先手を選んで始めます</div><div class="sgrid c1"><button class="primary" data-ol="start" data-first="0">自分が先手で始める</button>' +
+           '<button class="primary" data-ol="start" data-first="1">相手が先手で始める</button><button data-ol="start" data-first="r">ランダムに決める</button></div>';
+    h += '<div class="sgrid c2" style="margin-top:8px"><button data-ol="leave">対戦をやめる</button><button data-close="1">閉じる</button></div>';
+  }
+  openSheet(h);
+}
+
+// ---- つなぐ部分（olNet）----
+// 試験の中継: 試験の側が window.__olNetSet(path, data) で受け取り、相手のページの window.__olNetRecv(path, data) に渡す
+function olRelayNet(){
+  var subs = {}, docs = {};
+  window.__olNetRecv = function(path, data){ docs[path] = data; (subs[path] || []).forEach(function(fn){ fn(data); }); };
+  return {
+    set: function(path, data){ docs[path] = data; window.__olNetSet(path, JSON.parse(JSON.stringify(data))); return Promise.resolve(); },
+    watch: function(path, fn){
+      (subs[path] = subs[path] || []).push(fn);
+      Promise.resolve(window.__olNetGet ? window.__olNetGet(path) : null).then(function(d){ if (d) docs[path] = d; fn(d || null); });
+      return function(){ subs[path] = (subs[path] || []).filter(function(f){ return f !== fn; }); };
+    },
+    savePriv: function(gid, priv){ try { localStorage.setItem("horobeat-online-priv-" + gid, JSON.stringify(priv)); } catch (e){} },
+    loadPriv: function(gid){ try { return Promise.resolve(JSON.parse(localStorage.getItem("horobeat-online-priv-" + gid) || "null")); } catch (e){ return Promise.resolve(null); } }
+  };
+}
+// 公開したシミュレーター: claude.ai のデータの保存（db）。共有の盤面は games/<コード>、自分の控えは自分だけが読める data/users/<自分>/
+// 同じ文書への書き込みは1つずつ（書いている間に次が来たら、終わってから最新だけを書く）。受け取った文書は、受け取りの処理の外で扱う
+function olDbNet(db, uid){
+  var busy = {}, next = {};
+  var write = function(path, data){
+    busy[path] = true;
+    db.doc(path).set(data).catch(function(e){ fxLog("オンライン：書き込めませんでした（" + (e && e.code || e) + "）。招待の権限（編集者）を確かめてください"); render(); })
+      .then(function(){ busy[path] = false; if (next[path]){ var d = next[path]; next[path] = null; write(path, d); } });
+  };
+  return {
+    set: function(path, data){ data = JSON.parse(JSON.stringify(data)); if (busy[path]) next[path] = data; else write(path, data); return Promise.resolve(); },
+    watch: function(path, fn){ return db.doc(path).onSnapshot(function(s){ var d = s.exists ? s.data() : null; setTimeout(function(){ fn(d); }, 0); },
+      function(e){ fxLog("オンライン：つながりが切れました（" + (e && e.code || e) + "）。読み込み直すと、つなぎ直します"); render(); }); },
+    savePriv: function(gid, priv){ return db.doc("data/users/" + uid + "/hbpriv-" + gid).set({ priv:priv }).catch(function(){}); },
+    loadPriv: function(gid){ return db.doc("data/users/" + uid + "/hbpriv-" + gid).get().then(function(s){ return s.exists ? s.data().priv : null; }).catch(function(){ return null; }); }
+  };
+}
+// 使えるつなぎ方を探す（試験の中継 → claude.ai の db）。見つからなければ ol.net は null のまま
+function olFindNet(){
+  if (window.__olNetSet){ ol.net = olRelayNet(); return olResume(); }
+  if (window.claude && claude.use){
+    Promise.all([claude.use("db"), claude.use("user")]).then(function(r){
+      var db = r[0], user = r[1]; if (!db || !user) return;
+      user.id().then(function(id){ if (!id) return; ol.net = olDbNet(db, id); olResume(); });
+    }).catch(function(){});
+  }
+}
+// 読み込み直したとき: 前の部屋に戻る
+function olResume(){
+  var s = null; try { s = JSON.parse(localStorage.getItem(OL_KEY) || "null"); } catch (e){}
+  if (!s || !s.gid || ol.on) return render();
+  olEnter(!!s.host, s.gid, s.dl); ol.resumed = true; ol.loading = true;
+  ol.net.loadPriv(s.gid).then(function(p){ ol.priv = p || {}; olMerge(state); render(); });
+}
+// ---- バトルのワザ・ブースト（オンライン）。相手の手札は分からないので、相手の番は相手の端末に聞く ----
+function olWaza(){
+  var b = state.battle, p = b.turn, mine = battleActs(0);
+  if (p === 1){
+    return olAsk("waza", { failed:b.olFailed || [] }, function(r){
+      var B = state.battle; if (!B) return render();
+      if (r.use){
+        var f = findCard(r.use.uid);
+        if (!f){ B.turn = 0; return battleRun(); }
+        if (!f.card.key && CARDS[r.use.key]) f.card.key = r.use.key;
+        f.card.up = true;
+        olPayPreset = { pi:1, uids:r.pay || [] };
+        snap(); fxClear();
+        return (r.use.kind === "boost" ? useBoost : useWaza)(r.use.uid, battler(1), function(used){
+          olPayPreset = null;
+          var B2 = state.battle; if (!B2) return render();
+          if (used){ (r.use.kind === "boost" ? B2.boosts : B2.used)[1].push(r.use.uid); B2.turn = 0; B2.olNone1 = false; }
+          else (B2.olFailed = B2.olFailed || []).push(r.use.uid);
+          battleRun();
+        });
+      }
+      snap();
+      var what = r.none ? "使えるワザ・ブーストがない" : r.end ? "ワザ・ブーストの使用を終えた" : "使わない";
+      if (r.none) B.olNone1 = true;
+      fxLog(SIDE_NAME[1] + "：" + what);
+      if (r.end || !mine.length){ B.stage = "judge"; return battleRun(); }
+      B.turn = 0; battleRun();
+    });
+  }
+  if (!mine.length){
+    if (b.olNone1){ fxLog("ワザ・ブースト：両者とも使えるものがない"); b.stage = "judge"; return battleRun(); }
+    fxLog(SIDE_NAME[0] + "：使えるワザ・ブーストがない"); b.turn = 1; return battleRun();
+  }
+  var user = battler(0), labels = mine.map(actLabel), nUse = labels.length, oppMay = !b.olNone1;
+  if (oppMay) labels.push("使わない（" + SIDE_NAME[1] + "の番へ）");
+  labels.push("ワザの使用を終えて、パワーを比べる");
+  var choose = function(i){
+    if (i < nUse){
+      var a = mine[i]; snap(); fxClear();
+      return (a.kind === "boost" ? useBoost : useWaza)(a.c.uid, user, function(used){
+        var B = state.battle; if (!B) return render();
+        if (used){ (a.kind === "boost" ? B.boosts : B.used)[0].push(a.c.uid); B.turn = 1; }
+        battleRun(); });
+    }
+    snap();
+    if (oppMay && i === nUse){ fxLog(SIDE_NAME[0] + "：使わない"); state.battle.turn = 1; return battleRun(); }
+    fxLog("ワザ・ブーストの使用を終えた"); state.battle.stage = "judge"; battleRun();
+  };
+  if (isAI(0)) return aiLater(function(){ choose(aiWazaChoice(0, mine, oppMay)); });
+  fxChoose(sideBrief(0) + " 対 " + sideBrief(1) + "。ワザとブーストは先手から交互に1枚ずつ使えます（手引書・ルール動画）。いまは" + SIDE_NAME[0] + "の番です。" +
+    "（いつ終わるかは手引書に書かれていないので、終えるときは「ワザの使用を終えて、パワーを比べる」を押します）", labels, choose, battlePause, bTitle());
+}
+// 相手のハートのトリガー（相手の端末で決めた出し先で）を処理する
+function olTrig(p, h, r, commit, next){
+  var idxOf = function(u){ var f = u && findCard(u); return f ? zoneOfCard(f.card).idx : -1; };
+  if (r.kw === "ドローT") return HEART_TRIGGERS["ドローT"].run(p, h, commit, next);
+  if (r.kw === "ラストオーバーT"){
+    var P = state.players[p];
+    commit(); moveCard(h.uid, p, "hand"); h.up = true; h.turned = false;
+    var before = P.hand.length; drawTo(p, 1, "hand", true);
+    fxLog("ラストオーバートリガー：「" + nm(h) + "」を公開して手札に加え、カードを" + (P.hand.length - before) + "枚引いた");
+    render();
+    if (!r.over || idxOf(r.over) < 0 || P.heart.length > 1) return next();
+    return triggerToLine(p, h, idxOf(r.over), function(){}, next);
+  }
+  if (r.over && idxOf(r.over) >= 0) return triggerToLine(p, h, idxOf(r.over), commit, next);
+  var fe = firstEmptyLine(p);
+  if (fe >= 0) return triggerToLine(p, h, fe, commit, next);
+  commit(); moveCard(h.uid, p, "hand"); h.turned = false; fxLog("出せる場所がないので、手札に加えた"); render(); next();
+}
 /* ---------------- シート ---------------- */
 var sheetWrap = document.getElementById("sheetwrap");
 var sheetEl   = document.getElementById("sheet");
@@ -3695,6 +4250,13 @@ sheetEl.addEventListener("click", function(e){
   }
   if (ds.lib){ libSheetClick(ds); return; }
   if (ds.recopen){ closeSheet(); replayOpen(ds.recopen); return; }
+  if (ds.ol){
+    if (ds.ol === "create") return olCreate();
+    if (ds.ol === "join") return olJoin((document.getElementById("olCode") || {}).value);
+    if (ds.ol === "start") return olStart(ds.first === "r" ? "r" : +ds.first);
+    if (ds.ol === "leave") return askConfirm("オンライン対戦をやめますか？（1人で遊んでいた盤面に戻ります。相手の画面はそのまま止まります）", "やめる", olLeave);
+    return;
+  }
   if (ds.fxa !== undefined && ds.fxa !== ""){
     var a1 = fxAsk; fxAsk = null; closeSheet();
     if (a1){ if (+ds.fxa < 0) a1.cancel(); else a1.cb(+ds.fxa); }
@@ -3787,12 +4349,14 @@ document.getElementById("btnPhase").addEventListener("click", function(){
 });
 // 準備（先手を決めて配る・引き直すか決める）と、バトルの再開。ヘッダーとガイドのボタン
 document.addEventListener("click", function(e){
-  var t = e.target.closest("button[data-prep], button[data-flow]"); if (!t) return;
+  var t = e.target.closest("button[data-prep], button[data-flow], button[data-ol-lobby]"); if (!t) return;
+  if (t.dataset.olLobby){ olLobbySheet(); return; }
   if (t.dataset.prep === "deal"){
+    if (ol.on) return olLobbySheet();   // オンライン対戦は「部屋」から始める
     var first = +t.dataset.first;
     askConfirm(boardIsEmpty() ? "" : "盤面を消して、準備からやり直します。よろしいですか？", "やり直す", function(){ snap(); prepDeal(first); render(); }); return;
   }
-  if (t.dataset.prep === "mull"){ snap(); prepMull(+t.dataset.pi, t.dataset.redraw === "1"); render(); return; }
+  if (t.dataset.prep === "mull"){ if (ol.on && (+t.dataset.pi !== 0 || !olHolder())) return; snap(); prepMull(+t.dataset.pi, t.dataset.redraw === "1"); render(); return; }
   if (t.dataset.flow === "resume"){ if (fxAsk || picking || aiBusy) return; fxClear(); battleRun(); return; }
   if (t.dataset.flow === "ai"){ aiPaused = false; render(); return; }
 });
@@ -3814,6 +4378,8 @@ document.querySelectorAll(".filters select").forEach(function(sel){
 document.getElementById("fClear").addEventListener("click", function(){ ui.f = {}; saveUI(); syncFilterInputs(); renderBuilder(); });
 // 対戦の記録を見返す
 document.getElementById("btnRec").addEventListener("click", function(){ recSheet(); });
+// オンライン対戦（部屋を作る・入る・始める・やめる）
+document.getElementById("btnOnline").addEventListener("click", function(){ if (!ol.net && !ol.on) return olNoNet(); olLobbySheet(); });
 document.getElementById("replaybar").addEventListener("click", function(e){
   var b = e.target.closest("button[data-rb]"); if (!b || !replay) return;
   var a = b.dataset.rb;
@@ -3947,6 +4513,7 @@ document.addEventListener("contextmenu", function(e){ if (e.target.closest(".car
 state = load() || newState();
 setupFilters();
 render();
+olFindNet();
 </script>
 </body>
 </html>
