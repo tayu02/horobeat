@@ -28,7 +28,7 @@ async function run(label, viewport, touch, full){
     await p.evaluate(([me,opp,ex])=>{
       let n=0; const mk=(k,o,e)=>Object.assign({uid:'I'+(n++),owner:o,key:k,up:true,turned:false,note:''},e||{});
       const P=(spec,o)=>{ const pl={heart:[],waza:[],ena:[],hand:[],grave:[],deck:[],line:[[],[],[],[],[]],decklist:{}};
-        for(let i=0;i<10;i++) pl.deck.push(mk(null,o,{up:false}));
+        for(let i=0;i<(spec.deckN===undefined?10:spec.deckN);i++) pl.deck.push(mk(null,o,{up:false}));
         const hs=spec.heart===undefined?5:spec.heart;
         if(typeof hs==='number') for(let i=0;i<hs;i++) pl.heart.push(mk(null,o,{up:false}));
         else hs.forEach(k=>pl.heart.push(typeof k==='string'?mk(k,o,{up:false}):mk(k.k,o,Object.assign({up:false},k))));
@@ -126,6 +126,15 @@ async function run(label, viewport, touch, full){
   await settle();
   s=await S();
   ok(s.players[1].grave.some(c=>c.key==='HD02-008') && s.players[1].hand.length===3 && (await log()).includes('ドロートリガー'),'AI のハートが破壊されたら、ドロートリガーを使う（墓地へ置き、3枚引く）');
+  // トリガーを使わない（山札が少ないのでドロートリガーを使わない）: 相手に見せずに手札に加える（依頼者の判断 2026-10-22）。
+  // AI の手札を伏せているので、記録にもカードの名前とトリガーの種類を出さない
+  await setup({line:[['HB01-001']]},{line:[['HD02-001']], deckN:2, heart:['HD02-003','HD02-003','HD02-003','HD02-003',{k:'HD02-008',turned:true}], flags:{enaCharged:true}},{phase:1,first:0});
+  ok(await until(()=>state.phase===2,6000),'AI が召喚フェイズを送る');
+  await settle();
+  s=await S();
+  const L6=await log();
+  ok(s.players[1].hand.some(c=>c.key==='HD02-008') && L6.includes('トリガーは使わずに、ハートのカードを手札に加える'),'山札が少ないと、ドロートリガーは使わずに手札に加える');
+  ok(!L6.includes('翠炎よ') && !L6.includes('ドロートリガーは使わず'),'トリガーを使わないときは、相手に見せない（記録にカードの名前もトリガーの種類も出さない）');
   // エントリートリガー: 空いているラインに出す（質問は出さない）
   await setup({line:[['HB01-001']]},{line:[['HD02-001'],['HD02-001']], heart:['HD02-003','HD02-003','HD02-003','HD02-003',{k:'HD02-004',turned:true}], flags:{enaCharged:true}},{phase:1,first:0});
   ok(await until(()=>state.phase===2,6000),'AI が召喚フェイズを送る');

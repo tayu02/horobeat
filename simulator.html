@@ -2112,7 +2112,10 @@ function heartBreak(p, h, next0, mark){
   var next = function(){ focusReset(); render(); next0(); };
   var toHand = function(){
     commit(); moveCard(h.uid, p, "hand"); h.up = true; h.turned = false;
-    fxLog(SIDE_NAME[p] + "のハートが破壊され、「" + nm(h) + "」を手札に加えた"); render(); next(); };
+    // トリガーを使えない・使わないときは、相手に見せずに手札に加える（依頼者の判断 2026-10-22。rules_guess.md B-2）。
+    // AI の手札を伏せているときは、記録にもカードの名前を出さない
+    fxLog(SIDE_NAME[p] + "のハートが破壊され、" + (aiHideHand(p) ? "カードを1枚" : "「" + nm(h) + "」を") + "手札に加えた（トリガーは使わない。相手には見せない）");
+    render(); next(); };
   var trig = HEART_TRIGGERS[kw], labels = [], acts = [];
   // トリガーはハートが破壊されたときのルール（手引書 用語解説）なので、「効果: 手動」のときも選べる。
   // 出たカードの「出たとき」などの能力欄の効果は、いつもどおり「効果: 自動」のときだけ処理する
@@ -3344,8 +3347,9 @@ function aiWazaChoice(p, acts, oppCan){
 // 考え方: 使えるトリガーは使う（エントリー・オーバー・ラストオーバーはコストを払わずに出せる、ドローは3枚引ける）。
 // ただしドロートリガーは、山札が少ない（3枚以下）ときは使わない
 function aiTrigChoice(p, h, kw, can){
-  if (!can){ aiSay(p, "ハートの「" + nm(h) + "」を手札に加える"); return 0; }
-  if (kw === "ドローT" && state.players[p].deck.length < (aiNormal(p) ? aiW(p).drawT : 4)){ aiSay(p, "山札が少ないので、ドロートリガーは使わずに手札に加える"); return 1; }
+  // 使わないときは、どのカードか・どのトリガーかを記録に出さない（相手に見せずに手札に加える。依頼者の判断 2026-10-22）
+  if (!can){ aiSay(p, "ハートのカードを手札に加える"); return 0; }
+  if (kw === "ドローT" && state.players[p].deck.length < (aiNormal(p) ? aiW(p).drawT : 4)){ aiSay(p, "トリガーは使わずに、ハートのカードを手札に加える"); return 1; }
   return 0;
 }
 // トリガーでラインに出すとき、このあとのバトル（まだバトルしていないライン）を見通した点数
