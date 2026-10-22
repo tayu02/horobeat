@@ -163,6 +163,22 @@ async function run(label, viewport, touch, full){
   await p.click('#flow button[data-flow="ai"]');
   ok(await until(()=>state.phase===1,6000) && (await S()).players[1].enaCharged,'「AIを進める」で続きを行う');
 
+  // ---- 8b. AI の手札を伏せる（既定）。触れない。見せるにもできる。勝敗が決まったら見せる ----
+  await setup({},{hand:['HD02-003','HD02-004','HB01-061'], ena:['HD02-001']},{phase:1,first:1});
+  let hid=await p.evaluate(()=>({ n:document.querySelectorAll('#side-1 .z-hand .card.hid').length, names:document.querySelector('#side-1 .z-hand').textContent }));
+  ok(hid.n===3 && !hid.names.includes('つくものジャンボ') && !hid.names.includes('樹霊千年'),'AI の手札は伏せて（裏向きで）表示し、名前は出さない');
+  ok(await p.evaluate(()=>!!state.players[1].hand.every(c=>c.up)),'伏せるのは表示だけ（カードの向きは変えない）');
+  await p.locator('#side-1 .z-hand .card.hid').first().click(); await wait(300);
+  ok(!(await sheetOpen()),'伏せた AI の手札をタップしても中身は出ない');
+  await p.click('#btnAi'); await wait(450);
+  ok(await p.$('#sheet button[data-aihide="1"].primary'),'相手を選ぶシートに「AI の手札: 伏せる／見せる」がある（いまは伏せる）');
+  await p.click('#sheet button[data-aihide="0"]'); await wait(80);
+  ok((await p.textContent('#side-1 .z-hand')).includes('つくものジャンボ') && await p.evaluate(()=>ui.aiHide===false),'「見せる」にすると AI の手札が見える');
+  await p.click('#btnAi'); await wait(450); await p.click('#sheet button[data-aihide="1"]'); await wait(80);
+  await p.evaluate(()=>{ state.winner=0; state.winWhy='試験'; render(); });
+  ok((await p.textContent('#side-1 .z-hand')).includes('つくものジャンボ'),'勝敗が決まったら AI の手札を見せる');
+  await p.evaluate(()=>{ delete state.winner; render(); });
+
   // ---- 9. 人に戻すと動かない ----
   await pickAi('');
   ok((await p.textContent('#btnAi'))==='相手: 人','「人」を選ぶと「相手: 人」に戻る');

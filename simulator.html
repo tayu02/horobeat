@@ -495,7 +495,7 @@ body:not(.view-play) #fxlog, body:not(.view-play) #pickbar{display:none !importa
     <p><b>進行</b>（公式の手引書のラウンドの進行どおり）：準備 → 召喚フェイズ（先手）→ 召喚フェイズ（後手）→ バトルフェイズ → エンドフェイズ → 次のラウンド。準備は、先手を選んで配り、両者が引き直すかを決めると自動で終わります。上部の欄に、いまのフェイズと誰の番かが出ます。</p>
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ。同じコストには重ねられません。重ねるラインは、条件を満たしていればどのラインでも選べます）。<b>エナが足りないときは使えません</b>。</p>
     <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。ダウンしているホロビトも通常どおりバトルし、勝てば通常どおりダメージを与えます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、負けたホロビトとハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ダブルダメージの2ダメージは、1ダメージを2回、上から順に入れます。引き分けは、お互いのホロビトにそれぞれ1ダメージ（ダウンしていなければダウン、すでにダウンしていれば破壊）で、ハートはダメージを受けません。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。バトルのたびに両者のカードの画像を並べて出し、パワーを比べたら結果（勝ち・負け）を見せます（「続ける」で次へ）。ハートが破壊されたときは、そのカードの画像を出してトリガーチェックします。</p>
-    <p><b>相手をAIにする</b>：上部の「相手: 人」を押して「AI ふつう」か「AI かんたん」を選ぶと、相手の番に AI が自動で動きます（引き直すか、エナチャージ、どのホロビトをどのラインに出すか、ワザ・ブーストを使うか、ハートのトリガー、効果で選ぶカード）。<b>ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます</b>（AI にルールを決めさせないため）。AI が何をしたかは下の記録に残ります。「戻す」で AI の番に戻ったときは AI が止まるので、「AIを進める」で続けます。「かんたん」は、その場でいちばん強くなる出し方をします。「ふつう」は、第1ラインから順にバトルの結果（どのラインで勝ち負けし、ハートに何回ダメージが入るか、トドメになるか）を見通し、エナを使うと次のエナドローで引ける枚数が減ることやカードの効果も数えて、出し方・ワザ・ブースト（5つのラインへの配り方）・トリガーを選びます（AI どうしで800回対戦させると、「ふつう」が「かんたん」に約86%勝ちます）。AI はあなたの手札の中身を見ません（盤面と枚数だけを見ます）。</p>
+    <p><b>相手をAIにする</b>：上部の「相手: 人」を押して「AI ふつう」か「AI かんたん」を選ぶと、相手の番に AI が自動で動きます（引き直すか、エナチャージ、どのホロビトをどのラインに出すか、ワザ・ブーストを使うか、ハートのトリガー、効果で選ぶカード）。<b>ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます</b>（AI にルールを決めさせないため）。AI が何をしたかは下の記録に残ります。「戻す」で AI の番に戻ったときは AI が止まるので、「AIを進める」で続けます。「かんたん」は、その場でいちばん強くなる出し方をします。「ふつう」は、第1ラインから順にバトルの結果（どのラインで勝ち負けし、ハートに何回ダメージが入るか、トドメになるか）を見通し、エナを使うと次のエナドローで引ける枚数が減ることやカードの効果も数えて、出し方・ワザ・ブースト（5つのラインへの配り方）・トリガーを選びます（AI どうしで800回対戦させると、「ふつう」が「かんたん」に約86%勝ちます）。AI はあなたの手札の中身を見ません（盤面と枚数だけを見ます）。AI の手札も裏向きで表示します（相手を選ぶシートで「見せる」にもできます。勝敗が決まったら見せます）。</p>
     <p><b>盤面の印</b>：効果を出しているカードは金の太い枠と「効果」、効果の対象は赤の太い枠と「対象」、バトル中のカードは白の太い枠と「バトル」、選ぶ候補は金の太い枠と「選ぶ」の札が付きます。</p>
     <p><b>エンドフェイズ</b>：スライドステップ・エナドロー・エナリフレッシュを自動で行います。</p>
     <p><b>効果</b>：ヘッダーが「効果: 自動」のとき、確定している部分だけ自動で処理し、未確定の部分は聞くか手で処理してもらいます。</p>
@@ -2400,6 +2400,13 @@ function stripHTML(arr, tagFn){
   var h = ""; for (var i = 0; i < arr.length; i++) h += cardHTML(arr[i], tagFn ? tagFn(arr[i]) : ""); return h;
 }
 function lockCls(pi){ return lockOf(pi) ? " locked" : ""; }
+// AI の手札を伏せる（依頼者の指示 2026-10-22。2「AIの手札を裏向きにする」）。表示だけを伏せ、カードの向き（state）は変えない。
+// 伏せたカードは触れない（タップで中身を見られない・動かせない）。勝敗が決まったら見せる
+function aiHideHand(pi){ return isAI(pi) && !aiForce && ui.aiHide !== false && state.winner === undefined; }
+function hiddenStripHTML(arr){
+  if (!arr.length) return '<div class="empty">（なし）</div>';
+  return arr.map(function(c){ return '<div class="card hid" data-owner="' + c.owner + '"><div class="ci down"><div class="mark">AI</div></div></div>'; }).join("");
+}
 function zoneHTML(pi, zone, cls, extraClass, tappable){
   var arr = state.players[pi][zone];
   return '<div class="zone ' + cls + lockCls(pi) + '" data-drop="' + zone + '" data-pi="' + pi + '">' +
@@ -2407,7 +2414,7 @@ function zoneHTML(pi, zone, cls, extraClass, tappable){
              // 狭い列では「ハート／ゾーン」のように語の切れ目で折り返す
              ZONE_NAME[zone].replace(/^(.+)(ゾーン)$/, '<span><span class="nw">$1</span><span class="nw">$2</span></span>') + ' <span class="zcount">(' + arr.length + ')</span></div>' +
            // 手札は、エナが足りず使えないカードに「使えない」の帯を付ける
-           '<div class="strip' + (extraClass || "") + '">' + stripHTML(arr, zone === "hand" ? affordTag : null) + '</div>' +
+           '<div class="strip' + (extraClass || "") + '">' + (zone === "hand" && aiHideHand(pi) ? hiddenStripHTML(arr) : stripHTML(arr, zone === "hand" ? affordTag : null)) + '</div>' +
          '</div>';
 }
 function lineHTML(pi){
@@ -2513,10 +2520,10 @@ function starterTabsHTML(pi){
 var UI_KEY = "horobeat-sim-ui";
 var ui = loadUI();
 function loadUI(){
-  var d = { view:"play", deckPi:0, f:{}, ai:false };
+  var d = { view:"play", deckPi:0, f:{}, ai:false, aiHide:true };
   try {
     var s = JSON.parse(localStorage.getItem(UI_KEY) || "null");
-    if (s){ if (["play", "cards", "deck"].indexOf(s.view) >= 0) d.view = s.view; d.deckPi = s.deckPi === 1 ? 1 : 0; if (s.f && typeof s.f === "object") d.f = s.f; d.ai = s.ai === true ? "normal" : (s.ai === "normal" || s.ai === "easy") ? s.ai : false; }
+    if (s){ if (["play", "cards", "deck"].indexOf(s.view) >= 0) d.view = s.view; d.deckPi = s.deckPi === 1 ? 1 : 0; if (s.f && typeof s.f === "object") d.f = s.f; d.ai = s.ai === true ? "normal" : (s.ai === "normal" || s.ai === "easy") ? s.ai : false; d.aiHide = s.aiHide !== false; }
   } catch(e){}
   return d;
 }
@@ -3524,6 +3531,10 @@ sheetEl.addEventListener("click", function(e){
   if (ds.close){ closeSheet(); if (fxAsk){ var a0 = fxAsk; fxAsk = null; a0.cancel(); } return; }
   if (ds.cfm){ var yes = sheetYes; closeSheet(); if (yes) yes(); return; }
   if (ds.ailv !== undefined){ closeSheet(); setAi(ds.ailv); return; }
+  if (ds.aihide !== undefined){
+    ui.aiHide = ds.aihide === "1"; saveUI(); closeSheet();
+    fxClear(); fxLog(ui.aiHide ? "AI の手札を伏せる（裏向きで表示。勝敗が決まったら見せる）" : "AI の手札を見せる"); render(); return;
+  }
   if (ds.lib){ libSheetClick(ds); return; }
   if (ds.fxa !== undefined && ds.fxa !== ""){
     var a1 = fxAsk; fxAsk = null; closeSheet();
@@ -3649,6 +3660,9 @@ document.getElementById("btnAi").addEventListener("click", function(){
     '<div class="sgrid c1">' + row("", "人（自分で動かす）", "相手の側も自分で操作します") +
     row("normal", "AI ふつう", "第1ラインから順に、バトルの結果を見通して出し方・ワザを選びます") +
     row("easy", "AI かんたん", "その場でいちばん強くなる出し方をします") + '</div>' +
+    '<div class="sect">AI の手札</div><div class="sgrid c2">' +
+    '<button data-aihide="1"' + (ui.aiHide !== false ? ' class="primary"' : "") + '>伏せる（裏向き）</button>' +
+    '<button data-aihide="0"' + (ui.aiHide === false ? ' class="primary"' : "") + '>見せる</button></div>' +
     '<div class="sgrid c1" style="margin-top:8px"><button data-close="1">閉じる</button></div>');
 });
 function setAi(lv){
@@ -3686,6 +3700,7 @@ document.addEventListener("pointerdown", function(e){
   var pileEl = e.target.closest("[data-pile]");
   if (pileEl){ drag = { pile:+pileEl.dataset.pile, moved:false }; return; }
   var cardEl = e.target.closest(".card"); if (!cardEl) return;
+  if (cardEl.classList.contains("hid")) return;   // 伏せた AI の手札は触れない
   // 召喚フェイズ中の、番でない側のカードは動かせない（タップで見るだけ）
   var sideEl = cardEl.closest(".side"), locked = !!(sideEl && lockOf(+sideEl.dataset.pi));
   drag = { cid:cardEl.dataset.cid, el:cardEl, x0:e.clientX, y0:e.clientY, moved:false, locked:locked };
