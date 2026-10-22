@@ -92,8 +92,18 @@ async function run(label, viewport, touch){
   await setup({hand:['HD01-001'], line:[['HB01-001']], ena:['HD01-001','HD01-001']});
   await open(await hand('HD01-001'));
   lb=await lineBtns();
-  ok(lb[0].dis && !lb[1].dis,'同じコスト（2）のホロビトの上（第1ライン）は押せない。空の第2ラインは押せる（手引書「コストが小さいホロビトの上」）');
+  ok(lb[0].dis && !lb[1].dis,'同じコスト（2）のホロビトの上（第1ライン）は押せない。空の第2ラインは押せる（手引書「コストが小さいホロビトの上」・よくある質問「同じコストにはできません」）');
   await p.click('#sheet button[data-close="1"]'); await wait(100);
+  // どのラインのホロビトに重ねるかは自由に選べる。一番数字が小さいラインでなくてよい（公式「よくある質問」）
+  await setup({hand:['HD01-012'], line:[['HB01-001'],['HD01-001'],['HB01-001']], ena:['HD01-001','HD01-001','HD01-001','HD01-001']});
+  await open(await hand('HD01-012'));
+  lb=await lineBtns();
+  ok(!lb[0].dis && !lb[1].dis && !lb[2].dis,'コストが小さいホロビトが3つのラインにいれば、どのラインにも重ねられる（よくある質問）');
+  await p.click('#sheet button[data-close="1"]'); await wait(100);
+  await toLine(await hand('HD01-012'),2);
+  await btn('支払って出す');
+  s=await S();
+  ok(s.players[0].line[2].length===2 && s.players[0].line[0].length===1 && s.players[0].line[1].length===1 && await turned()===3,'第3ラインのホロビトを選んで重ねられる（第1ラインでなくてよい）');
 
   // ---- 色: 同じ色が足りなければ、払うエナを選ぶ ----
   await setup({hand:['HD02-001'], ena:['HD02-001','HD01-001','HD01-001']});

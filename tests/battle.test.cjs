@@ -70,6 +70,15 @@ async function run(label, viewport, touch){
   ok((await log()).includes('引き分け') && top(s,0,0).turned && top(s,1,0).turned,'引き分け（4000 対 4000）: お互いのホロビトがダウン');
   ok(s.players.every(P=>P.heart.every(c=>!c.turned)),'引き分け: ハートはダメージを受けない');
   ok(s.nextFirst===1,'第1ラインが引き分け → 次のラウンドは先手後手が入れ替わる');
+  // ---- 2b. 引き分けは、お互いのホロビトにそれぞれ1ダメージ。すでにダウンしていれば破壊、していなければダウン（公式「よくある質問」）----
+  await setup({line:[[{k:'HB01-001',turned:true}]]},{line:[['HD02-003']]});
+  await battle(); s=await S();
+  ok(!s.players[0].line[0].length && s.players[0].grave.some(c=>c.key==='HB01-001') && top(s,1,0).turned,'引き分け: すでにダウンしていたホロビトは1ダメージで破壊され、ダウンしていないほうはダウンする（よくある質問）');
+  ok(s.players.every(P=>P.heart.every(c=>!c.turned)) && s.players.every(P=>P.heart.length===5),'引き分け: どちらもバトルに勝っていないので、お互いのハートにダメージはない（よくある質問）');
+  // ---- 2c. ダウンしているホロビトも通常通りバトルを行い、勝ったときは通常通りダメージを与える（公式「よくある質問」）----
+  await setup({line:[[{k:'HB01-001',turned:true}]]},{line:[['HD01-001']]});
+  await battle(); s=await S();
+  ok((await log()).includes('自分の勝ち') && top(s,1,0).turned && s.players[1].heart[4].turned,'ダウンしている自分のホロビト（4000）も通常どおりバトルし、勝って相手のホロビトとハートにダメージを与える（よくある質問）');
 
   // ---- 3. ダウン中に負ける → 破壊されて墓地へ。束なら下をどうするか聞く ----
   await setup({line:[['HB01-001']]},{line:[[{k:'HD01-001',turned:true}],[{k:'HB01-001'},{k:'HD01-001',turned:true}]]},{});
