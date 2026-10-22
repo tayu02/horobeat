@@ -462,7 +462,7 @@ body:not(.view-play) #fxlog, body:not(.view-play) #pickbar{display:none !importa
     <ol>
       <li>（任意）<b>スタートデッキ</b>で遊ぶなら、ここで選びます（公式の収録カード一覧どおりの50枚）。自分で組むなら上部の<b>「🔍 カード」</b>で、カードの画像の一覧から −／＋ で入れます（<b>「📋 デッキ」</b>でいまのデッキを確かめられます）。入れなかった枠は<b>未確定カード</b>（灰色）で埋まります。
         <div class="starterrow" id="guideStarters"></div></li>
-      <li>（任意）<b>相手をAIにする</b>なら、上部の<b>「相手: 人」</b>を押して「相手: AI」にします。AI は「相手のデッキ」で遊びます。</li>
+      <li>（任意）<b>相手をAIにする</b>なら、上部の<b>「相手: 人」</b>を押して「AI ふつう」か「AI かんたん」を選びます。AI は「相手のデッキ」で遊びます。</li>
       <li>じゃんけんで<b>先手</b>を決めて、下のボタン（上部の「準備」の欄と同じ）を押します。山札を混ぜて6枚ずつ配ります（準備①②③）。</li>
       <li>両者が<b>「引き直す」か「このまま」</b>を選びます（④）。両者が決めたら、ハート5枚・エナ1枚を置いて（⑤⑥）、自動で<b>召喚フェイズ（先手）</b>に進みます。</li>
       <li>召喚フェイズは<b>先手→後手</b>の順。自分の番でないときは、自分の側のカードは見るだけで動かせません。終わったら上部の<b>「フェイズ送り」</b>。</li>
@@ -483,7 +483,7 @@ body:not(.view-play) #fxlog, body:not(.view-play) #pickbar{display:none !importa
     <p><b>進行</b>（公式の手引書のラウンドの進行どおり）：準備 → 召喚フェイズ（先手）→ 召喚フェイズ（後手）→ バトルフェイズ → エンドフェイズ → 次のラウンド。準備は、先手を選んで配り、両者が引き直すかを決めると自動で終わります。上部の欄に、いまのフェイズと誰の番かが出ます。</p>
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ。同じコストには重ねられません。重ねるラインは、条件を満たしていればどのラインでも選べます）。<b>エナが足りないときは使えません</b>。</p>
     <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。ダウンしているホロビトも通常どおりバトルし、勝てば通常どおりダメージを与えます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、負けたホロビトとハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ダブルダメージの2ダメージは、1ダメージを2回、上から順に入れます。引き分けは、お互いのホロビトにそれぞれ1ダメージ（ダウンしていなければダウン、すでにダウンしていれば破壊）で、ハートはダメージを受けません。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。バトルのたびに両者のカードの画像を並べて出し、パワーを比べたら結果（勝ち・負け）を見せます（「続ける」で次へ）。ハートが破壊されたときは、そのカードの画像を出してトリガーチェックします。</p>
-    <p><b>相手をAIにする</b>：上部の「相手: 人」を押すと「相手: AI」になり、相手の番に AI が自動で動きます（引き直すか、エナチャージ、どのホロビトをどのラインに出すか、ワザ・ブーストを使うか、ハートのトリガー、効果で選ぶカード）。<b>ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます</b>（AI にルールを決めさせないため）。AI が何をしたかは下の記録に残ります。「戻す」で AI の番に戻ったときは AI が止まるので、「AIを進める」で続けます。AI の考え方はかんたんなもの（出せる中でいちばん伸びる出し方をする、下回っていれば上回れるいちばん安いワザ・ブーストを使う など）で、強さはそこそこです。</p>
+    <p><b>相手をAIにする</b>：上部の「相手: 人」を押して「AI ふつう」か「AI かんたん」を選ぶと、相手の番に AI が自動で動きます（引き直すか、エナチャージ、どのホロビトをどのラインに出すか、ワザ・ブーストを使うか、ハートのトリガー、効果で選ぶカード）。<b>ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます</b>（AI にルールを決めさせないため）。AI が何をしたかは下の記録に残ります。「戻す」で AI の番に戻ったときは AI が止まるので、「AIを進める」で続けます。「かんたん」は、その場でいちばん強くなる出し方をします。「ふつう」は、第1ラインから順にバトルの結果（どのラインで勝ち負けし、ハートに何回ダメージが入るか、トドメになるか）を見通して、出し方・ワザ・ブースト・トリガーを選びます（AI どうしで400回対戦させると、「ふつう」が「かんたん」に約78%勝ちます）。AI はあなたの手札の中身を見ません（盤面と枚数だけを見ます）。</p>
     <p><b>盤面の印</b>：効果を出しているカードは金の太い枠と「効果」、効果の対象は赤の太い枠と「対象」、バトル中のカードは白の太い枠と「バトル」、選ぶ候補は金の太い枠と「選ぶ」の札が付きます。</p>
     <p><b>エンドフェイズ</b>：スライドステップ・エナドロー・エナリフレッシュを自動で行います。</p>
     <p><b>効果</b>：ヘッダーが「効果: 自動」のとき、確定している部分だけ自動で処理し、未確定の部分は聞くか手で処理してもらいます。</p>
@@ -1016,7 +1016,7 @@ var PART_FX = {
         var hs = [];
         P.line.forEach(function(st){ var t = st[st.length - 1]; if (t && t.up && isHolo(t)) hs.push(t.uid); });
         var pickH = function(uid){ x.sel = [findCard(uid).card]; focusTgt(uid); fxLog(nm(x.sel[0]) + " を選んだ"); next(); };
-        if (isAI(x.pi) && hs.length) return aiLater(function(){ aiSay("効果で選ぶホロビト（ダウンしているもの → パワーが大きいもの）"); pickH(aiPickOwnHolo(hs)); });
+        if (isAI(x.pi) && hs.length) return aiLater(function(){ aiSay(x.pi, "効果で選ぶホロビト（ダウンしているもの → パワーが大きいもの）"); pickH(aiPickOwnHolo(hs)); });
         return startPick(hs, "自分のホロビトを" + a.n + "体選んでください（ラインの一番上のホロビトから。束の下のカードを選べるかは未確定なので候補に入れていません）",
           pickH,
           function(){ x.sel = null; fxLog("選ぶ処理は手で行う"); next(); }, "手で処理する");
@@ -1025,7 +1025,7 @@ var PART_FX = {
       var cands = P.ena.filter(function(c){ var d = cardDef(c); return !a.color || (d && d.color_mark === a.color); });
       if (isAI(x.pi) && cands.length) return aiLater(function(){
         var u = aiPickOwnEna(cands.map(function(c){ return c.uid; })); x.sel = [findCard(u).card]; focusTgt(u);
-        aiSay("効果で選ぶエナ（使用済みのもの）"); fxLog(nm(x.sel[0]) + " を選んだ"); next(); });
+        aiSay(x.pi, "効果で選ぶエナ（使用済みのもの）"); fxLog(nm(x.sel[0]) + " を選んだ"); next(); });
       startPick(cands.map(function(c){ return c.uid; }),
         "自分の" + (a.color ? a.color + "の" : "") + "エナを" + a.n + "枚選んでください" +
         (a.color ? "（色が未確定のエナは候補に入れていません）" : ""),
@@ -1054,7 +1054,7 @@ var PART_FX = {
         openCardSheet(uid, o, true, next); };
       var hs = state.players[o].hand.map(function(c){ return c.uid; });
       // AI が捨てるカードを選ぶ。捨てる先は未確定なので、いつもどおり人に聞く
-      if (isAI(o) && hs.length) return aiLater(function(){ aiSay("捨てる手札を選んだ（内容が分からないカード → コストが小さいもの）"); discard(aiPickDiscard(hs)); });
+      if (isAI(o) && hs.length) return aiLater(function(){ aiSay(o, "捨てる手札を選んだ（内容が分からないカード → コストが小さいもの）"); discard(aiPickDiscard(hs)); });
       startPick(hs, SIDE_NAME[o] + "が捨てる手札を" + a.n + "枚選んでください（選ぶのは" + SIDE_NAME[o] + "）", discard, stop); } },
   may_reveal_from_hand:    { how:"選択", why:"任意なので見せないことも選べる。候補は手札の印字のコストで絞る（コストの増減は計算しない）。見せたカードは手札に残る",
     run:function(x, a, next){
@@ -1064,7 +1064,7 @@ var PART_FX = {
       var note = unk ? "（コストが分からないカード " + unk + " 枚は候補に入れていない）" : "";
       x.didSo = false;
       if (!cands.length){ fxLog("手札にコスト" + a.n + "以上のホロビトがないので見せない" + note); return next(); }
-      if (isAI(x.pi)) return aiLater(function(){ x.didSo = true; aiSay("手札の「" + nm(cands[0]) + "」を見せる"); fxLog(nm(cands[0]) + " を見せた（手札に残る）"); next(); });
+      if (isAI(x.pi)) return aiLater(function(){ x.didSo = true; aiSay(x.pi, "手札の「" + nm(cands[0]) + "」を見せる"); fxLog(nm(cands[0]) + " を見せた（手札に残る）"); next(); });
       startPick(cands.map(function(c){ return c.uid; }),
         "見せるホロビトを" + a.m + "体選んでください（コスト" + a.n + "以上。見せなくてもよい）" + note,
         function(uid){ x.didSo = true; fxLog(nm(findCard(uid).card) + " を見せた（手札に残る）"); next(); },
@@ -2117,7 +2117,7 @@ function triggerToLine(p, h, idx, commit, next){
 function pickOver(p, h, commit, next, onCancel){
   var ov = overTargets(p, h);
   if (isAI(p) && ov.length) return aiLater(function(){
-    var t = aiOverTarget(ov); aiSay("「" + nm(h) + "」を「" + nm(t) + "」の上にオーバービートで出す");
+    var t = aiOverTarget(p, h, ov); aiSay(p, "「" + nm(h) + "」を「" + nm(t) + "」の上にオーバービートで出す");
     triggerToLine(p, h, zoneOfCard(t).idx, commit, next); });
   startPick(ov.map(function(c){ return c.uid; }), "「" + nm(h) + "」をオーバービートで出します。下にするホロビトを選んでください（コストが小さいホロビト）",
     function(uid){ triggerToLine(p, h, zoneOfCard(findCard(uid).card).idx, commit, next); }, onCancel || battlePause);
@@ -2133,8 +2133,11 @@ var HEART_TRIGGERS = {
       if (fe >= 0){ labels.push("空いているラインの1番前（第" + (fe + 1) + "ライン）に出す"); acts.push(function(){ triggerToLine(p, h, fe, commit, next); }); }
       if (overTargets(p, h).length){ labels.push("オーバービートで出す（下にするホロビトを選ぶ）"); acts.push(function(){ pickOver(p, h, commit, next); }); }
       if (acts.length === 1) return acts[0]();
-      // AI: 空いているラインに出す（ホロビトが多いほど有利。ティザー⑧・入門⑧）
-      if (isAI(p)) return aiLater(function(){ aiSay("エントリートリガー：空いているラインに出す"); acts[0](); });
+      // AI: 「かんたん」は空いているラインに出す（ホロビトが多いほど有利。ティザー⑧・入門⑧）。「ふつう」はこのあとのバトルを見通して選ぶ
+      if (isAI(p)) return aiLater(function(){
+        var ch = aiEntryChoice(p, h, fe, overTargets(p, h));
+        if (!ch.over){ aiSay(p, "エントリートリガー：空いているライン（第" + (fe + 1) + "ライン）に出す"); return acts[0](); }
+        aiSay(p, "エントリートリガー：「" + nm(ch.over) + "」の上にオーバービートで出す"); triggerToLine(p, h, ch.idx, commit, next); });
       fxChoose("エントリートリガー：「" + nm(h) + "」をどう出しますか？（コストは支払わない）", labels, function(i){ acts[i](); }, battlePause, "ハートが破壊された（トリガー）", heartHead(p, h));
     } },
   // オーバートリガー: 既に出ているホロビトの上にオーバービートで出す（コストは支払わない）
@@ -2501,7 +2504,7 @@ function loadUI(){
   var d = { view:"play", deckPi:0, f:{}, ai:false };
   try {
     var s = JSON.parse(localStorage.getItem(UI_KEY) || "null");
-    if (s){ if (["play", "cards", "deck"].indexOf(s.view) >= 0) d.view = s.view; d.deckPi = s.deckPi === 1 ? 1 : 0; if (s.f && typeof s.f === "object") d.f = s.f; d.ai = s.ai === true; }
+    if (s){ if (["play", "cards", "deck"].indexOf(s.view) >= 0) d.view = s.view; d.deckPi = s.deckPi === 1 ? 1 : 0; if (s.f && typeof s.f === "object") d.f = s.f; d.ai = s.ai === true ? "normal" : (s.ai === "normal" || s.ai === "easy") ? s.ai : false; }
   } catch(e){}
   return d;
 }
@@ -2676,7 +2679,7 @@ function flowHTML(){
   if (state.phase === 2){
     if (state.battle)
       return '<span>第' + (state.battle.line + 1) + 'ラインのバトル中</span>' +
-        (aiBusy ? '<span>' + SIDE_NAME[AI_SIDE] + '（AI）が考えています…</span>' : fxAsk || picking ? "" : '<button class="mini primary" data-flow="resume">バトルを続ける</button>');
+        (aiBusy ? '<span>AIが考えています…</span>' : fxAsk || picking ? "" : '<button class="mini primary" data-flow="resume">バトルを続ける</button>');
     return '<span>バトルフェイズ終了。' + (state.nextFirst !== undefined ? "次のラウンドの先手は" + SIDE_NAME[state.nextFirst] + "。" : "") + '「フェイズ送り」でエンドフェイズへ</span>';
   }
   return '<span>エンドフェイズ（スライド・エナドロー・エナリフレッシュを済ませた）。「フェイズ送り」で次のラウンドへ</span>';
@@ -2699,8 +2702,8 @@ function render(){
   document.getElementById("btnUndo").disabled = !undoStack.length;
   // AI の召喚フェイズの間は押せない（止めているときは押せる）
   document.getElementById("btnPhase").disabled = state.phase < 0 || state.winner !== undefined || (isAI(activeOf()) && !aiPaused);
-  document.getElementById("btnAi").textContent = aiOn() ? "相手: AI" : "相手: 人";
-  document.getElementById("btnAi").className = "mini" + (aiOn() ? " on" : "");
+  document.getElementById("btnAi").textContent = isAI(AI_SIDE) ? "相手: AI " + AI_LEVELS[aiLevel(AI_SIDE)] : "相手: 人";
+  document.getElementById("btnAi").className = "mini" + (isAI(AI_SIDE) ? " on" : "");
   document.getElementById("flow").innerHTML = flowHTML();
   document.getElementById("side-1").innerHTML = sideHTML(1);
   document.getElementById("side-0").innerHTML = sideHTML(0);
@@ -2715,16 +2718,27 @@ function render(){
 }
 
 /* ---------------- AI（相手を自動で動かす）---------------- */
-// 依頼者の指示（2026-10-22「AIが対戦相手にしてくれるように」。依頼者の選択: シミュレーター内蔵のAI）。
+// 依頼者の指示（2026-10-22「AIが対戦相手にしてくれるように」。依頼者の選択: シミュレーター内蔵のAI。
+// 同日「3です」: トークンを使わずに内蔵のAIを強くする）。
 // AI が決めるのは、プレイヤーが自分で選ぶことだけ: 引き直すか／エナチャージするカード／どのホロビトをどのラインに出すか／
 // ワザ・ブーストを使うか／ハートのトリガーを使うか・どこに出すか／効果で選ぶカード。
 // ルールが未確定でシミュレーターが聞くこと（rules_guess.md）は、AI の番でも人に聞く（AI にルールを決めさせない）。
+// AI は人の手札の中身を見ない（見るのは盤面・ハートの枚数と向き・手札とエナの枚数だけ。実際の対戦で相手から見えるもの）。
+// 強さは2つ: 「かんたん」（その場でいちばん伸びる出し方）と「ふつう」（第1ラインから順に、バトルの結果を見通して選ぶ）。
 // 下の「考え方」はルールではなく遊び方の方針で、いつも確定ルールの範囲（出せる・使えると判定されたもの）から選ぶ
 var AI_SIDE = 1, AI_DELAY = 700;
+var AI_LEVELS = { normal:"ふつう", easy:"かんたん" };
+var aiForce = null;   // 試験・強さの測定用: { 0:"normal", 1:"easy" } のように両方の側を AI にする（画面からは選べない）
 var aiTimer = null, aiBusy = false, aiPaused = false, aiEpoch = 0, aiActing = 0, aiMemo = {};
-function aiOn(){ return !!ui.ai; }
-function isAI(p){ return aiOn() && p === AI_SIDE; }
-function aiSay(s){ fxLog(SIDE_NAME[AI_SIDE] + "（AI）：" + s); }
+function aiLevel(p){
+  if (p !== 0 && p !== 1) return null;
+  if (aiForce) return aiForce[p] || null;
+  return p === AI_SIDE && AI_LEVELS[ui.ai] ? ui.ai : null;
+}
+function isAI(p){ return !!aiLevel(p); }
+function aiAny(){ return isAI(0) || isAI(1); }
+function aiNormal(p){ return aiLevel(p) === "normal"; }
+function aiSay(p, s){ fxLog(SIDE_NAME[p] + "（AI）：" + s); }
 // AI の操作の間は、操作ごとに記録を消さない（AI が何をしたかを人があとで読めるように）
 function aiRun(fn){ aiActing++; try { fn(); } finally { aiActing--; } }
 // 少し待ってから決める（人が追えるように）。待っている間に盤面が変わったら（戻す・人の操作）やめる
@@ -2732,7 +2746,7 @@ function aiLater(fn){
   aiBusy = true; var ep = aiEpoch;
   setTimeout(function(){
     aiBusy = false;
-    if (ep !== aiEpoch || !aiOn()){ render(); return; }
+    if (ep !== aiEpoch || !aiAny()){ render(); return; }
     aiRun(fn);
   }, AI_DELAY);
   render();
@@ -2745,33 +2759,39 @@ function aiStop(){
 }
 // いま AI がすること（準備④の引き直し・自分の召喚フェイズ）。バトル中の判断は、その場で聞かれたときに決める
 function aiWants(){
-  if (!aiOn() || state.winner !== undefined) return null;
-  if (state.phase < 0) return state.prep === "mull" && !state.players[AI_SIDE].mull ? "mull" : null;
-  return activeOf() === AI_SIDE ? "summon" : null;
+  if (!aiAny() || state.winner !== undefined) return null;
+  if (state.phase < 0){
+    if (state.prep !== "mull") return null;
+    for (var p = 0; p < 2; p++) if (isAI(p) && !state.players[p].mull) return { what:"mull", p:p };
+    return null;
+  }
+  var a = activeOf();
+  return isAI(a) ? { what:"summon", p:a } : null;
 }
 function aiIdle(){ return !aiBusy && !picking && !fxAsk && !sheetWrap.classList.contains("on"); }
 // render のたびに呼ぶ。AI の番で、人への質問が開いていなければ、少し待って1手進める。
 // 待っている間に盤面が変わってもよい（動く時点の盤面で、もう一度すべきことを確かめる）。
 // 動けなかったとき（質問が開いた など）は、その処理が終わったときの render でまた呼ばれる
 function aiKick(){
-  if (aiTimer || aiPaused || ui.view !== "play" || !aiWants() || !aiIdle()) return;
+  if (aiTimer || aiPaused || (!aiForce && ui.view !== "play") || !aiWants() || !aiIdle()) return;
   aiTimer = setTimeout(function(){
     aiTimer = null;
-    if (aiPaused || ui.view !== "play" || !aiIdle()) return;
+    if (aiPaused || (!aiForce && ui.view !== "play") || !aiIdle()) return;
     var w = aiWants(); if (!w) return;
-    aiRun(function(){ if (w === "mull") aiMull(); else aiSummonStep(); });
+    aiRun(function(){ if (w.what === "mull") aiMull(w.p); else aiSummonStep(w.p); });
   }, AI_DELAY);
 }
 function aiPw(c){ var d = cardDef(c); return c.up && d && typeof d.power === "number" ? d.power : 0; }
 function aiKnown(c){ var d = cardDef(c); return !!(c.up && d); }
+function aiCost(c){ var d = cardDef(c); return c.up && d && typeof d.cost === "number" ? d.cost : 0; }
 
 // ---- 準備④: 引き直すか ----
 // 考え方: 最初のラウンドに出せる（コスト2以下の）ホロビトが手札になければ引き直す
-function aiMull(){
-  var P = state.players[AI_SIDE];
+function aiMull(p){
+  var P = state.players[p];
   var ok = P.hand.some(function(c){ var d = cardDef(c); return aiKnown(c) && d.type === "ホロビト" && typeof d.cost === "number" && d.cost <= 2; });
-  aiSay(ok ? "手札にコスト2以下のホロビトがあるので、引き直さない" : "手札にコスト2以下のホロビトがないので、引き直す");
-  snap(); prepMull(AI_SIDE, !ok); render();
+  aiSay(p, ok ? "手札にコスト2以下のホロビトがあるので、引き直さない" : "手札にコスト2以下のホロビトがないので、引き直す");
+  snap(); prepMull(p, !ok); render();
 }
 
 // ---- 召喚フェイズ: エナチャージ → ホロビトを出す（1手ずつ）→ フェイズ送り ----
@@ -2780,26 +2800,26 @@ function aiMemoNow(){
   if (!aiMemo[key]){ aiMemo = {}; aiMemo[key] = { bad:{} }; }
   return aiMemo[key];
 }
-function aiSummonStep(){
-  var pi = AI_SIDE, P = state.players[pi], m = aiMemoNow();
-  if (!P.enaCharged && !P.mainStarted && !m.charged){
-    m.charged = true;
+function aiSummonStep(pi){
+  var P = state.players[pi], m = aiMemoNow();
+  if (!P.enaCharged && !P.mainStarted && !m["charged" + pi]){
+    m["charged" + pi] = true;
     var ch = aiChargePick(pi);
-    if (ch){ aiSay("エナチャージ：「" + nm(ch.c) + "」をエナにする（" + ch.why + "）"); enaCharge(ch.c.uid, pi); return; }
-    aiSay("エナチャージはしない（手札が1枚以下）");
+    if (ch){ aiSay(pi, "エナチャージ：「" + nm(ch.c) + "」をエナにする（" + ch.why + "）"); enaCharge(ch.c.uid, pi); return; }
+    aiSay(pi, "エナチャージはしない（手札が1枚以下）");
   }
-  var mv = aiBestPlay(pi);
+  var mv = aiNormal(pi) ? aiPlanPlay(pi) : aiBestPlay(pi);
   if (mv){
     var k = mv.c.uid + "@" + mv.idx;
     if (m.bad[k]){ mv = null; }
     else {
       m.bad[k] = true;   // 同じ出し方を2回試さない（出せなかったときに同じ手を繰り返さないため）
-      aiSay(mv.why); playFromHand(mv.c.uid, pi, mv.idx, true); return;
+      aiSay(pi, mv.why); playFromHand(mv.c.uid, pi, mv.idx, true); return;
     }
   }
   var known = P.hand.filter(aiKnown).length;
-  aiSay(P.hand.length && !known ? "手札が未確定カードだけなので、ホロビトを出せない（📋 デッキで相手のデッキを選べます）。召喚フェイズを終える"
-                                : "これ以上出さない。召喚フェイズを終える");
+  aiSay(pi, P.hand.length && !known ? "手札が未確定カードだけなので、ホロビトを出せない（📋 デッキで相手のデッキを選べます）。召喚フェイズを終える"
+                                    : "これ以上出さない。召喚フェイズを終える");
   snap(); nextPhase(); render();
   if (state.phase === 2 && state.battle) battleRun();
 }
@@ -2824,10 +2844,9 @@ function aiSameColor(pi, d, need){
   if (d.color_mark === "unknown") return false;
   return untappedEna(pi).filter(function(e){ var x = cardDef(e); return x && x.color_mark === d.color_mark; }).length >= need;
 }
-// 出し方を選ぶ。考え方: 出したあとのパワーの伸び。新しいラインは加点（ホロビトが多いほど有利。ティザー⑧・入門⑧）、
-// ダウンしているホロビトに重ねるのも加点（ダウンが解ける。入門⑫）、正面の相手のホロビトより強くなるのも加点。安いほうを少し優先
-function aiBestPlay(pi){
-  var P = state.players[pi], o = 1 - pi, best = null, m = aiMemoNow();
+// AI が選べる出し方（人に聞かずに出せるもの）
+function aiPlays(pi){
+  var P = state.players[pi], m = aiMemoNow(), out = [];
   P.hand.forEach(function(c){
     var d = cardDef(c);
     if (!aiKnown(c) || d.type !== "ホロビト" || typeof d.cost !== "number" || typeof d.power !== "number") return;
@@ -2836,22 +2855,119 @@ function aiBestPlay(pi){
       var v = lineVerdict(c, pi, i);
       if (!v.can || v.viaUp || v.pc.unknown) continue;
       if (v.pc.need > 0 && !aiSameColor(pi, d, v.pc.need)) continue;
-      var top = lineTop(pi, i), front = lineTop(o, i);
-      var score = d.power - (top ? aiPw(top) : 0) - v.pc.need * 100;
-      if (!top) score += 3000;
-      if (top && top.turned) score += 2000;
-      if (front && aiPw(front) && d.power > aiPw(front)) score += 1500;
-      if (!best || score > best.score) best = { c:c, idx:i, score:score, top:top, need:v.pc.need };
+      out.push({ c:c, idx:i, top:lineTop(pi, i), need:v.pc.need });
     }
   });
+  return out;
+}
+function aiPlayWhy(mv){
+  return "「" + nm(mv.c) + "」を第" + (mv.idx + 1) + "ラインに" + (mv.top ? "「" + nm(mv.top) + "」の上にオーバービートで出す" : "出す") + "（エナ " + mv.need + " 枚）";
+}
+// 「かんたん」: 出したあとのパワーの伸び。新しいラインは加点（ホロビトが多いほど有利。ティザー⑧・入門⑧）、
+// ダウンしているホロビトに重ねるのも加点（ダウンが解ける。入門⑫）、正面の相手のホロビトより強くなるのも加点。安いほうを少し優先
+function aiBestPlay(pi){
+  var o = 1 - pi, best = null;
+  aiPlays(pi).forEach(function(mv){
+    var front = lineTop(o, mv.idx), pw = aiPw(mv.c);
+    var score = pw - (mv.top ? aiPw(mv.top) : 0) - mv.need * 100;
+    if (!mv.top) score += 3000;
+    if (mv.top && mv.top.turned) score += 2000;
+    if (front && aiPw(front) && pw > aiPw(front)) score += 1500;
+    if (!best || score > best.score){ mv.score = score; best = mv; }
+  });
   if (!best || best.score <= 0) return null;
-  best.why = "「" + nm(best.c) + "」を第" + (best.idx + 1) + "ラインに" +
-    (best.top ? "「" + nm(best.top) + "」の上にオーバービートで出す" : "出す") + "（エナ " + best.need + " 枚）";
+  best.why = aiPlayWhy(best);
+  return best;
+}
+
+// ---- 「ふつう」: 第1ラインから順に、バトルの結果を見通す ----
+// 見えるもの（盤面のカード・ハートの枚数と向き）だけで、いまの盤面のままバトルしたら何が起きるかを数え、点数にする（自分から見た点数）。
+// 確定ルール: 正面は同じ番号のライン、パワーの高いほうが勝ち、負けたホロビトとそのプレイヤーのハートにダメージ、引き分けはお互いのホロビトだけ、
+// 不戦勝も勝ち、ダウンしていればダメージで破壊、ハートは上から順に、ハートが0枚のときのダメージでトドメ（手引書・ルール動画・よくある質問）。
+// ワザ・ブーストは数えない（まだ使っていない分は分からない）。判定できない条件の効果も数えない
+var AI_W = { hit:10, kill:1000, down:1, destroy:4, cost:0.5, board:0.5, ena:0.3, card:2 };
+function aiHearts(p){ var H = state.players[p].heart; return { n:H.length, down: H.length ? !!H[H.length - 1].turned : false }; }
+// n 回のダメージを、上から順に入れる。トドメ（ハートが0枚のときのダメージ）なら true
+function aiHit(h, n){
+  if (n <= 0) return false;
+  if (h.n === 0) return true;
+  for (var k = 0; k < n && h.n > 0; k++){ if (h.down){ h.n--; h.down = false; } else h.down = true; }
+  return false;
+}
+// 勝ったホロビト W が負けた側のプレイヤーに与えるダメージ（ダブルダメージ・バリアは、判定できるときだけ数える）
+function aiDmg(W, L){
+  var n = W && stOfBadge(W, /^ダブルダメージ$/).st === "on" ? 2 : 1;
+  if (L){ var b = stOfBadge(L, /^(\d+)バリア$/); if (b.st === "on") n -= b.n; }
+  return Math.max(0, n);
+}
+// ホロビトがダメージを受けたときの損（持ち主から見て）。ダウンしていれば破壊
+function aiHoloLoss(c){
+  if (!c.turned) return AI_W.down + aiCost(c) * 0.1;
+  if (stOfBadge(c, /^破壊されない$/).st === "on") return 0;
+  return AI_W.destroy + aiCost(c) * AI_W.cost;
+}
+// ラインにいるカードのいまのパワー。バトル中のホロビトは使ったワザ・ブーストも数える
+function aiLinePow(p, i, c){
+  var b = state.battle;
+  if (state.phase === 2 && b && b.line === i && battler(p) === c) return aiPow(p);
+  var d = cardDef(c); if (!c.up || !d || typeof d.power !== "number") return null;
+  var parts = [{ n:d.power }], asks = [];
+  (ABILITY_MAP[c.key] || []).forEach(function(ab){ powerFx(ctxOf(c), ab, "このホロビト", parts, asks, ""); });
+  var t = 0; parts.forEach(function(q){ t += q.n; }); return t;
+}
+// from: 数え始めるライン。resp: 相手がこのあと召喚フェイズでホロビトを出せる（相手が空いているラインの不戦勝は半分に見る）
+function aiForecast(pi, from, resp){
+  var o = 1 - pi, me = aiHearts(pi), op = aiHearts(o), sc = 0;
+  for (var i = from || 0; i < LINE_COUNT; i++){
+    var a = lineTop(pi, i), b = lineTop(o, i);
+    if (!a && !b) continue;
+    var pa = a ? aiLinePow(pi, i, a) : 0, pb = b ? aiLinePow(o, i, b) : 0;
+    if (pa === null || pb === null) continue;                  // パワーが分からないラインは数えない
+    var w = !b ? pi : !a ? o : pa > pb ? pi : pb > pa ? o : -1;
+    if (w === -1){ sc += aiHoloLoss(b) - aiHoloLoss(a); continue; }
+    var W = w === pi ? a : b, L = w === pi ? b : a, n = aiDmg(W, L);
+    if (L) sc += (w === pi ? 1 : -1) * aiHoloLoss(L);
+    if (w === pi){
+      if (!b && resp){ sc += n * AI_W.hit * 0.5; continue; }
+      if (aiHit(op, n)) return sc + AI_W.kill;
+      sc += n * AI_W.hit;
+    } else {
+      if (aiHit(me, n)) return sc - AI_W.kill;
+      sc -= n * AI_W.hit;
+    }
+  }
+  return sc;
+}
+// 盤面に残るホロビトの値打ち（次のラウンド以降も戦い、オーバービートの土台になる）
+function aiBoard(pi){
+  var v = 0;
+  for (var i = 0; i < LINE_COUNT; i++){ var t = lineTop(pi, i); if (t) v += AI_W.board * (1 + aiPw(t) / 2000) - (t.turned ? AI_W.down : 0); }
+  return v;
+}
+function aiValue(pi, from, resp){ return aiForecast(pi, from, resp) + aiBoard(pi); }
+// 仮に第 idx ラインに置いてみて数え、すぐ元に戻す（カードはいまある場所＝手札・ハートなどから動かす）
+function aiTry(pi, c, idx, fn){
+  var src = findCard(c.uid).list, at = src.indexOf(c), st = state.players[pi].line[idx], under = st[st.length - 1];
+  var keep = { up:c.up, turned:c.turned, ut: under ? under.turned : false };
+  src.splice(at, 1); st.push(c); c.up = true; c.turned = false; if (under) under.turned = false;   // オーバービートでダウンが解ける（入門⑫）
+  try { return fn(); }
+  finally { st.pop(); src.splice(at, 0, c); c.up = keep.up; c.turned = keep.turned; if (under) under.turned = keep.ut; }
+}
+function aiResp(pi){ return state.phase === 0 && state.first === pi; }   // 自分が先手の召喚フェイズ: このあと相手が出せる
+// 「ふつう」: 出したときの見通しの伸びがいちばん大きい出し方（使うエナの分を少し引く）。伸びなければ出さない
+function aiPlanPlay(pi){
+  var resp = aiResp(pi), base = aiValue(pi, 0, resp), best = null;
+  aiPlays(pi).forEach(function(mv){
+    var val = aiTry(pi, mv.c, mv.idx, function(){ return aiValue(pi, 0, resp); });
+    mv.gain = val - base - mv.need * AI_W.ena;
+    if (!best || mv.gain > best.gain) best = mv;
+  });
+  if (!best || best.gain <= 0) return null;
+  best.why = aiPlayWhy(best);
   return best;
 }
 
 // ---- バトル: ワザ・ブースト ----
-// 考え方: いまのパワーで上回っていれば使わない。下回っていれば、上回れるもののうちいちばん安いものを使う。届かなければ使わない。
 // パワーは、計算できる分だけで見る（未確定で人に聞く条件は、まだ答えがなければ数えない）
 function aiPow(p){
   var r = powerParts(p); if (r.err) return null;
@@ -2869,23 +2985,39 @@ function aiActCost(a){
   var x = a.kind === "boost" ? boostOf(a.c).cost : cardDef(a.c).cost;
   return typeof x === "number" ? x : 99;
 }
+// いまのラインのバトルが my 対 op で終わったときの点数（このラインだけ。自分から見て）
+function aiLineValue(p, my, op){
+  var o = 1 - p, a = battler(p), b = battler(o);
+  if (!b) return 0;
+  if (my === op) return aiHoloLoss(b) - aiHoloLoss(a);
+  var win = my > op, W = win ? a : b, L = win ? b : a, n = aiDmg(W, L);
+  var h = aiHearts(win ? o : p), kill = aiHit(h, n);
+  var v = aiHoloLoss(L) + (kill ? AI_W.kill : n * AI_W.hit);
+  return win ? v : -v;
+}
 // 返すのは bWaza の選択肢の番号（acts.length は「使わない」か「使用を終える」）
 function aiWazaChoice(p, acts, oppCan){
-  var o = 1 - p, my = aiPow(p), op = battler(o) ? aiPow(o) : -1, pass = acts.length;
-  var no = function(why){ aiSay(why + (oppCan ? "、ワザ・ブーストは使わない" : "、ワザ・ブーストの使用を終える")); return pass; };
+  var o = 1 - p, my = aiPow(p), op = battler(o) ? aiPow(o) : -1, pass = acts.length, m = aiMemoNow();
+  var no = function(why){ aiSay(p, why + (oppCan ? "、ワザ・ブーストは使わない" : "、ワザ・ブーストの使用を終える")); return pass; };
   if (my === null) return no("自分のパワーを計算できないので");
   if (op === null) return no("相手のパワーを計算できないので");
   if (my > op) return no("パワーで上回っている（" + my + " 対 " + op + "）ので");
-  var best = -1, m = aiMemoNow();
+  var best = -1, bestV = 0, normal = aiNormal(p), cur = normal ? aiLineValue(p, my, op) : 0;
   acts.forEach(function(a, i){
     var g = aiActGain(a);
-    if (m.bad["w" + a.c.uid]) return;   // 一度選んで使えなかったもの（条件を満たさないなど）は選び直さない
-    if (g !== null && my + g > op && (best < 0 || aiActCost(a) < aiActCost(acts[best]))) best = i;
+    if (m.bad["w" + a.c.uid] || g === null) return;   // 一度選んで使えなかったもの（条件を満たさないなど）は選び直さない
+    if (!normal){
+      if (my + g > op && (best < 0 || aiActCost(a) < aiActCost(acts[best]))) best = i;
+      return;
+    }
+    // 「ふつう」: 勝てる・引き分けに持ち込める（ハートへのダメージを防げる）なら、そのラインの点数の伸びから、使うカードとエナの分を引いて比べる
+    var v = aiLineValue(p, my + g, op) - cur - AI_W.card - aiActCost(a) * AI_W.ena;
+    if (v > bestV){ bestV = v; best = i; }
   });
-  if (best < 0) return no("使っても上回れない（" + my + " 対 " + op + "）ので");
-  var a = acts[best];
+  if (best < 0) return no((normal ? "使っても割に合わない" : "使っても上回れない") + "（" + my + " 対 " + op + "）ので");
+  var a = acts[best], g2 = aiActGain(a);
   m.bad["w" + a.c.uid] = true;
-  aiSay((a.kind === "boost" ? "ブースト" : "ワザ") + "「" + nm(a.c) + "」を使う（" + my + " 対 " + op + "。+" + aiActGain(a) + " で上回る）");
+  aiSay(p, (a.kind === "boost" ? "ブースト" : "ワザ") + "「" + nm(a.c) + "」を使う（" + my + " 対 " + op + "。+" + g2 + " で" + (my + g2 > op ? "上回る" : "引き分けにする") + "）");
   return best;
 }
 
@@ -2893,13 +3025,30 @@ function aiWazaChoice(p, acts, oppCan){
 // 考え方: 使えるトリガーは使う（エントリー・オーバー・ラストオーバーはコストを払わずに出せる、ドローは3枚引ける）。
 // ただしドロートリガーは、山札が少ない（3枚以下）ときは使わない
 function aiTrigChoice(p, h, kw, can){
-  if (!can){ aiSay("ハートの「" + nm(h) + "」を手札に加える"); return 0; }
-  if (kw === "ドローT" && state.players[p].deck.length <= 3){ aiSay("山札が少ないので、ドロートリガーは使わずに手札に加える"); return 1; }
+  if (!can){ aiSay(p, "ハートの「" + nm(h) + "」を手札に加える"); return 0; }
+  if (kw === "ドローT" && state.players[p].deck.length <= 3){ aiSay(p, "山札が少ないので、ドロートリガーは使わずに手札に加える"); return 1; }
   return 0;
 }
-// オーバービートの下にするホロビト。考え方: ダウンしているもの（重ねるとダウンが解ける。入門⑫）→
-// バトルフェイズなら、まだバトルしていないライン → パワーが小さいもの
-function aiOverTarget(list){
+// トリガーでラインに出すとき、このあとのバトル（まだバトルしていないライン）を見通した点数
+function aiTrigValue(p, h, idx){
+  var from = state.battle ? state.battle.line + 1 : 0;
+  return aiTry(p, h, idx, function(){ return aiValue(p, from, false); });
+}
+// エントリートリガー: 空いているライン（idxNew）とオーバービート（ov）のどちらに出すか。返すのは { idx, over }
+function aiEntryChoice(p, h, idxNew, ov){
+  if (!aiNormal(p) || !ov.length) return { idx:idxNew, over:null };
+  var best = { idx:idxNew, over:null, v:aiTrigValue(p, h, idxNew) };
+  ov.forEach(function(t){ var i = zoneOfCard(t).idx, v = aiTrigValue(p, h, i); if (v > best.v) best = { idx:i, over:t, v:v }; });
+  return best;
+}
+// オーバービートの下にするホロビト。「かんたん」: ダウンしているもの（重ねるとダウンが解ける。入門⑫）→
+// バトルフェイズなら、まだバトルしていないライン → パワーが小さいもの。「ふつう」: このあとのバトルを見通していちばんよいもの
+function aiOverTarget(p, h, list){
+  if (aiNormal(p)){
+    var best = null;
+    list.forEach(function(t){ var v = aiTrigValue(p, h, zoneOfCard(t).idx); if (!best || v > best.v) best = { t:t, v:v }; });
+    return best.t;
+  }
   var later = function(c){ var z = zoneOfCard(c); return state.battle && z && z.idx > state.battle.line ? 1 : 0; };
   return list.slice().sort(function(a, b){
     return ((b.turned ? 1 : 0) - (a.turned ? 1 : 0)) || (later(b) - later(a)) || (aiPw(a) - aiPw(b)); })[0];
@@ -3099,6 +3248,7 @@ sheetEl.addEventListener("click", function(e){
   var ds = t.dataset;
   if (ds.close){ closeSheet(); if (fxAsk){ var a0 = fxAsk; fxAsk = null; a0.cancel(); } return; }
   if (ds.cfm){ var yes = sheetYes; closeSheet(); if (yes) yes(); return; }
+  if (ds.ailv !== undefined){ closeSheet(); setAi(ds.ailv); return; }
   if (ds.fxa !== undefined && ds.fxa !== ""){
     var a1 = fxAsk; fxAsk = null; closeSheet();
     if (a1){ if (+ds.fxa < 0) a1.cancel(); else a1.cb(+ds.fxa); }
@@ -3213,11 +3363,20 @@ document.querySelectorAll(".filters select").forEach(function(sel){
 document.getElementById("fClear").addEventListener("click", function(){ ui.f = {}; saveUI(); syncFilterInputs(); renderBuilder(); });
 // 相手を AI にする／人に戻す（この端末の設定。盤面の「戻す」には含めない）
 document.getElementById("btnAi").addEventListener("click", function(){
-  ui.ai = !ui.ai; saveUI(); aiEpoch++; aiPaused = false;
-  if (aiTimer){ clearTimeout(aiTimer); aiTimer = null; }
-  fxClear(); fxLog(ui.ai ? "相手を AI にした。AI は相手の番に自動で動きます（ルールが未確定のことは、AI の番でもあなたに聞きます）" : "相手を人に戻した（相手の側も自分で動かします）");
-  render();
+  var cur = aiLevel(AI_SIDE) || "", row = function(v, t, d){
+    return '<button data-ailv="' + v + '"' + (cur === v ? ' class="primary"' : "") + '><b>' + t + '</b><br><small>' + d + '</small></button>'; };
+  openSheet('<h3>相手を選ぶ</h3><div class="fxq">AI は相手の番に自動で動きます。ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます。</div>' +
+    '<div class="sgrid c1">' + row("", "人（自分で動かす）", "相手の側も自分で操作します") +
+    row("normal", "AI ふつう", "第1ラインから順に、バトルの結果を見通して出し方・ワザを選びます") +
+    row("easy", "AI かんたん", "その場でいちばん強くなる出し方をします") + '</div>' +
+    '<div class="sgrid c1" style="margin-top:8px"><button data-close="1">閉じる</button></div>');
 });
+function setAi(lv){
+  ui.ai = AI_LEVELS[lv] ? lv : false; saveUI(); aiEpoch++; aiPaused = false;
+  if (aiTimer){ clearTimeout(aiTimer); aiTimer = null; }
+  fxClear(); fxLog(ui.ai ? "相手を AI（" + AI_LEVELS[ui.ai] + "）にした。AI は相手の番に自動で動きます（ルールが未確定のことは、AI の番でもあなたに聞きます）" : "相手を人に戻した（相手の側も自分で動かします）");
+  render();
+}
 document.getElementById("btnFx").addEventListener("click", function(){ snap(); state.fxAuto = !fxOn(); picking = null; fxClear(); render(); });
 document.getElementById("pickCancel").addEventListener("click", function(){ var p = picking; picking = null; render(); if (p) p.cancel(); });
 document.getElementById("fxlog").addEventListener("click", function(e){

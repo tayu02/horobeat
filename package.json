@@ -12,6 +12,7 @@
     "abilities": "node tools/ability.mjs build && node tools/ability.mjs index",
     "test": "node tests/run.mjs",
     "test:repeat": "node tests/run.mjs --repeat 5",
+    "ai:bench": "node tools/ai-bench.cjs",
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "devDependencies": {

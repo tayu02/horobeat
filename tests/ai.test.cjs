@@ -1,6 +1,8 @@
 // 相手を AI にする（依頼者の指示 2026-10-22「AIが対戦相手にしてくれるように」。シミュレーター内蔵のAI）
 // AI が決めるのは、プレイヤーが選ぶことだけ（引き直す・エナチャージ・どのホロビトをどこへ・ワザ／ブースト・トリガー・効果で選ぶカード）。
 // ルールが未確定でシミュレーターが聞くことは、AI の番でも人に聞く。
+// 強さは2つ（2026-10-22「3です」= トークンを使わずに強くする）: 「かんたん」（その場でいちばん伸びる出し方）と「ふつう」（バトルの結果を見通す）。
+// 2〜8 は「かんたん」の考え方を、11 は「ふつう」の考え方を確かめる。強さの比較は tools/ai-bench.cjs（AI どうしの対戦の勝率）
 const H = require('./harness.cjs');
 const { devices, ok } = H;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -40,14 +42,25 @@ async function run(label, viewport, touch, full){
     },[me,opp,ex||{}]);
   };
   const delay=ms=>p.evaluate(ms=>{ AI_DELAY=ms; },ms);
+  // 上部の「相手: …」から選ぶ（シートが開いて 0.4 秒は押しても効かない）
+  const pickAi=async lv=>{ await p.click('#btnAi'); await wait(450); await p.click(`#sheet button[data-ailv="${lv}"]`); await wait(80); };
 
   // ---- 1. 切り替え ----
   ok((await p.textContent('#btnAi'))==='相手: 人' && !(await p.evaluate(()=>ui.ai)),'はじめは「相手: 人」（AI は動かない）');
-  await p.click('#btnAi');
-  ok((await p.textContent('#btnAi'))==='相手: AI' && await p.evaluate(()=>ui.ai===true),'押すと「相手: AI」になる');
-  ok((await log()).includes('AI の番でもあなたに聞きます'),'ルールが未確定のことは AI の番でも人に聞く、と知らせる');
+  await p.click('#btnAi'); await wait(450);
+  ok(await p.evaluate(()=>[...document.querySelectorAll('#sheet button[data-ailv]')].map(b=>b.dataset.ailv).join())===',normal,easy','押すと、相手を「人／AI ふつう／AI かんたん」から選ぶシートが開く');
+  ok((await p.textContent('#sheet')).includes('AI の番でもあなたに聞きます'),'シートに、ルールが未確定のことは AI の番でも人に聞くと書いてある');
+  await p.click('#sheet button[data-ailv="normal"]'); await wait(80);
+  ok((await p.textContent('#btnAi'))==='相手: AI ふつう' && await p.evaluate(()=>ui.ai==='normal'),'「AI ふつう」を選ぶと「相手: AI ふつう」になる');
+  ok((await log()).includes('AI の番でもあなたに聞きます'),'記録にも、ルールが未確定のことは AI の番でも人に聞く、と出る');
   await p.reload(); await wait(150);
-  ok((await p.textContent('#btnAi'))==='相手: AI','再読み込みしても AI のまま（この端末の設定）');
+  ok((await p.textContent('#btnAi'))==='相手: AI ふつう','再読み込みしても AI のまま（この端末の設定）');
+  // 以前の保存（相手を AI にするかどうかだけ）は「ふつう」として読む
+  await p.evaluate(()=>{ localStorage.setItem('horobeat-sim-ui', JSON.stringify({view:'play',deckPi:0,f:{},ai:true})); });
+  await p.reload(); await wait(150);
+  ok((await p.textContent('#btnAi'))==='相手: AI ふつう','以前の保存（ai: true）は「AI ふつう」として読む');
+  await pickAi('easy');
+  ok((await p.textContent('#btnAi'))==='相手: AI かんたん' && await p.evaluate(()=>ui.ai==='easy'),'「AI かんたん」も選べる（2〜8 は「かんたん」で確かめる）');
   await delay(40);
 
   // ---- 2. 準備④: 引き直すか ----
@@ -150,16 +163,37 @@ async function run(label, viewport, touch, full){
   ok(await until(()=>state.phase===1,6000) && (await S()).players[1].enaCharged,'「AIを進める」で続きを行う');
 
   // ---- 9. 人に戻すと動かない ----
-  await p.click('#btnAi');
-  ok((await p.textContent('#btnAi'))==='相手: 人','押すと「相手: 人」に戻る');
+  await pickAi('');
+  ok((await p.textContent('#btnAi'))==='相手: 人','「人」を選ぶと「相手: 人」に戻る');
   await setup({},{hand:['HD02-003'], ena:['HD02-001','HD02-001']},{phase:0,first:1});
   await wait(500);
   s=await S();
   ok(s.phase===0 && !s.players[1].enaCharged && !s.players[1].line[0].length && !(await p.textContent('#flow')).includes('AI'),'相手が人なら、相手の番でも自動では動かない');
 
+  // ---- 11. 「ふつう」: バトルの結果を見通して選ぶ ----
+  await pickAi('normal');
+  // 勝てないが、ブーストで引き分けにできる（4000+2000 対 6000）→ 使う（ハートへのダメージを防ぐ）。「かんたん」は上回れないので使わない
+  await setup({line:[['HD01-012']]},{line:[['HD02-003']], hand:['HD02-009'], ena:['HD02-001']},{phase:1,first:1});
+  await p.click('#btnPhase'); await settle();
+  s=await S();
+  ok((await log()).includes('引き分けにする') && !s.players[1].hand.some(c=>c.key==='HD02-009'),'「ふつう」: 勝てなくても、ブーストで引き分けにできるなら使う');
+  ok(s.players[1].heart.every(c=>!c.turned) && top(s,0,0).turned && top(s,1,0).turned,'引き分けなので AI のハートはダメージを受けず、お互いのホロビトがダウンする');
+  // 出し方: 負けているラインに重ねて勝ちに変える（不戦勝のラインに重ねるより伸びる）
+  await setup({line:[['HB01-001']]},{hand:['HD02-004'], ena:['HD02-001'], line:[['HD02-001'],['HD02-003']], flags:{enaCharged:true}},{phase:1,first:0});
+  ok(await until(()=>state.phase===2,6000),'AI が召喚フェイズを終える');
+  s=await S();
+  ok(s.players[1].line[0].length===2 && top(s,1,0).key==='HD02-004','「ふつう」: 負けている第1ライン（2000 対 4000）に重ねて勝ちに変える（5000）');
+  await p.evaluate(()=>{ fxAsk=null; closeSheet(); state.battle=null; render(); });
+  // トドメ: 相手のハートが0枚なら、勝てる出し方を選ぶ（空いたラインに出せば不戦勝でトドメ）
+  await setup({line:[['HB01-061']], heart:0},{hand:['HD02-001'], ena:['HD02-001','HD02-001'], line:[['HD02-003']], flags:{enaCharged:true}},{phase:1,first:0});
+  ok(await until(()=>state.phase===2,6000),'AI が召喚フェイズを終える');
+  s=await S();
+  ok(top(s,1,1)&&top(s,1,1).key==='HD02-001','「ふつう」: 相手のハートが0枚なので、空いた第2ラインに出す（不戦勝でトドメになる）');
+  await settle();
+  ok((await S()).winner===1,'AI の勝ち（ハートが0枚のときのダメージ）');
+
   // ---- 10. 1ゲーム通して遊ぶ（自分の側は同じ考え方でスクリプトが動かす）----
   if(full){
-    await p.click('#btnAi');
     await p.evaluate(()=>{ AI_DELAY=15; state=newState(); undoStack=[]; loadStarter(0,'HB-SD01'); loadStarter(1,'HB-SD02'); fxClear(); render(); });
     await p.click('#flow button[data-prep="deal"][data-first="0"]');
     await p.click('#flow button[data-prep="mull"][data-pi="0"][data-redraw="0"]');
