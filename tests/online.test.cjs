@@ -227,7 +227,9 @@ async function run(label, viewport, touch){
   ok(samples.length > 10 && bad.length === 0, '対戦中ずっと（' + samples.length + ' 回調べた）、どちらの画面にも相手の山札・ハート・裏向きのカードの中身がない' + (bad.length ? ': ' + bad.slice(0, 3).join(' / ') : ''));
   ok(sneak.length === 0, '相手の手札で中身が分かるのは、見せられた（表になった）カードだけ' + (sneak.length ? ': ' + sneak.slice(0, 3).join(' / ') : ''));
   if (sneak.length && process.env.OL_DEBUG) R.msgs.forEach((m, i) => { const j = JSON.stringify(m.data); if (j.includes(sneak[0])) console.log(i, m.who, m.path, j.slice(Math.max(0, j.indexOf(sneak[0]) - 200), j.indexOf(sneak[0]) + 200)); });
-  ok(await ev(A, () => { const s = localStorage.getItem('horobeat-online-priv-' + ol.gid) || ''; return s.includes('A-') && !s.includes('B-'); }), '自分の端末の控えには、自分のカードだけ');
+  ok(await ev(A, () => { const s = localStorage.getItem('horobeat-online-priv-' + ol.gid + '-A') || ''; return s.includes('A-') && !s.includes('B-'); }) &&
+     await ev(B, () => { const s = localStorage.getItem('horobeat-online-priv-' + ol.gid + '-B') || ''; return s.includes('B-') && !s.includes('A-'); }),
+     '自分の端末の控えには、自分のカードだけ。控えは部屋と側ごとに分ける（同じアカウントの2台でも上書きしない）');
   ok((await flow(A)).includes('勝利') && (await flow(B)).includes('勝利'), '両方の画面に勝敗が出る');
   ok(await ev(B, () => document.querySelectorAll('#side-1 .z-hand .card.hid').length === 0), '勝敗が決まったら、相手の手札の伏せ（描き方）は外す（中身は届いていないので、分からないカードとして描く）');
 

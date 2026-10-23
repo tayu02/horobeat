@@ -516,7 +516,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ。同じコストには重ねられません。重ねるラインは、条件を満たしていればどのラインでも選べます）。<b>エナが足りないときは使えません</b>。</p>
     <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。ダウンしているホロビトも通常どおりバトルし、勝てば通常どおりダメージを与えます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、負けたホロビトとハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ダブルダメージの2ダメージは、1ダメージを2回、上から順に入れます。引き分けは、お互いのホロビトにそれぞれ1ダメージ（ダウンしていなければダウン、すでにダウンしていれば破壊）で、ハートはダメージを受けません。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。バトルのたびに両者のカードの画像を並べて出し、パワーを比べたら結果（勝ち・負け）を見せます（「続ける」で次へ）。ハートが破壊されたときは、そのカードの画像を出してトリガーチェックします。</p>
     <p><b>相手をAIにする</b>：上部の「相手: 人」を押して「AI ふつう」か「AI かんたん」を選ぶと、相手の番に AI が自動で動きます（引き直すか、エナチャージ、どのホロビトをどのラインに出すか、ワザ・ブーストを使うか、ハートのトリガー、効果で選ぶカード）。<b>ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます</b>（AI にルールを決めさせないため）。AI が何をしたかは下の記録に残ります。「戻す」で AI の番に戻ったときは AI が止まるので、「AIを進める」で続けます。「かんたん」は、その場でいちばん強くなる出し方をします。「ふつう」は、第1ラインから順にバトルの結果（どのラインで勝ち負けし、ハートに何回ダメージが入るか、トドメになるか）を見通し、エナを使うと次のエナドローで引ける枚数が減ることやカードの効果も数えて、出し方・ワザ・ブースト（5つのラインへの配り方）・トリガーを選びます（AI どうしで800回対戦させると、「ふつう」が「かんたん」に約86%勝ちます）。AI はあなたの手札の中身を見ません（盤面と枚数だけを見ます）。AI の手札も裏向きで表示します（相手を選ぶシートで「見せる」にもできます。勝敗が決まったら見せます）。</p>
-    <p><b>オンライン対戦</b>：上部の「🌐 対戦」で部屋を作り、出た6文字のコードを相手に伝えます。相手は同じシミュレーターを開いて「部屋に入る」にコードを入れます。作った人が先手を選んで始めます。デッキは、それぞれのいまの「自分のデッキ」です。あなたの手札・山札・ハートの中身は相手の端末には送りません（場に出たカード・表になったカードだけが届きます）。相手が決めること（引き直す・ワザ・ブースト・ハートのトリガー・効果で選ぶカードなど）は、相手の画面に出ます。自分の番でないときは、自分の側も操作できません。「戻す」と AI は使えません。読み込み直すと、同じ部屋の続きに戻ります。使えるのは、claude.ai で公開したシミュレーターを、ログインして開いたときだけです。相手は、このシミュレーターに「編集者」としてメールで招待されている必要があります（リンクで共有していないとき）。</p>
+    <p><b>オンライン対戦</b>：上部の「🌐 対戦」で部屋を作り、出た6文字のコードを相手に伝えます。相手は同じシミュレーターを開いて「部屋に入る」にコードを入れます。作った人が先手を選んで始めます。デッキは、それぞれのいまの「自分のデッキ」です。あなたの手札・山札・ハートの中身は相手の端末には送りません（場に出たカード・表になったカードだけが届きます）。相手が決めること（引き直す・ワザ・ブースト・ハートのトリガー・効果で選ぶカードなど）は、相手の画面に出ます。自分の番でないときは、自分の側も操作できません。「戻す」と AI は使えません。読み込み直すと、同じ部屋の続きに戻ります。使えるのは、claude.ai で公開したシミュレーターを、ログインして開いたときだけです。相手は、このシミュレーターに「編集者」としてメールで招待されている必要があります（リンクで共有していないとき）。1人で試すときは、同じアカウントのまま別の端末（またはパソコンの別のブラウザ）で開けば、招待なしで試せます（同じブラウザの2つのタブでは試せません）。</p>
     <p><b>対戦の記録</b>：上部の「📼 記録」で、配った直後からの盤面を1手ずつ見返せます（⏮ ◀ ▶ ⏭・つまみ・PC は矢印キー）。見返している間は盤面を触れず、「閉じる」でいまの盤面に戻ります。記録はこの端末のブラウザに、いまのゲームと1つ前のゲームの2つまで残ります。</p>
     <p><b>盤面の印</b>：効果を出しているカードは金の太い枠と「効果」、効果の対象は赤の太い枠と「対象」、バトル中のカードは白の太い枠と「バトル」、選ぶ候補は金の太い枠と「選ぶ」の札が付きます。</p>
     <p><b>エンドフェイズ</b>：スライドステップ・エナドロー・エナリフレッシュを自動で行います。</p>
@@ -3586,6 +3586,8 @@ function recSheet(){
 var OL_KEY = "horobeat-online";
 var ol = { on:false, host:false, gid:null, net:null, priv:{}, ver:0, mayPub:false, wait:null, seq:0, handled:0, logN:0, logSeen:{}, pub:[], peer:null, failed:{}, queued:null, closing:false };
 function olSide(){ return ol.host ? 0 : 1; }                 // 自分の、共有の盤面での側
+// 自分だけの控えの名前。部屋と側ごとに分ける（同じアカウントの2台で試すときに、互いの控えを上書きしないように）
+function olPrivId(){ return ol.gid + "-" + (ol.host ? "A" : "B"); }
 function isRemote(p){ return ol.on && p === 1; }             // 相手（端末の中では、相手はいつも 1）
 // いま盤面を変えてよい側（端末の中の向き）。勝敗が決まったら誰も変えない
 function olHolderSide(){
@@ -3858,7 +3860,7 @@ function olBuildDeck(){
   shuffleArr(deck);
   ol.priv = {};
   deck.forEach(function(c){ c.uid = pre + "-" + olRand(6); ol.priv[c.uid] = c.key; });
-  ol.net.savePriv(ol.gid, ol.priv);
+  ol.net.savePriv(olPrivId(), ol.priv);
   return deck;
 }
 function shuffleArr(a){ for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
@@ -3959,8 +3961,8 @@ function olRelayNet(){
       Promise.resolve(window.__olNetGet ? window.__olNetGet(path) : null).then(function(d){ if (d) docs[path] = d; fn(d || null); });
       return function(){ subs[path] = (subs[path] || []).filter(function(f){ return f !== fn; }); };
     },
-    savePriv: function(gid, priv){ try { localStorage.setItem("horobeat-online-priv-" + gid, JSON.stringify(priv)); } catch (e){} },
-    loadPriv: function(gid){ try { return Promise.resolve(JSON.parse(localStorage.getItem("horobeat-online-priv-" + gid) || "null")); } catch (e){ return Promise.resolve(null); } }
+    savePriv: function(id, priv){ try { localStorage.setItem("horobeat-online-priv-" + id, JSON.stringify(priv)); } catch (e){} },
+    loadPriv: function(id){ try { return Promise.resolve(JSON.parse(localStorage.getItem("horobeat-online-priv-" + id) || "null")); } catch (e){ return Promise.resolve(null); } }
   };
 }
 // 公開したシミュレーター: claude.ai のデータの保存（db）。共有の盤面は games/<コード>、自分の控えは自分だけが読める data/users/<自分>/
@@ -3976,8 +3978,8 @@ function olDbNet(db, uid){
     set: function(path, data){ data = JSON.parse(JSON.stringify(data)); if (busy[path]) next[path] = data; else write(path, data); return Promise.resolve(); },
     watch: function(path, fn){ return db.doc(path).onSnapshot(function(s){ var d = s.exists ? s.data() : null; setTimeout(function(){ fn(d); }, 0); },
       function(e){ fxLog("オンライン：つながりが切れました（" + (e && e.code || e) + "）。読み込み直すと、つなぎ直します"); render(); }); },
-    savePriv: function(gid, priv){ return db.doc("data/users/" + uid + "/hbpriv-" + gid).set({ priv:priv }).catch(function(){}); },
-    loadPriv: function(gid){ return db.doc("data/users/" + uid + "/hbpriv-" + gid).get().then(function(s){ return s.exists ? s.data().priv : null; }).catch(function(){ return null; }); }
+    savePriv: function(id, priv){ return db.doc("data/users/" + uid + "/hbpriv-" + id).set({ priv:priv }).catch(function(){}); },
+    loadPriv: function(id){ return db.doc("data/users/" + uid + "/hbpriv-" + id).get().then(function(s){ return s.exists ? s.data().priv : null; }).catch(function(){ return null; }); }
   };
 }
 // 使えるつなぎ方を探す（試験の中継 → claude.ai の db）。見つからなければ ol.net は null のまま
@@ -3995,7 +3997,7 @@ function olResume(){
   var s = null; try { s = JSON.parse(localStorage.getItem(OL_KEY) || "null"); } catch (e){}
   if (!s || !s.gid || ol.on) return render();
   olEnter(!!s.host, s.gid, s.dl); ol.resumed = true; ol.loading = true;
-  ol.net.loadPriv(s.gid).then(function(p){ ol.priv = p || {}; olMerge(state); render(); });
+  ol.net.loadPriv(olPrivId()).then(function(p){ ol.priv = p || {}; olMerge(state); render(); });
 }
 // ---- バトルのワザ・ブースト（オンライン）。相手の手札は分からないので、相手の番は相手の端末に聞く ----
 function olWaza(){
