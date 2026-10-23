@@ -222,6 +222,11 @@ async function run(label, viewport, touch){
   const G = await playOut(A, B, samples), fin = G.fin;
   ok(G.ok, '両方を AI に任せると、最後まで進み、両方の画面で同じ側が勝つ（' + fin[0].r + ' ラウンド・盤面を ' + fin[0].n + ' 回送った。勝ち: ' + (fin[0].w === 0 ? '作った側' : '入った側') + '）');
   ok(G.same, '終わったとき、両方の画面の共有の盤面が一致する');
+  // 盤面の動き（攻撃・攻撃を受ける）の知らせも、共有の盤面と一緒に届く（相手の端末でも同じ動きを見せる。カードの番号だけで、中身は入らない）
+  const fxMsgs = R.msgs.filter(m => /^games\/[^/]+$/.test(m.path) && (m.data.fx || []).some(e => e.k === 'attack'));
+  const fxSeen = await Promise.all([A, B].map(p => ev(p, () => Object.keys(ol.fxSeen).length)));
+  ok(fxMsgs.length > 0 && fxMsgs.every(m => m.data.fx.every(e => Object.keys(e).every(k => ['k', 'a', 't', 'u', 'clash', 'n'].includes(k)))) && fxSeen[0] + fxSeen[1] > 0,
+     '攻撃・攻撃を受ける動きの知らせが、共有の盤面と一緒に相手に届く（カードの番号だけ）');
   const L = leaks(R), bad = samples.flatMap(s => s.bad), sneak = samples.flatMap(s => s.handKeys).filter(u => !L.revealed.has(u));
   ok(L.bad.length === 0, '送られたもの（' + R.msgs.length + ' 件）に、手札・山札・ハート・裏向きのカードの中身もデッキの中身も入っていない' + (L.bad.length ? ': ' + L.bad.slice(0, 3).join(' / ') : ''));
   ok(samples.length > 10 && bad.length === 0, '対戦中ずっと（' + samples.length + ' 回調べた）、どちらの画面にも相手の山札・ハート・裏向きのカードの中身がない' + (bad.length ? ': ' + bad.slice(0, 3).join(' / ') : ''));

@@ -191,6 +191,16 @@ main{padding:8px 8px 24px;max-width:1400px;margin:0 auto}
 }
 .card.ghosting{opacity:.25}
 .card.pressing .ci{outline:2px solid var(--gold);outline-offset:1px}
+/* 動き: 盤面の上に重ねるカードの写し（依頼者の指示 2026-10-23） */
+#motion{position:fixed;inset:0;pointer-events:none;z-index:90}
+#motion .mg{position:fixed;transform-origin:50% 50%;will-change:transform}
+#motion .mg > .card{position:absolute;left:0;top:0;width:100%;height:100%}
+#motion .mg:not(.flip) > .card{filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
+#motion .mg.flip{transform-style:preserve-3d}
+#motion .mg.flip > .card{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+#motion .mg.flip > .card.mback{transform:rotateY(180deg)}
+#motion .burst{position:fixed;border-radius:50%;border:3px solid #ffd36b;box-shadow:0 0 18px 6px rgba(255,120,60,.7),inset 0 0 12px rgba(255,200,120,.8)}
+.card.mhide{opacity:0}
 #ghost{position:fixed;z-index:200;pointer-events:none;transform:translate(-50%,-50%) scale(1.15);opacity:.92;filter:drop-shadow(0 6px 12px rgba(0,0,0,.6))}
 .pile{
   width:var(--cw);height:var(--ch);border-radius:5px;
@@ -517,6 +527,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
     <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。ダウンしているホロビトも通常どおりバトルし、勝てば通常どおりダメージを与えます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、負けたホロビトとハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ダブルダメージの2ダメージは、1ダメージを2回、上から順に入れます。引き分けは、お互いのホロビトにそれぞれ1ダメージ（ダウンしていなければダウン、すでにダウンしていれば破壊）で、ハートはダメージを受けません。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。バトルのたびに両者のカードの画像を並べて出し、パワーを比べたら結果（勝ち・負け）を見せます（「続ける」で次へ）。ハートが破壊されたときは、そのカードの画像を出してトリガーチェックします。</p>
     <p><b>相手をAIにする</b>：上部の「相手: 人」を押して「AI ふつう」か「AI かんたん」を選ぶと、相手の番に AI が自動で動きます（引き直すか、エナチャージ、どのホロビトをどのラインに出すか、ワザ・ブーストを使うか、ハートのトリガー、効果で選ぶカード）。<b>ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます</b>（AI にルールを決めさせないため）。AI が何をしたかは下の記録に残ります。「戻す」で AI の番に戻ったときは AI が止まるので、「AIを進める」で続けます。「かんたん」は、その場でいちばん強くなる出し方をします。「ふつう」は、第1ラインから順にバトルの結果（どのラインで勝ち負けし、ハートに何回ダメージが入るか、トドメになるか）を見通し、エナを使うと次のエナドローで引ける枚数が減ることやカードの効果も数えて、出し方・ワザ・ブースト（5つのラインへの配り方）・トリガーを選びます（AI どうしで800回対戦させると、「ふつう」が「かんたん」に約86%勝ちます）。AI はあなたの手札の中身を見ません（盤面と枚数だけを見ます）。AI の手札も裏向きで表示します（相手を選ぶシートで「見せる」にもできます。勝敗が決まったら見せます）。</p>
     <p><b>オンライン対戦</b>：上部の「🌐 対戦」で部屋を作り、出た6文字のコードを相手に伝えます。相手は同じシミュレーターを開いて「部屋に入る」にコードを入れます。作った人が先手を選んで始めます。デッキは、それぞれのいまの「自分のデッキ」です。あなたの手札・山札・ハートの中身は相手の端末には送りません（場に出たカード・表になったカードだけが届きます）。相手が決めること（引き直す・ワザ・ブースト・ハートのトリガー・効果で選ぶカードなど）は、相手の画面に出ます。自分の番でないときは、自分の側も操作できません。「戻す」と AI は使えません。読み込み直すと、同じ部屋の続きに戻ります。使えるのは、claude.ai で公開したシミュレーターを、ログインして開いたときだけです。相手は、このシミュレーターに「編集者」としてメールで招待されている必要があります（リンクで共有していないとき）。1人で試すときは、同じアカウントのまま別の端末（またはパソコンの別のブラウザ）で開けば、招待なしで試せます（同じブラウザの2つのタブでは試せません）。</p>
+    <p><b>カードの動き</b>：カードを動かすと、前の場所から新しい場所へ飛んで見えます（山札から引くと裏から表に返りながら手札へ、手札から出すときは持ち上げてから、墓地へは傾きながら落ちる）。バトルの結果が出ると、勝ったホロビトが相手に飛び込み（攻撃）、ダメージを受けたホロビトとハートは揺れて赤く光ります。動いている間に出る質問は、動き終わってから出ます。端末の設定で動きを減らしている（iPhone の「視差効果を減らす」など）ときは動かしません。見せ方だけで、盤面の中身は変わりません。</p>
     <p><b>対戦の記録</b>：上部の「📼 記録」で、配った直後からの盤面を1手ずつ見返せます（⏮ ◀ ▶ ⏭・つまみ・PC は矢印キー）。見返している間は盤面を触れず、「閉じる」でいまの盤面に戻ります。記録はこの端末のブラウザに、いまのゲームと1つ前のゲームの2つまで残ります。</p>
     <p><b>盤面の印</b>：効果を出しているカードは金の太い枠と「効果」、効果の対象は赤の太い枠と「対象」、バトル中のカードは白の太い枠と「バトル」、選ぶ候補は金の太い枠と「選ぶ」の札が付きます。</p>
     <p><b>エンドフェイズ</b>：スライドステップ・エナドロー・エナリフレッシュを自動で行います。</p>
@@ -550,6 +561,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
   </div>
 </main>
 
+<div id="motion"></div>
 <div id="sheetwrap"><div id="sheetbg"></div><div id="sheet"></div></div>
 <div id="pickbar"><span id="pickmsg"></span><button class="mini" id="pickCancel">やめる</button></div>
 <div id="fxlog"></div>
@@ -1892,7 +1904,7 @@ function resultText(w){ return w === -1 ? "引き分け" : SIDE_NAME[w] + "の�
 function bJudge(){
   var b = state.battle, c = [battler(0), battler(1)];
   // manual: プレイヤーが結果を選んだとき（結果の画面は出さない）
-  var go = function(w, manual){ var B = state.battle; B.winner = w; if (manual) B.shown = true; B.stage = "after"; battleRun(); };
+  var go = function(w, manual){ var B = state.battle; B.winner = w; if (manual) B.shown = true; B.stage = "after"; motionAttack(w); battleRun(); };
   if (b.users[0] && b.users[1] && (!c[0] || !c[1]))
     return fxChoose("バトルの途中で、" + [0, 1].filter(function(p){ return !c[p]; }).map(function(p){ return SIDE_NAME[p]; }).join("と") +
       "のホロビトがラインの一番上からいなくなりました。このときのバトルの結果は手引書に書かれていません。結果を選んでください。",
@@ -1995,6 +2007,7 @@ function holoDamage(p, next){
     if (state.battle.users[p]) fxLog(SIDE_NAME[p] + "の負けたホロビトは、もうラインの一番上にいない（ホロビトへのダメージはなし）");
     mark(); return next();
   }
+  motionFx({ k:"hit", u:c.uid });
   if (!c.turned){
     c.turned = true; mark();
     fxLog(SIDE_NAME[p] + "「" + nm(c) + "」がダメージを受けてダウンした（横向き）");
@@ -2127,6 +2140,7 @@ function topHeart(p){ var H = state.players[p].heart; return H[H.length - 1]; }
 function heartDamage(p, next, mark){
   var h = topHeart(p);
   if (!h){ fxLog(SIDE_NAME[p] + "のハートがない（手で動かした？）。ハートへのダメージは手で処理してください"); return next(); }
+  motionFx({ k:"hit", u:h.uid });
   if (!h.turned){
     h.turned = true; mark();
     fxLog(SIDE_NAME[p] + "のハート（重なりの一番上）がダメージを受けてダウンした（横向き）");
@@ -2477,7 +2491,8 @@ function aiHideHand(pi){
 }
 function hiddenStripHTML(arr){
   if (!arr.length) return '<div class="empty">（なし）</div>';
-  return arr.map(function(c){ return '<div class="card hid" data-owner="' + c.owner + '"><div class="ci down"><div class="mark">AI</div></div></div>'; }).join("");
+  // data-mcid は動きのためだけ（伏せたカードは触れないので data-cid は付けない）
+  return arr.map(function(c){ return '<div class="card hid" data-mcid="' + esc(c.uid) + '" data-owner="' + c.owner + '"><div class="ci down"><div class="mark">AI</div></div></div>'; }).join("");
 }
 function zoneHTML(pi, zone, cls, extraClass, tappable){
   var arr = state.players[pi][zone];
@@ -2970,6 +2985,8 @@ function aiFlowHTML(){
 }
 var FXB = {};
 function render(){
+  if (!motionOK() && mo.live.length) motionStop();
+  motionBefore();   // 動き: 描き直す前のカードの位置を覚える
   FXB = fxBadges();
   document.getElementById("btnFx").textContent = fxOn() ? "効果: 自動" : "効果: 手動";
   document.getElementById("btnFx").className = "mini" + (fxOn() ? " on" : "");
@@ -2999,9 +3016,283 @@ function render(){
     return '<span class="who ' + (pi === 0 ? "me" : "opp") + '">' + SIDE_NAME[pi] + '</span>' +
       STARTERS.map(function(S){ return starterButtonHTML(pi, S.id, starterLabel(S), cur === S); }).join("");
   }).join('<span style="flex-basis:100%;height:0"></span>');
+  motionAfter();
   save();
   aiKick();
   olPublishSoon();
+}
+
+/* ---------------- 動き（依頼者の指示 2026-10-23）---------------- */
+// 依頼者の指示:「カードが攻撃してるようなモーション、カードが攻撃を受けてるようなモーション」
+// 「カードをドローしてるようなアクション、カードを手札に入れたようなアクション、手札からカードを抜き取る（使うために出す）アクション、
+//  手札や場から墓地にカードが動くアクション」。
+// しくみ: 盤面は描き直すたびに作り直すので、描き直す前のカードの位置（と、1枚ずつは描かない山札の位置）を覚えておき（motionBefore）、
+// 描き直したあと（画面に出す直前。motionPlay）に、前の位置から新しい位置まで、盤面の上に重ねた写し（#motion）を動かす。着いたら本物を見せる。
+// 同じ置き場の中で並びがずれただけのカードは本物をすべらせ、向き（縦・横）が変わったカードは本物を回す。
+// 攻撃（バトルの結果が出たとき）と攻撃を受ける（ダメージ）は、バトルの処理が motionFx で知らせる。
+// 盤面（state）は変えない。見せ方だけ。動かさないとき: 動きを減らす設定（iPhone の「視差効果を減らす」など）・盤面を出していないとき・
+// 一度にたくさん動くとき（記録を大きく飛ばしたとき など）。
+// 動いている間に開く画面（質問など）は、動き終わってから出す（後ろに隠れて見えなくならないように。長くても MOTION_HOLD）。
+// 1回の描き直しの間に、攻撃と攻撃を受けることが続けて起きたとき（第1ラインのダメージ → 第2ラインの攻撃 など）は、起きた順に見せる。
+var MOTION_MAX = 30, MOTION_HOLD = 2400;
+var mo = { snap:null, raf:0, fx:[], live:[], locs:{}, until:0, sheetT:0, sheetPending:false, pub:[], n:0, layer:null, dropAt:null };
+function motionOK(){
+  if (ui.view !== "play" || document.hidden) return false;
+  try { return !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); } catch (e){ return true; }
+}
+// 動き終わるまでの残り（ミリ秒）
+function motionLeft(){ return Math.max(0, mo.until - performance.now()); }
+// 動き終わってから fn を行う（AI が、動いている途中に次の手を指さないように）
+function motionWait(fn){
+  var w = motionLeft();
+  if (!document.hidden && (mo.raf || w > 30)) return setTimeout(function(){ motionWait(fn); }, Math.max(30, w));
+  fn();
+}
+function motionLayer(){ return mo.layer || (mo.layer = document.getElementById("motion")); }
+// どのカードがどこにあるか（盤面の中身から。山札のカードも含む）
+function motionLocs(){
+  var m = {};
+  state.players.forEach(function(P, pi){
+    ["hand", "deck", "heart", "ena", "waza", "grave"].forEach(function(z){ P[z].forEach(function(c){ m[c.uid] = { pi:pi, z:z }; }); });
+    P.line.forEach(function(st, i){ st.forEach(function(c){ m[c.uid] = { pi:pi, z:"line", i:i }; }); });
+  });
+  return m;
+}
+// 盤面のカード（伏せた手札も data-mcid で数える。伏せた手札は触れないので data-cid は付けない）
+function motionEls(){ return document.querySelectorAll("#side-0 .card[data-cid], #side-1 .card[data-cid], #side-0 .card[data-mcid], #side-1 .card[data-mcid]"); }
+function motionUid(el){ return el.dataset.cid || el.dataset.mcid; }
+function motionRect(r){ return { left:r.left, top:r.top, width:r.width, height:r.height }; }
+var MOTION_ZONES = ["deck", "hand", "grave", "heart", "ena", "waza"];
+// 置き場の位置（カード1枚の大きさ）。山札は山の位置、ほかは置き場の左上
+function motionZoneRect(pi, z){
+  var el = z === "deck" ? document.querySelector("#side-" + pi + " [data-pile]") : document.querySelector("#side-" + pi + ' .zone[data-drop="' + z + '"] .strip');
+  if (!el) return null;
+  var r = el.getBoundingClientRect(); if (!r.width) return null;
+  if (z === "deck") return motionRect(r);
+  var c = document.querySelector("#side-0 .card, #side-1 .card"), cr = c && c.getBoundingClientRect();
+  return { left:r.left + 2, top:r.top + 2, width:cr && cr.width || 52, height:cr && cr.height || 73 };
+}
+// バトルの処理から知らせる: { k:"attack", a:攻撃するカード, t:向かう先のカード, clash:引き分け } / { k:"hit", u:攻撃を受けるカード }
+// オンライン対戦では、相手の端末でも同じ動きを見せるために、共有の盤面と一緒に送る（mo.pub）
+function motionFx(e){
+  e.n = mo.n = Math.max(mo.n + 1, Date.now());
+  mo.fx.push(e); if (mo.fx.length > 20) mo.fx.shift();
+  mo.pub.push(e); if (mo.pub.length > 10) mo.pub.shift();
+}
+// バトルの結果が出たとき: 勝ったホロビトが、負けたホロビト（いなければ負けた側のハート）に向かう。引き分けは両方から
+function motionAttack(w){
+  var c = [battler(0), battler(1)];
+  if (w === -1){
+    if (c[0] && c[1]){ motionFx({ k:"attack", a:c[0].uid, t:c[1].uid, clash:true }); motionFx({ k:"attack", a:c[1].uid, t:c[0].uid, clash:true }); }
+    return;
+  }
+  if (!c[w]) return;
+  var t = c[1 - w] || topHeart(1 - w);
+  if (t) motionFx({ k:"attack", a:c[w].uid, t:t.uid });
+}
+// 描き直す前（render の初め）: いまの画面のカードの位置を覚える。同じ処理の中で何度描き直しても、覚えるのは最初の1回だけ
+function motionBefore(){
+  if (mo.raf || !motionOK()) return;
+  var S = { cards:{}, zones:{}, locs:mo.locs };
+  motionEls().forEach(function(el){
+    var r = el.getBoundingClientRect(); if (!r.width) return;
+    S.cards[motionUid(el)] = { r:motionRect(r), html:el.outerHTML, turned:el.classList.contains("turned"), up:!el.querySelector(".ci.down"), owner:el.dataset.owner };
+  });
+  [0, 1].forEach(function(pi){ MOTION_ZONES.forEach(function(z){ var r = motionZoneRect(pi, z); if (r) S.zones[pi + z] = r; }); });
+  mo.snap = S;
+  mo.raf = requestAnimationFrame(motionPlay);
+}
+// 描き直したあと（render の終わり）: いまのカードの場所を覚える（次に描き直すときの「前の場所」）
+function motionAfter(){ mo.locs = motionLocs(); }
+function motionPlay(){
+  mo.raf = 0;
+  var S = mo.snap, fx = mo.fx; mo.snap = null; mo.fx = [];
+  var els = {}; motionEls().forEach(function(el){ els[motionUid(el)] = el; });
+  // 動いている途中の写しがあるカードは、作り直された本物も隠したままにする
+  mo.live.forEach(function(L){ if (!L.done && els[L.u]){ L.el = els[L.u]; L.el.classList.add("mhide"); } });
+  if (S && motionOK()) motionRun(S, fx, els);
+  mo.dropAt = null;
+  if (mo.sheetPending){ var w = Math.min(MOTION_HOLD, motionLeft()); clearTimeout(mo.sheetT); if (w > 0) mo.sheetT = setTimeout(motionSheetNow, w); else motionSheetNow(); }
+}
+function motionRun(S, fx, els){
+  var prev = S.locs || {}, locs = mo.locs, flies = [], shifts = [], turns = [], hits = {}, hitOrder = [];
+  fx.forEach(function(e){ if (e.k === "hit" && !hits[e.u]){ hits[e.u] = true; hitOrder.push(e.u); } });
+  Object.keys(els).forEach(function(u){
+    var el = els[u], a = S.cards[u], p0 = prev[u], p1 = locs[u];
+    if (!p1) return;
+    var b = motionRect(el.getBoundingClientRect()); if (!b.width) return;
+    var up = !el.querySelector(".ci.down");
+    if (a && p0 && p0.pi === p1.pi && p0.z === p1.z && p0.i === p1.i){
+      if (Math.abs(a.r.left - b.left) > 3 || Math.abs(a.r.top - b.top) > 3) shifts.push({ el:el, a:a.r, b:b });
+      if (a.turned !== el.classList.contains("turned")) turns.push({ u:u, el:el, on:!a.turned });
+      else if (hits[u]) turns.push({ u:u, el:el, on:null });
+      return;
+    }
+    if (!p0) return;
+    var src = a ? a.r : S.zones[p0.pi + p0.z], drop = mo.dropAt && mo.dropAt.u === u;
+    // ドラッグで置いたカードは、指を離したところから
+    if (drop) src = { left:mo.dropAt.x - b.width / 2, top:mo.dropAt.y - b.height / 2, width:b.width, height:b.height };
+    if (!src) return;
+    var wasUp = a ? a.up : false;
+    flies.push({ u:u, el:el, a:src, b:b, from:p0.z, to:p1.z, toUp:up, flip:wasUp !== up, drop:drop,
+                 html: up || !a ? el.outerHTML : a.html, owner:el.dataset.owner });
+  });
+  // 1枚ずつは描かない置き場（山札）へ行ったカードは、写しだけをそこまで動かして消す
+  Object.keys(S.cards).forEach(function(u){
+    if (els[u] || !locs[u]) return;
+    var p1 = locs[u], b = motionZoneRect(p1.pi, p1.z), c = S.cards[u]; if (!b) return;
+    flies.push({ u:u, el:null, a:c.r, b:b, from:prev[u] && prev[u].z, to:p1.z, toUp:false, flip:c.up, html:c.html, owner:c.owner, vanish:true });
+  });
+  if (flies.length > MOTION_MAX || shifts.length > MOTION_MAX * 2) return;
+  // 攻撃と攻撃を受けるのを、起きた順に並べる（引き分けの2つの攻撃は同時）
+  var end = 0, t = 0, hitAt = {}, prevE = null;
+  fx.forEach(function(e){
+    if (e.k === "attack"){
+      var together = prevE && prevE.k === "attack" && e.clash && prevE.clash && prevE.a === e.t;
+      if (together) t -= 470;
+      end = Math.max(end, motionLunge(S, els, e, t)); t += 470;
+    } else if (e.k === "hit" && hitAt[e.u] === undefined){ hitAt[e.u] = t; t += 300; }
+    prevE = e;
+  });
+  var tMove = t + (fx.length ? 80 : 0), nDraw = 0, nFly = 0;
+  flies.forEach(function(f){
+    var d = hits[f.u] ? hitAt[f.u] : tMove + (f.from === "deck" ? (nDraw++) * 70 : (nFly++) * 45);
+    end = Math.max(end, motionFly(f, d, !!hits[f.u]));
+  });
+  turns.forEach(function(x){
+    var h = hits[x.u], d = h ? hitAt[x.u] : tMove;
+    if (h){ motionHitEl(x.el, hitAt[x.u]); d += 300; end = Math.max(end, d); }
+    if (x.on !== null) end = Math.max(end, motionTurn(x.el, x.on, d));
+  });
+  // 攻撃を受けたのに、場所も向きも変わらなかったカード（破壊されない など）
+  hitOrder.forEach(function(u){
+    if (!els[u] || flies.some(function(f){ return f.u === u; }) || turns.some(function(x){ return x.u === u; })) return;
+    motionHitEl(els[u], hitAt[u]); end = Math.max(end, hitAt[u] + 340);
+  });
+  shifts.forEach(function(s){
+    s.el.animate([{ transform:"translate(" + (s.a.left - s.b.left) + "px," + (s.a.top - s.b.top) + "px)" }, { transform:"none" }],
+      { duration:240, delay:tMove, easing:"cubic-bezier(.25,.8,.35,1)", fill:"backwards" });
+    end = Math.max(end, tMove + 240);
+  });
+  if (end) mo.until = Math.max(mo.until, performance.now() + Math.min(end, MOTION_HOLD));
+}
+// 写しを作る（本物と同じ見た目。backOwner を渡すと、裏面も付けて裏返せるようにする）
+function motionGhost(html, r, kind, backOwner){
+  var g = document.createElement("div");
+  g.className = "mg" + (backOwner !== undefined ? " flip" : "");
+  g.dataset.kind = kind;
+  g.style.cssText = "left:" + r.left + "px;top:" + r.top + "px;width:" + r.width + "px;height:" + r.height + "px;--cw:" + r.width + "px;--ch:" + r.height + "px";
+  g.innerHTML = html.replace(/\s(mhide|pickable|pressing|ghosting)\b/g, "") +
+    (backOwner !== undefined ? '<div class="card mback" data-owner="' + esc(backOwner || "0") + '"><div class="ci down"><div class="mark">裏</div></div></div>' : "");
+  motionLayer().appendChild(g);
+  return g;
+}
+// 写しが動いている間は本物を隠す。動き終わったら（途中でやめても）写しを消して本物を見せる
+function motionLive(u, g, el, anims){
+  mo.live.forEach(function(L){ if (L.u === u && !L.done) motionEnd(L); });
+  var L = { u:u, g:g, el:el, done:false }, left = anims.length;
+  if (el) el.classList.add("mhide");
+  mo.live.push(L);
+  anims.forEach(function(a){ a.onfinish = a.oncancel = function(){ if (--left <= 0) motionEnd(L); }; });
+}
+function motionEnd(L){
+  if (L.done) return;
+  L.done = true; L.g.remove();
+  if (L.el) L.el.classList.remove("mhide");
+  mo.live = mo.live.filter(function(x){ return !x.done; });
+}
+// 動いている途中のものを、すぐに終える（盤面を出さなくなったとき など）
+function motionStop(){
+  mo.live.slice().forEach(motionEnd);
+  document.querySelectorAll("#motion .burst").forEach(function(e){ e.remove(); });
+  mo.until = 0;
+}
+// 写しの動き。位置は「新しい位置に置いた写しを、前の位置へずらす」で表す（中心を合わせる）
+function motionTf(r, b, o){
+  o = o || {};
+  return (o.p ? "perspective(700px) " : "") +
+    "translate(" + (r.left + r.width / 2 - b.left - b.width / 2) + "px," + (r.top + r.height / 2 - b.top - b.height / 2 + (o.y || 0)) + "px) " +
+    "scale(" + (r.width / b.width) * (o.s || 1) + ") rotate(" + (o.r || 0) + "deg)" + (o.p ? " rotateY(" + (o.ry || 0) + "deg)" : "");
+}
+function motionMid(a, b){ return { left:(a.left + b.left) / 2, top:(a.top + b.top) / 2, width:(a.width + b.width) / 2, height:(a.height + b.height) / 2 }; }
+// 置き場から置き場へ。ドロー（山札→手札）・手札に入れる・手札から出す・墓地へ で動き方を変える。hit なら、前の位置で揺れてから動く
+function motionFly(f, delay, hit){
+  var kind = f.vanish ? "vanish" : f.drop ? "move" : f.from === "deck" && f.to === "hand" ? "draw" : f.from === "hand" ? "pull" : f.to === "grave" ? "grave" : f.to === "hand" ? "tohand" : "move";
+  if (f.to === "grave" && kind === "pull") kind = "grave";
+  var g = motionGhost(f.html, f.b, kind, f.flip ? f.owner : undefined), a = f.a, b = f.b, m = motionMid(a, b), p = f.flip;
+  // 裏返すとき: 表になるなら裏（180°）から表（0°）へ、裏になるなら表から裏へ
+  var ry0 = p ? (f.toUp ? 180 : 0) : 0, ry1 = p ? (f.toUp ? 0 : 180) : 0, rym = p ? 90 : 0;
+  var k = [], s = hit ? .32 : 0, at = function(x){ return s + (1 - s) * x; };
+  if (hit) [0, -7, 7, -5, 4].forEach(function(x, i){ k.push({ transform:motionTf({ left:a.left + x, top:a.top, width:a.width, height:a.height }, b, { p:p, ry:ry0, r:i ? x / 3 : 0 }), filter:i === 1 ? "brightness(1.8) saturate(.4)" : "none", offset:i * .07 }); });
+  k.push({ transform:motionTf(a, b, { p:p, ry:ry0 }), filter:"none", offset:s });
+  if (kind === "pull") k.push({ transform:motionTf(a, b, { p:p, ry:ry0, y:-24, s:1.16 }), filter:"none", offset:at(.28) });
+  else if (kind === "draw") k.push({ transform:motionTf(m, b, { p:p, ry:rym, y:-26, s:1.08 }), filter:"none", offset:at(.5) });
+  else if (kind === "tohand") k.push({ transform:motionTf(m, b, { p:p, ry:rym, y:-30, s:1.06 }), filter:"none", offset:at(.5) });
+  else if (kind === "grave") k.push({ transform:motionTf(m, b, { p:p, ry:rym, r:-14, s:.96 }), filter:"brightness(.75) saturate(.6)", offset:at(.55) });
+  else if (p) k.push({ transform:motionTf(m, b, { p:p, ry:rym }), filter:"none", offset:at(.5) });
+  var last = { transform:motionTf(b, b, { p:p, ry:ry1, s:f.vanish ? .9 : 1 }), filter:"none", offset:1 };
+  if (f.vanish){ k.forEach(function(x){ x.opacity = 1; }); last.opacity = .15; }
+  k.push(last);
+  var dur = (kind === "pull" ? 480 : kind === "grave" ? 460 : kind === "draw" ? 430 : 380) + (hit ? 320 : 0);
+  var an = g.animate(k, { duration:dur, delay:delay, easing:"cubic-bezier(.3,.7,.35,1)", fill:"backwards" });
+  motionLive(f.u, g, f.el, [an]);
+  if (hit) motionBurst(a, delay);
+  return delay + dur;
+}
+// 攻撃: 写しが相手のカードに向かって飛び込み、戻る。当たるところで火花
+function motionLunge(S, els, e, delay){
+  var A = els[e.a], ar = A ? motionRect(A.getBoundingClientRect()) : S.cards[e.a] && S.cards[e.a].r;
+  var T = S.cards[e.t] ? S.cards[e.t].r : els[e.t] ? motionRect(els[e.t].getBoundingClientRect()) : null;
+  if (!ar || !T) return 0;
+  var k = e.clash ? .38 : .62, dx = (T.left + T.width / 2 - ar.left - ar.width / 2) * k, dy = (T.top + T.height / 2 - ar.top - ar.height / 2) * k;
+  var g = motionGhost(A ? A.outerHTML : S.cards[e.a].html, ar, "attack");
+  var an = g.animate([
+    { transform:"translate(0,0) scale(1) rotate(0deg)", offset:0 },
+    { transform:"translate(" + (-dx * .12) + "px," + (-dy * .12) + "px) scale(1.06) rotate(" + (dx > 0 ? -4 : 4) + "deg)", offset:.18 },
+    { transform:"translate(" + dx + "px," + dy + "px) scale(1.16) rotate(0deg)", offset:.45 },
+    { transform:"translate(0,0) scale(1) rotate(0deg)", offset:1 }
+  ], { duration:520, delay:delay, easing:"ease-in-out", fill:"backwards" });
+  motionLive(e.a, g, A, [an]);
+  motionBurst(T, delay + 230);
+  return delay + 520;
+}
+// 攻撃を受ける: 揺れて、赤く光る
+function motionHitEl(el, delay){
+  el.animate([{ transform:"none" }, { transform:"translateX(-7px) rotate(-2deg)" }, { transform:"translateX(7px) rotate(2deg)" },
+    { transform:"translateX(-5px) rotate(-1deg)" }, { transform:"translateX(3px)" }, { transform:"none" }], { duration:340, delay:delay, easing:"ease-out" });
+  var ci = el.querySelector(".ci");
+  if (ci) ci.animate([{ filter:"none" }, { filter:"brightness(1.9) sepia(1) saturate(6) hue-rotate(-45deg)", offset:.2 }, { filter:"none" }], { duration:440, delay:delay });
+  motionBurst(motionRect(el.getBoundingClientRect()), delay);
+}
+// 縦向き⇔横向き（ダウン・回復・エナの使用など）
+function motionTurn(el, on, delay){
+  var ci = el.querySelector(".ci"); if (!ci) return delay;
+  var down = { transform:"rotate(90deg) scale(.72)", opacity:.75 }, up = { transform:"none", opacity:1 };
+  ci.animate(on ? [up, down] : [down, up], { duration:300, delay:delay, easing:"cubic-bezier(.3,1.3,.6,1)", fill:"backwards" });
+  return delay + 300;
+}
+// 当たったところの火花
+function motionBurst(r, delay){
+  var d = document.createElement("div"), s = Math.max(r.width, r.height) * .95;
+  d.className = "burst";
+  d.style.cssText = "left:" + (r.left + r.width / 2 - s / 2) + "px;top:" + (r.top + r.height / 2 - s / 2) + "px;width:" + s + "px;height:" + s + "px";
+  motionLayer().appendChild(d);
+  var an = d.animate([{ transform:"scale(.2)", opacity:0 }, { transform:"scale(.7)", opacity:1, offset:.25 }, { transform:"scale(1.6)", opacity:0 }],
+    { duration:420, delay:delay, fill:"both", easing:"ease-out" });
+  an.onfinish = an.oncancel = function(){ d.remove(); };
+}
+// 画面（シート）を出す。動いている途中なら、動き終わってから出す
+function motionShowSheet(){
+  clearTimeout(mo.sheetT); mo.sheetT = 0;
+  if (!motionOK() || (!mo.raf && !motionLeft())) return motionSheetNow(true);
+  mo.sheetPending = true;
+  if (!mo.raf) mo.sheetT = setTimeout(motionSheetNow, Math.min(MOTION_HOLD, motionLeft()));
+}
+function motionSheetNow(force){
+  mo.sheetT = 0;
+  if (!mo.sheetPending && force !== true) return;
+  mo.sheetPending = false;
+  sheetWrap.classList.add("on"); sheetGuardUntil = performance.now() + 400;
 }
 
 /* ---------------- AI（相手を自動で動かす）---------------- */
@@ -3032,11 +3323,11 @@ function aiRun(fn){ aiActing++; try { fn(); } finally { aiActing--; } }
 // 少し待ってから決める（人が追えるように）。待っている間に盤面が変わったら（戻す・人の操作）やめる
 function aiLater(fn){
   aiBusy = true; var ep = aiEpoch;
-  setTimeout(function(){
+  setTimeout(function(){ motionWait(function(){
     aiBusy = false;
     if (ep !== aiEpoch || !aiAny()){ render(); return; }
     aiRun(fn);
-  }, AI_DELAY);
+  }); }, AI_DELAY);
   render();
 }
 // 「戻す」のあと: 待っている判断をやめ、AI の番なら止めておく（「AIを進める」で続ける）
@@ -3056,19 +3347,19 @@ function aiWants(){
   var a = activeOf();
   return isAI(a) ? { what:"summon", p:a } : null;
 }
-function aiIdle(){ return !aiBusy && !picking && !fxAsk && !sheetWrap.classList.contains("on"); }
+function aiIdle(){ return !aiBusy && !picking && !fxAsk && !sheetWrap.classList.contains("on") && !mo.sheetPending; }
 // render のたびに呼ぶ。AI の番で、人への質問が開いていなければ、少し待って1手進める。
 // 待っている間に盤面が変わってもよい（動く時点の盤面で、もう一度すべきことを確かめる）。
 // 動けなかったとき（質問が開いた など）は、その処理が終わったときの render でまた呼ばれる
 function aiKick(){
   if (olLocked()) return;   // オンライン対戦: 番でない端末・相手の答えを待っている間は動かない
   if (replay || aiTimer || aiPaused || (!aiForce && ui.view !== "play") || !aiWants() || !aiIdle()) return;
-  aiTimer = setTimeout(function(){
+  aiTimer = setTimeout(function(){ motionWait(function(){
     aiTimer = null;
     if (aiPaused || (!aiForce && ui.view !== "play") || !aiIdle()) return;
     var w = aiWants(); if (!w) return;
     aiRun(function(){ if (w.what === "mull") aiMull(w.p); else aiSummonStep(w.p); });
-  }, AI_DELAY);
+  }); }, AI_DELAY);
 }
 function aiPw(c){ var d = cardDef(c); return c.up && d && typeof d.power === "number" ? d.power : 0; }
 function aiKnown(c){ var d = cardDef(c); return !!(c.up && d); }
@@ -3662,14 +3953,16 @@ function olPublish(){
   var S = olToShared(state), j = JSON.stringify(S);
   if (j === ol.lastJ && !ol.forcePub) return;
   ol.lastJ = j; ol.forcePub = false; ol.ver++;
-  ol.net.set("games/" + ol.gid, { v:ol.ver, by:olSide(), s:S, log:ol.pub.slice(-40) });
+  ol.net.set("games/" + ol.gid, { v:ol.ver, by:olSide(), s:S, log:ol.pub.slice(-40), fx:mo.pub.slice() });
   ol.mayPub = olHolderSide() === 0;
   olRevealMissing();
 }
 function olOnState(doc){
   if (ol.loading){ ol.loading = false; if (!doc) render(); }   // 読み込み直したとき: 盤面が届いた（まだ始めていなければ、届くものはない）
   if (!doc || !doc.s || doc.v <= ol.ver) return;
-  ol.ver = doc.v;
+  var first = !ol.ver; ol.ver = doc.v;
+  // 相手の端末の動き（攻撃・攻撃を受ける）を、こちらでも見せる。部屋に入った・読み込み直した直後の分は見せない
+  (doc.fx || []).forEach(function(e){ var k = "s" + doc.by; if (e.n <= (ol.fxSeen[k] || 0)) return; ol.fxSeen[k] = e.n; if (!first){ mo.fx.push(e); if (mo.fx.length > 20) mo.fx.shift(); } });
   state = olFromShared(doc.s); ol.lastJ = JSON.stringify(doc.s); ol.mayPub = olHolderSide() === 0;
   // 相手の記録を、こちらの向きに直して足す
   (doc.log || []).forEach(function(e){
@@ -3877,7 +4170,7 @@ function olWatch(){
 function olEnter(host, gid, dl){
   ol.offline = JSON.stringify(state);                       // 1人で遊んでいた盤面は取っておき、やめたら戻す
   ol.mydl = JSON.parse(JSON.stringify(dl || state.players[0].decklist || {}));   // この対戦で使う自分のデッキ
-  ol.on = true; ol.host = host; ol.gid = gid; ol.ver = 0; ol.mayPub = false; ol.resumed = false; ol.loading = false; ol.wait = null; ol.seq = 0; ol.handled = 0; ol.pub = []; ol.logN = 0; ol.logSeen = {}; ol.peer = null; ol.lastJ = null;
+  ol.on = true; ol.host = host; ol.gid = gid; ol.ver = 0; ol.mayPub = false; ol.resumed = false; ol.loading = false; ol.wait = null; ol.seq = 0; ol.handled = 0; ol.pub = []; ol.logN = 0; ol.logSeen = {}; ol.fxSeen = {}; ol.peer = null; ol.lastJ = null;
   undoStack = []; aiStop(); aiPaused = false; picking = null; fxAsk = null;
   olStoreSession(); olWatch();
 }
@@ -4084,8 +4377,9 @@ function askConfirm(msg, yesLabel, onYes){
     '<div class="sgrid c2"><button class="primary" data-cfm="1">' + esc(yesLabel || "はい") + '</button><button data-close="1">やめる</button></div>');
   sheetYes = onYes;
 }
-function openSheet(html){ sheetEl.innerHTML = html; sheetWrap.classList.add("on"); sheetGuardUntil = performance.now() + 400; sheetEl.scrollTop = 0; }
+function openSheet(html){ sheetEl.innerHTML = html; sheetEl.scrollTop = 0; motionShowSheet(); }   // 動いている途中なら、動き終わってから出す
 function closeSheet(){
+  mo.sheetPending = false; clearTimeout(mo.sheetT);
   sheetWrap.classList.remove("on"); sheetEl.innerHTML = ""; sheetForce = false; sheetYes = null;
   // 効果の途中で開いたメニューなら、閉じたあとに続きを処理する（いまの操作を終えてから）
   var a = sheetAfter; sheetAfter = null; if (a) setTimeout(a, 0);
@@ -4490,6 +4784,7 @@ document.addEventListener("pointerup", function(e){
     var tgt = dropTargetAt(e.clientX, e.clientY);
     if (tgt){
       var dm = findCard(drag.cid), dbefore = dm ? zoneOfCard(dm.card) : null, dcid = drag.cid;
+      mo.dropAt = { u:dcid, x:e.clientX, y:e.clientY };   // 動き: 指を離したところから置き場へ
       var tl = lockOf(+tgt.dataset.pi);
       if (tl){ endDrag(); fxClear(); fxLog("使えない：" + tl); render(); return; }
       if (dm && isPlayFromHand(dm.card, dbefore, tgt.dataset.drop, +tgt.dataset.pi)){

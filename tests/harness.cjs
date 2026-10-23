@@ -17,8 +17,15 @@ fs.mkdirSync(OUT, { recursive: true });
 
 // この環境の Chromium を優先し、無ければ Playwright の既定のものを使う
 const PINNED = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
-function launch() {
-  return chromium.launch(fs.existsSync(PINNED) ? { executablePath: PINNED } : {});
+// 盤面の動き（カードが飛ぶ・攻撃する など。2026-10-23〜）は tests/motion.test.cjs で確かめる。
+// ほかの試験は「動きを減らす」設定で開く（動いている途中のカードを押したり、位置を測ったりしないように）。
+// 動きを見たい試験は newContext / newPage に reducedMotion: "no-preference" を渡す
+async function launch() {
+  const b = await chromium.launch(fs.existsSync(PINNED) ? { executablePath: PINNED } : {});
+  const nc = b.newContext.bind(b), np = b.newPage.bind(b);
+  b.newContext = (o = {}) => nc({ reducedMotion: "reduce", ...o });
+  b.newPage = (o = {}) => np({ reducedMotion: "reduce", ...o });
+  return b;
 }
 
 let pass = 0, fail = 0, page = null, label = "";
