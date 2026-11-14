@@ -120,7 +120,9 @@ export function validateCards(path = "data/cards.json") {
   const byLine = new Map();
   for (const c of data.cards) {
     if (c.abilities === "unknown") continue;
-    for (const a of c.abilities) for (const l of a.split("\n")) {
+    for (const a of c.abilities) for (const l0 of a.split("\n")) {
+      // キーワードの下の文の頭の「・」は箇条書きの印。文そのものを比べたいので外す
+      const l = l0.replace(/^・/, "");
       if (l.length < 12) continue;
       if (!byLine.has(l)) byLine.set(l, []);
       byLine.get(l).push(c.key);

@@ -226,7 +226,7 @@
     },
     "only_lines_waza": {
       "role": "制限",
-      "text": "このワザは第{from}〜{to}ラインのホロビトのみ使える"
+      "text": "このワザは[{sep}]第{from}〜{to}ラインのホロビトのみ使える"
     },
     "cannot_be_overbeaten": {
       "role": "効果",
@@ -275,6 +275,35 @@
     "battle": {
       "role": "発火条件1",
       "text": "バトル"
+    },
+    "look_top_of_deck": {
+      "role": "効果",
+      "text": "山札の一番上を見る"
+    },
+    "may_put_to_bottom": {
+      "role": "効果",
+      "text": "そのカードを山札の一番下に置いてもよい"
+    },
+    "cards_under_more_than_front": {
+      "role": "効果条件",
+      "text": "このホロビトの下にあるカードの枚数が、正面のホロビトの下にあるカードの枚数より多い"
+    },
+    "damage_to_self": {
+      "role": "効果",
+      "text": "このホロビトに{n}ダメージを与える"
+    },
+    "select_from_hand": {
+      "role": "効果",
+      "text": "手札からコスト{n}以下のホロビトを{m}体選ぶ",
+      "ren": "手札からコスト{n}以下のホロビトを{m}体選び"
+    },
+    "may_put_under_selected": {
+      "role": "効果",
+      "text": "そのホロビトの一番下に置いてもよい"
+    },
+    "no_power_up_in_battle": {
+      "role": "効果",
+      "text": "このホロビトはバトル中、ワザやブーストでパワーが上がらない"
     }
   }
 }

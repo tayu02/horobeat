@@ -1202,5 +1202,198 @@
         }
       ]
     }
+  ],
+  "HB01-037": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "look_top_of_deck",
+          "then": "。"
+        },
+        "may_put_to_bottom"
+      ]
+    }
+  ],
+  "HB01-039": [
+    {
+      "keyword": {
+        "part": "barrier",
+        "args": {
+          "n": 1
+        }
+      }
+    }
+  ],
+  "HB01-041": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "緑"
+        }
+      },
+      "sub": [
+        {
+          "effects": [
+            {
+              "part": "power_plus",
+              "args": {
+                "n": 3000
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "HB01-042": [
+    {
+      "conditions": [
+        "cards_under_more_than_front"
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このワザ",
+            "n": 2000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-043": [
+    {
+      "effects": [
+        {
+          "part": "only_lines_waza",
+          "args": {
+            "sep": "、",
+            "from": 1,
+            "to": 2
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-044": [
+    {
+      "trigger": {
+        "subject": "this_holobito_battle",
+        "event": "ended"
+      },
+      "effects": [
+        {
+          "part": "damage_to_self",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-045": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "select_own",
+          "args": {
+            "what": "ホロビト",
+            "n": 1,
+            "unit": "体"
+          },
+          "then": "。"
+        },
+        {
+          "part": "select_from_hand",
+          "args": {
+            "n": 5,
+            "m": 1
+          }
+        },
+        {
+          "part": "may_put_under_selected",
+          "then": "。"
+        },
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          },
+          "if": [
+            "did_so"
+          ]
+        }
+      ]
+    }
+  ],
+  "HB01-046": [
+    {
+      "conditions": [
+        "boost_used_on_this"
+      ],
+      "effects": [
+        {
+          "part": "power_plus_passive",
+          "args": {
+            "n": 2000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-047": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "緑"
+        }
+      },
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_holobito",
+            "event": "entered"
+          },
+          "effects": [
+            {
+              "part": "may_reveal_from_hand",
+              "args": {
+                "n": 7,
+                "m": 1
+              },
+              "then": "。"
+            },
+            {
+              "part": "draw",
+              "args": {
+                "n": 1
+              },
+              "if": [
+                "did_so"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "HB01-048": [
+    {
+      "effects": [
+        "no_power_up_in_battle"
+      ]
+    }
   ]
 }
