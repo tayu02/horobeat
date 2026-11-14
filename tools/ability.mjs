@@ -68,14 +68,19 @@ export function render(ab, parts = loadParts()) {
     return s;
   }
   let s = "";
+  // condFirst: 「…なら、…とき、…」のように、条件が発火条件より前に印字される形（HB01-032）
+  const conds = () => {
+    for (const c of ab.conditions || []) {
+      const { p, args } = P(c);
+      s += `${fill(p.text, args)}なら、`;
+    }
+  };
+  if (ab.condFirst) conds();
   if (ab.trigger) {
     const a = P(ab.trigger.subject), b = P(ab.trigger.event);
     s += `${fill(a.p.text, a.args)}${ab.trigger.particle || "が"}${fill(b.p.text, b.args)}とき、`;
   }
-  for (const c of ab.conditions || []) {
-    const { p, args } = P(c);
-    s += `${fill(p.text, args)}なら、`;
-  }
+  if (!ab.condFirst) conds();
   const effs = ab.effects || [];
   if (!effs.length) throw new Error("効果が1つもない");
   effs.forEach((e, i) => {
@@ -210,6 +215,15 @@ export function parse(text, parts = loadParts()) {
   // 以下はすべて「ありうる分解」を列挙するジェネレーター。{ab, end, cost} を返す。
   function* sentence(pos) {
     yield* conditions(pos, [], 0, null);
+    yield* triggered(pos, [], 0, false);
+    // 「…なら、…とき、…」: 条件が発火条件より前に印字される形（HB01-032）
+    for (const [id, p] of byRole("効果条件")) {
+      const r = tryAt(text, pos, [{ tpl: p.text }, { lit: "なら、" }]);
+      if (!r) continue;
+      yield* triggered(r.end, [mkref(id, r.args[0])], freeLen(r.args[0]), true);
+    }
+  }
+  function* triggered(pos, pre, preCost, condFirst) {
     for (const [sid, sp] of byRole("発火条件1"))
       for (const [eid, ep] of byRole("発火条件2"))
       for (const particle of ["が", "を", "に"]) {
@@ -217,17 +231,18 @@ export function parse(text, parts = loadParts()) {
         if (!r) continue;
         note(r.end, "効果条件 または 効果");
         const trig = { subject: mkref(sid, r.args[0]), ...(particle === "が" ? {} : { particle }), event: mkref(eid, r.args[2]) };
-        yield* conditions(r.end, [], freeLen(r.args[0]) + freeLen(r.args[2]), trig);
+        yield* conditions(r.end, pre, preCost + freeLen(r.args[0]) + freeLen(r.args[2]), trig, condFirst);
       }
   }
-  function* conditions(pos, acc, cost, trig) {
+  function* conditions(pos, acc, cost, trig, condFirst) {
     for (const x of effects(pos, [], cost))
-      yield { ...x, ab: { ...(trig ? { trigger: trig } : {}), ...(acc.length ? { conditions: acc } : {}), ...x.ab } };
+      yield { ...x, ab: { ...(trig ? { trigger: trig } : {}), ...(acc.length ? { conditions: acc } : {}),
+                          ...(condFirst ? { condFirst: true } : {}), ...x.ab } };
     for (const [id, p] of byRole("効果条件")) {
       const r = tryAt(text, pos, [{ tpl: p.text }, { lit: "なら、" }]);
       if (!r) continue;
       note(r.end, "効果条件 または 効果");
-      yield* conditions(r.end, [...acc, mkref(id, r.args[0])], cost + freeLen(r.args[0]), trig);
+      yield* conditions(r.end, [...acc, mkref(id, r.args[0])], cost + freeLen(r.args[0]), trig, condFirst);
     }
   }
   // 効果1つ分の記録。if は、その効果が属する文の頭にある条件

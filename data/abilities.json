@@ -1147,5 +1147,60 @@
         "sep": "\n"
       }
     }
+  ],
+  "HB01-032": [
+    {
+      "conditions": [
+        {
+          "part": "in_lines",
+          "args": {
+            "subject": "このホロビト",
+            "from": 2,
+            "to": 5
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "gain_keyword",
+          "args": {
+            "subject": "このホロビト",
+            "keyword": "ダブルダメージ"
+          }
+        }
+      ],
+      "note": "note_double_damage_held"
+    },
+    {
+      "trigger": {
+        "subject": "battle",
+        "event": "ended"
+      },
+      "conditions": [
+        {
+          "part": "in_lines",
+          "args": {
+            "subject": "このホロビト",
+            "from": 3,
+            "to": 5
+          }
+        }
+      ],
+      "condFirst": true,
+      "effects": [
+        {
+          "part": "recover",
+          "args": {
+            "target": "正面のホロビト"
+          }
+        },
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
   ]
 }

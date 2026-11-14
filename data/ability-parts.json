@@ -157,7 +157,8 @@
     },
     "recover": {
       "role": "効果",
-      "text": "[{target}を]回復する"
+      "text": "[{target}を]回復する",
+      "ren": "[{target}を]回復させ"
     },
     "opponent_discard": {
       "role": "効果",
@@ -169,7 +170,7 @@
     },
     "gain_keyword": {
       "role": "効果",
-      "text": "{keyword}を得る"
+      "text": "[{subject}は]{keyword}を得る"
     },
     "indestructible": {
       "role": "効果",
@@ -270,6 +271,10 @@
     "note_no_cost": {
       "role": "補足",
       "text": "（コストは支払わない）"
+    },
+    "battle": {
+      "role": "発火条件1",
+      "text": "バトル"
     }
   }
 }

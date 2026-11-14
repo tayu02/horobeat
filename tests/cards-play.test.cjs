@@ -142,6 +142,12 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   bd=await badges(0,0);
   ok(bd.includes('破壊されない') && !bd.includes('+3000') && !bd.includes('ダブルダメージ'),'HB01-023: ダウンしている → 破壊されないだけ（'+bd+'）');
 
+  // HB01-032 第2〜5ラインにいるならダブルダメージを得る
+  await setup({line:[[],['HB01-032']]});
+  ok((await badges(0,1)).includes('ダブルダメージ'),'HB01-032: 第2ライン → ダブルダメージの印');
+  await setup({line:[['HB01-032']]});
+  ok(!(await badges(0,0)).includes('ダブルダメージ'),'HB01-032: 第1ライン → 付かない');
+
   // HB01-021 隣のラインにパワー4000以上がいないと出せない（印。出せるかは cost.test.cjs）
   await setup({line:[['HB01-021']]});
   ok((await badges(0,0)).includes('隣に 4000 以上が必要'),'HB01-021: 「隣に 4000 以上が必要」の印');
@@ -311,6 +317,17 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await setup({line:[[{k:'HB01-014',turned:true}]]});
   await tap(await top(0,0)); await fxbtn('バトルが終わったとき');
   ok(!(await S()).players[0].line[0][0].turned,'HB01-014: ダウン中 → このホロビトが回復して縦向きになる');
+
+  // HB01-032 第3〜5ラインにいるなら、バトルが終わったとき、正面のホロビトを回復させ、カードを1枚引く
+  // （条件が発火条件より前に印字される初の形）
+  await setup({line:[[],[],['HB01-032']]},{line:[[],[],[{k:'HD01-001',turned:true}]]});
+  await tap(await top(0,2)); await fxbtn('バトルが終わったとき');
+  s=await S();
+  ok(!s.players[1].line[2][0].turned && s.players[0].deck.length===9,'HB01-032: 第3ライン → 正面のホロビトが回復し、1枚引く');
+  await setup({line:[[],['HB01-032']]},{line:[[],[{k:'HD01-001',turned:true}]]});
+  await tap(await top(0,1)); await fxbtn('バトルが終わったとき');
+  s=await S();
+  ok(s.players[1].line[1][0].turned && s.players[0].deck.length===10,'HB01-032: 第2ライン → 条件を満たさず、何も起きない');
 
   // HB01-025 このホロビトのバトルが終わったとき、このホロビトを回復する
   await setup({line:[[{k:'HB01-025',turned:true}]]});
