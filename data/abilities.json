@@ -750,5 +750,148 @@
         }
       ]
     }
+  ],
+  "HB01-002": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-005": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "赤"
+        }
+      },
+      "sub": [
+        {
+          "effects": [
+            {
+              "part": "power_plus",
+              "args": {
+                "n": 2000
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "HB01-010": [
+    {
+      "effects": [
+        {
+          "part": "only_lines_waza",
+          "args": {
+            "from": 2,
+            "to": 5
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-011": [
+    {
+      "effects": [
+        "cannot_be_overbeaten"
+      ]
+    }
+  ],
+  "HB01-012": [
+    {
+      "conditions": [
+        {
+          "part": "in_lines",
+          "args": {
+            "subject": "このホロビト",
+            "from": 2,
+            "to": 5
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "n": 2000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-013": [
+    {
+      "conditions": [
+        {
+          "part": "not_down",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "n": 2000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-014": [
+    {
+      "trigger": {
+        "subject": "this_holobito_battle",
+        "event": "ended"
+      },
+      "effects": [
+        {
+          "part": "recover",
+          "args": {
+            "target": "このホロビト"
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-015": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "赤"
+        }
+      },
+      "sub": [
+        {
+          "conditions": [
+            "not_down"
+          ],
+          "effects": [
+            {
+              "part": "power_plus",
+              "args": {
+                "n": 3000
+              }
+            }
+          ]
+        }
+      ]
+    }
   ]
 }

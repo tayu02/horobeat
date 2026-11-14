@@ -101,6 +101,34 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await setup({line:[['HD01-011']], ena:[R(),R(),'HD02-001']});
   ok(!(await badges(0,0)).includes('+3000'),'HD01-011: 赤のエナ2枚 → 付かない');
 
+  // HB01-005 エナ詠み③（赤3枚以上）→ パワーを+2000
+  await setup({line:[['HB01-005']], ena:[R(),R(),R()]});
+  ok((await badges(0,0)).includes('+2000'),'HB01-005: 赤のエナ3枚 → +2000');
+  await setup({line:[['HB01-005']], ena:[R(),R()]});
+  ok(!(await badges(0,0)).includes('+2000'),'HB01-005: 赤のエナ2枚 → 付かない');
+
+  // HB01-015 エナ詠み③（赤3枚以上）・ダウンしていないなら +3000
+  await setup({line:[['HB01-015']], ena:[R(),R(),R()]});
+  ok((await badges(0,0)).includes('+3000'),'HB01-015: 赤のエナ3枚・縦向き → +3000');
+  await setup({line:[[{k:'HB01-015',turned:true}]], ena:[R(),R(),R()]});
+  ok(!(await badges(0,0)).includes('+3000'),'HB01-015: ダウンしている → 付かない');
+
+  // HB01-012 第2〜5ラインにいるなら +2000
+  await setup({line:[[],['HB01-012']]});
+  ok((await badges(0,1)).includes('+2000'),'HB01-012: 第2ライン → +2000');
+  await setup({line:[['HB01-012']]});
+  ok(!(await badges(0,0)).includes('+2000'),'HB01-012: 第1ライン → 付かない');
+
+  // HB01-013 ダウンしていないなら +2000
+  await setup({line:[['HB01-013']]});
+  ok((await badges(0,0)).includes('+2000'),'HB01-013: 縦向き → +2000');
+  await setup({line:[[{k:'HB01-013',turned:true}]]});
+  ok(!(await badges(0,0)).includes('+2000'),'HB01-013: ダウンしている → 付かない');
+
+  // HB01-011 このホロビトには、オーバービートできない（重ねられないことは cost.test.cjs で確かめる）
+  await setup({line:[['HB01-011']]});
+  ok((await badges(0,0)).includes('オーバービートされない'),'HB01-011: 「オーバービートされない」の印');
+
   // ラインに出ているなら、コストは1大きくなる（3枚）
   for(const k of ['HB01-034','HD02-001','HD02-014']){
     await setup({line:[[k]]});
@@ -127,6 +155,10 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await moveTo(await inZone(0,'hand','HD01-001'),'line',0);
   let s=await S();
   ok(s.players[0].line[0].length===1 && s.players[0].hand.length===1 && s.players[0].deck.length===9,'HD01-001: ラインに出す → 1枚引く');
+  // HB01-002 出たとき、カードを1枚引く
+  await setup({hand:['HB01-002']});
+  await moveTo(await inZone(0,'hand','HB01-002'),'line',0);
+  ok((await S()).players[0].deck.length===9,'HB01-002: ラインに出す → 1枚引く');
   // HD01-010 出たとき、下にカードがないなら1枚引く
   await setup({hand:['HD01-010']});
   await moveTo(await inZone(0,'hand','HD01-010'),'line',0);
@@ -230,6 +262,11 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await tap((await picks())[0]);
   ok(!(await S()).players[0].line[0][0].turned,'HD01-014: 自分（ダウン中）を選ぶ → 回復して縦向きになる');
 
+  // HB01-014 このホロビトのバトルが終わったとき、このホロビトを回復する
+  await setup({line:[[{k:'HB01-014',turned:true}]]});
+  await tap(await top(0,0)); await fxbtn('バトルが終わったとき');
+  ok(!(await S()).players[0].line[0][0].turned,'HB01-014: ダウン中 → このホロビトが回復して縦向きになる');
+
   // HD01-009 バトルに勝ったとき、第2〜5ラインにいるなら1枚引く
   await setup({line:[[],['HD01-009']]});
   await tap(await top(0,1)); await fxbtn('バトルに勝ったとき');
@@ -323,6 +360,24 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   ok((await q()).includes('「このホロビトがブーストを使っている」に当たる') && (await q()).includes('同じ意味かは印字から分かりません'),'HD01-012: ブーストを使ったとき、「が使っている」に当たるかは聞く（「に使う」と同じ意味かは未確定）');
   await ans(0);
   ok((await log()).includes('自分 11000'),'HD01-012: 「当たる」→ 6000＋ブースト 2000＋3000 ＝ 11000');
+
+  // HB01-014 ヒナタを導く七尾: 左辺のブーストが刷りによって違う（通常は +2000 ①、DR は印字なし）。
+  // どちらで遊ぶかは未確定なので、黙って使えないことにせず、判定できないと伝える
+  await setup({hand:['HB01-014','HD01-001'], line:[['HB01-001']], ena:[R()], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle();
+  ok((await q()).includes('ヒナタを導く七尾') && (await q()).includes('判定できません'),'HB01-014: 左辺が未確定の手札は、ブーストに使えるか判定できないと伝える');
+  const bo=await opts();
+  ok(bo.some(t=>t.includes('「レオまる」をブーストで使う')) && !bo.some(t=>t.includes('「ヒナタを導く七尾」をブーストで使う')),'HB01-014: 判定できないので、選択肢には出さない（レオまるは出る）');
+  await choose('パス');
+
+  // HB01-010 二番戦陣: このワザは第2〜5ラインのホロビトのみ使える
+  await setup({hand:['HB01-010'], line:[['HB01-001']], ena:[R()], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle(); await choose('二番戦陣');
+  ok((await log()).includes('使えない') && (await S()).players[0].hand.length===1,'HB01-010: 第1ラインのホロビトは使えず、手札に残る');
+  await choose('パス');
+  await setup({hand:['HB01-010'], line:[[],['HB01-001']], ena:[R()], heart:H5},{line:[[],['HD01-001']], heart:H5});
+  await battle(); await choose('二番戦陣');
+  ok((await log()).includes('自分 7000'),'HB01-010: 第2ラインのホロビトなら使える（4000＋ワザ 3000）');
 
   // 合術 うつし身の撃: このワザは自分がこのバトルで他のワザを使っているときのみ使える／勝ったならダメージ+1
   await setup({hand:['UNKNOWN-utsushimi'], line:[['HB01-001']], ena:[R(),'HB01-097'], heart:H5},{line:[['HD01-001']], heart:H5});

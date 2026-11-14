@@ -222,6 +222,14 @@
       "role": "キーワード",
       "text": "共鳴：{tribe}",
       "reminder": "このワザを使うホロビトの種族が{tribe}であるなら、このワザは以下の効果を得る"
+    },
+    "only_lines_waza": {
+      "role": "制限",
+      "text": "このワザは第{from}〜{to}ラインのホロビトのみ使える"
+    },
+    "cannot_be_overbeaten": {
+      "role": "効果",
+      "text": "このホロビトには、オーバービートできない"
     }
   }
 }

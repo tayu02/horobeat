@@ -3,15 +3,16 @@
     "description": "ホロビートカードゲーム カード印字レコード。カード画像に印字されている文字列のみを転記する。要約・言い換え・補完をしない。",
     "conventions": {
       "null": "カード全体が鮮明に見えていて、その項目が印字されていないことが確定している",
-      "unknown": "存在するが読めない、または画像で確認できない",
+      "unknown": "存在するが読めない、または画像で確認できない。刷りによって印字が違い、どちらの値で遊ぶのかが未確定の場合もこれを使う（→ printing_diff）",
       "color_mark": "左上のコスト丸の配色から読み取った色。自分の色名を印字したカードは1枚もないため、この名前にしている",
       "left_edge": "左辺の縦書き数値と丸数字。項目名はカードに印字されていない。公式の手引書（2026-10-09 受領）で、ホロビトの左辺は「⑦ブースト」、ワザの左辺は「⑧ワザのパワー」と確定（rules_confirmed.md §12）",
       "abilities": "● 1つにつき文字列1つ、印字どおり。解釈を混ぜない",
       "key": "検索用の識別子。通常は id と同じ。番号が読めないカードは id を unknown にし、key に UNKNOWN- で始まる仮の値を付ける",
-      "family": "カード名の下の行。公式の項目名は「種族」（手引書③。rules_confirmed.md §12）。キー名の family は、項目名が分かる前に付けたもの"
+      "family": "カード名の下の行。公式の項目名は「種族」（手引書③。rules_confirmed.md §12）。キー名の family は、項目名が分かる前に付けたもの",
+      "printing_diff": "同じカード番号でも刷りによって印字が違う項目（flavor / left_edge）は、printings の各版に印字どおりの値を書き、カード本体は unknown とする。どの刷りの値で遊ぶのかは、どの資料にも書かれていない"
     },
     "sources": "docs/rules_confirmed.md §0 を参照",
-    "updated": "2026-10-09"
+    "updated": "2026-11-14"
   },
   "cards": [
     {
@@ -1675,6 +1676,493 @@
         "フレーバーに「スザク・ブラッドは孤高の血族」とある（rules_guess.md A-22）",
         "フレーバーの1行目「…血族だ。誇」、2行目「…熱く燃や」は右端まで埋まっているため折り返しと判断し、改行を入れずに転記した",
         "左辺は +2000 と緑丸 1"
+      ]
+    },
+    {
+      "key": "HB01-002",
+      "id": "HB01-002",
+      "type": "ホロビト",
+      "name": "レオまる",
+      "name_ruby": null,
+      "color_mark": "赤",
+      "cost": 2,
+      "power": 2000,
+      "family": "ライガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "このホロビトが出たとき、カードを1枚引く。"
+      ],
+      "flavor": "unknown",
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "C",
+          "illustrator": "O-G Osahune",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high",
+          "flavor": "ちいさなからだのキュートな仔猫。これこそが怒涛の雷獣、レオの世を忍ぶ姿である。"
+        },
+        {
+          "rarity_mark": "DR",
+          "illustrator": "gozz",
+          "frame": "縦札",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high",
+          "flavor": "小さき身のいと愛らしき仔猫あり。これぞ人の世を渡り歩きし雷獣レオの忍びたる姿なり。"
+        }
+      ],
+      "notes": [
+        "2つの刷りでフレーバーの文面が違う。どちらも印字どおり printings に書いてある",
+        "同名の「レオまる」（HD01-001）とは別のカード番号で、フレーバーも違う"
+      ]
+    },
+    {
+      "key": "HB01-003",
+      "id": "HB01-003",
+      "type": "ホロビト",
+      "name": "鎌鼬 カマイチ",
+      "name_ruby": "カマイタチ",
+      "color_mark": "赤",
+      "cost": 2,
+      "power": 3000,
+      "family": "フウガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [],
+      "flavor": "ホロビトたちは相手を見つけては日夜戦いを仕掛けた。中には契約者と共にいるホロビトに単身挑む者もいた。",
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "C",
+          "illustrator": "UKAI bakuinu",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「鎌鼬」にのみ印字。「カマイチ」にルビはない"
+      ]
+    },
+    {
+      "key": "HB01-004",
+      "id": "HB01-004",
+      "type": "ホロビト",
+      "name": "夜さんぽ 七尾っち",
+      "name_ruby": "よ ななお",
+      "color_mark": "赤",
+      "cost": 2,
+      "power": 4000,
+      "family": "マボロシ・コミューン",
+      "left_edge": null,
+      "abilities": [],
+      "flavor": "ヒナタのことをこっそり見守り今日も今日とて夜の見廻り。これは七尾っちの真の姿をまだ誰も知らない日のおはなし。",
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "C",
+          "illustrator": "hatapug",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「夜」に よ（ひらがな）、「七尾」に ななお（ひらがな）",
+        "左辺に縦書き数値と丸数字が印字されていない"
+      ]
+    },
+    {
+      "key": "HB01-005",
+      "id": "HB01-005",
+      "type": "ホロビト",
+      "name": "雷獣おとん",
+      "name_ruby": "ライジュウ",
+      "color_mark": "赤",
+      "cost": 3,
+      "power": 3000,
+      "family": "ライガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "エナ詠み ③（自分のエナゾーンに赤のエナが3枚以上あるなら、このホロビトは以下の効果を得る）\n・パワーを+2000する。"
+      ],
+      "flavor": "オヤジ！ そんなのんびり過ごしてばっかじゃ身体中の電気が鈍っちまうぜ。　―雷獣 レオ",
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "C",
+          "illustrator": "Mamezawa",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「雷獣」にのみ印字。「おとん」にルビはない"
+      ]
+    },
+    {
+      "key": "HB01-007",
+      "id": "HB01-007",
+      "type": "ホロビト",
+      "name": "ユウキと鬼熊師匠",
+      "name_ruby": "オニグマ ししょう",
+      "color_mark": "赤",
+      "cost": 3,
+      "power": 5000,
+      "family": "ユウキ・コミューン",
+      "left_edge": null,
+      "abilities": [],
+      "flavor": "妖怪たちの生き残りを賭けた戦い「ホロビート」。この戦いに勝ち残りし者はホロビトを統べる百鬼夜行の王となる。救う者、欲を満たす者、頂点を目指す者…。人もホロビトも、互いに様々な想いを胸に立ち上がった。",
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "C",
+          "illustrator": "Takayuki Futami",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「鬼熊」に オニグマ（カタカナ）、「師匠」に ししょう（ひらがな）。1枚のカード内で文字種が混在する",
+        "左辺に縦書き数値と丸数字が印字されていない"
+      ]
+    },
+    {
+      "key": "HB01-008",
+      "id": "HB01-008",
+      "type": "ホロビト",
+      "name": "えんらマダム",
+      "name_ruby": null,
+      "color_mark": "赤",
+      "cost": 4,
+      "power": 6000,
+      "family": "オウチ・コミューン",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [],
+      "flavor": "ホロビトの中には人間の目から隠れて過ごす者もいた。実際、古くからの寺で暮らす宇加持ヒナタには多くの妖怪たちが憑いていたが、本人は全く気が付いていなかった。",
+      "trigger": {
+        "icon": "上",
+        "keyword": "オーバーT",
+        "text": "このホロビトをオーバービートで出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "C",
+          "illustrator": "Muna-Ge",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ]
+    },
+    {
+      "key": "HB01-009",
+      "id": "HB01-009",
+      "type": "ホロビト",
+      "name": "ハグレ犬神",
+      "name_ruby": "イヌガミ",
+      "color_mark": "赤",
+      "cost": 5,
+      "power": 7000,
+      "family": "ナガレモノ",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [],
+      "flavor": "消えゆく運命にワイルドに抗う神や妖がいた。孤独に戦うその者たちは「ナガレモノ」と呼ばれた。",
+      "trigger": {
+        "icon": "上",
+        "keyword": "オーバーT",
+        "text": "このホロビトをオーバービートで出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "C",
+          "illustrator": "AIRI YOSHIHISA",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「犬神」にのみ印字。「ハグレ」にルビはない"
+      ]
+    },
+    {
+      "key": "HB01-010",
+      "id": "HB01-010",
+      "type": "ワザ",
+      "name": "二番戦陣",
+      "name_ruby": "ニバンセンジン",
+      "color_mark": "赤",
+      "cost": 1,
+      "power": null,
+      "family": null,
+      "left_edge": {
+        "modifier": "+3000",
+        "cost": null
+      },
+      "abilities": [
+        "このワザは第2〜5ラインのホロビトのみ使える。"
+      ],
+      "flavor": null,
+      "trigger": {
+        "icon": "札",
+        "keyword": "ドローT",
+        "text": "このワザを捨て、カードを3枚引く。"
+      },
+      "printings": [
+        {
+          "rarity_mark": "C",
+          "illustrator": "ROBUJA",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ]
+    },
+    {
+      "key": "HB01-011",
+      "id": "HB01-011",
+      "type": "ホロビト",
+      "name": "シビレ提灯",
+      "name_ruby": "ちょうちん",
+      "color_mark": "赤",
+      "cost": 2,
+      "power": 5000,
+      "family": "ライガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "このホロビトには、オーバービートできない。"
+      ],
+      "flavor": "提灯にはよ〜昔はよ〜電気じゃなく火が灯ってたんだよ〜ビリビリ。―シビレ提灯",
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "UC",
+          "illustrator": "Ragi",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「提灯」にのみ印字。「シビレ」にルビはない",
+        "フレーバーの話し手を示す ― の前に全角空白は印字されていない"
+      ]
+    },
+    {
+      "key": "HB01-012",
+      "id": "HB01-012",
+      "type": "ホロビト",
+      "name": "鎌鼬 カマジ",
+      "name_ruby": "カマイタチ",
+      "color_mark": "赤",
+      "cost": 2,
+      "power": 2500,
+      "family": "フウガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "このホロビトが第2〜5ラインにいるなら、パワーを+2000する。"
+      ],
+      "flavor": "しゃあねえ、奥義カマすか！ 三塵斬り！！　―鎌鼬 カマジ",
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "UC",
+          "illustrator": "UKAI bakuinu",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「鎌鼬」にのみ印字。「カマジ」にルビはない"
+      ]
+    },
+    {
+      "key": "HB01-013",
+      "id": "HB01-013",
+      "type": "ホロビト",
+      "name": "ヒメコと剛腕のヒヒ",
+      "name_ruby": "ごうわん",
+      "color_mark": "赤",
+      "cost": 3,
+      "power": 3000,
+      "family": "コンガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "このホロビトがダウンしていないなら、パワーを+2000する。"
+      ],
+      "flavor": "生き残りを賭けた戦い「ホロビート」にも暗黙のルールが存在したが、掟破りな奇襲を謀る者も少なくなかった。",
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "UC",
+          "illustrator": "shishimi",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「剛腕」にのみ印字"
+      ]
+    },
+    {
+      "key": "HB01-014",
+      "id": "HB01-014",
+      "type": "ホロビト",
+      "name": "ヒナタを導く七尾",
+      "name_ruby": "みちび ななお",
+      "color_mark": "赤",
+      "cost": 3,
+      "power": 5000,
+      "family": "マボロシ・コミューン",
+      "left_edge": "unknown",
+      "abilities": [
+        "このホロビトのバトルが終わったとき、このホロビトを回復する。"
+      ],
+      "flavor": "unknown",
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "UC",
+          "illustrator": "hatapug",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high",
+          "flavor": "案ずるなヒナ、命を賭けた執拗さも、時には必要じゃ。　―七尾",
+          "left_edge": {
+            "modifier": "+2000",
+            "cost": 1
+          }
+        },
+        {
+          "rarity_mark": "DR",
+          "illustrator": "HIRO SUDA",
+          "frame": "縦札",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high",
+          "flavor": null,
+          "left_edge": null
+        }
+      ],
+      "notes": [
+        "通常の刷りには左辺に +2000 と丸数字 1 が印字されているが、DR の刷りには印字されていない。どちらの印字で遊ぶのかは資料にないため、カード本体は unknown",
+        "DR の刷りにはフレーバーが印字されていない",
+        "ルビは「導」に みちび（ひらがな）、「七尾」に ななお（ひらがな）"
+      ]
+    },
+    {
+      "key": "HB01-015",
+      "id": "HB01-015",
+      "type": "ホロビト",
+      "name": "ジンと奮雷するレオ",
+      "name_ruby": "ふんらい",
+      "color_mark": "赤",
+      "cost": 4,
+      "power": 4500,
+      "family": "ライガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "エナ詠み ③（自分のエナゾーンに赤のエナが3枚以上あるなら、このホロビトは以下の効果を得る）\n・ダウンしていないなら、パワーを+3000する。"
+      ],
+      "flavor": "雷獣レオは、鳴海ジンと契約し、共に戦うホロビトである。滅びの危機に瀕した同志たちを導き、仲間を滅亡の危機から救う救世主となる。それがレオの秘める大いなる願いだった。",
+      "trigger": {
+        "icon": "上",
+        "keyword": "オーバーT",
+        "text": "このホロビトをオーバービートで出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "UC",
+          "illustrator": "Inuchiyo Meimaru",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「奮雷」にのみ印字"
       ]
     }
   ]

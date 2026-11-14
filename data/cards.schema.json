@@ -10,6 +10,21 @@
   },
   "definitions": {
     "unknown": { "const": "unknown" },
+    "leftEdge": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/definitions/unknown" },
+        {
+          "type": "object",
+          "required": ["modifier", "cost"],
+          "additionalProperties": false,
+          "properties": {
+            "modifier": { "type": "string", "pattern": "^[+-][0-9]+$" },
+            "cost": { "oneOf": [ { "type": "integer", "minimum": 0 }, { "type": "null" }, { "$ref": "#/definitions/unknown" } ] }
+          }
+        }
+      ]
+    },
     "nonEmpty": { "type": "string", "minLength": 1 },
     "card": {
       "type": "object",
@@ -25,23 +40,9 @@
         "cost":  { "oneOf": [ { "type": "integer", "minimum": 0 }, { "$ref": "#/definitions/unknown" } ] },
         "power": { "oneOf": [ { "type": "integer", "minimum": 0 }, { "type": "null" }, { "$ref": "#/definitions/unknown" } ] },
         "family": { "oneOf": [ { "$ref": "#/definitions/nonEmpty" }, { "type": "null" } ] },
-        "left_edge": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "#/definitions/unknown" },
-            {
-              "type": "object",
-              "required": ["modifier", "cost"],
-              "additionalProperties": false,
-              "properties": {
-                "modifier": { "type": "string", "pattern": "^[+-][0-9]+$" },
-                "cost": { "oneOf": [ { "type": "integer", "minimum": 0 }, { "type": "null" }, { "$ref": "#/definitions/unknown" } ] }
-              }
-            }
-          ]
-        },
+        "left_edge": { "$ref": "#/definitions/leftEdge" },
         "abilities": { "oneOf": [ { "type": "array", "items": { "$ref": "#/definitions/nonEmpty" } }, { "$ref": "#/definitions/unknown" } ] },
-        "flavor": { "oneOf": [ { "$ref": "#/definitions/nonEmpty" }, { "type": "null" } ] },
+        "flavor": { "anyOf": [ { "$ref": "#/definitions/nonEmpty" }, { "type": "null" }, { "$ref": "#/definitions/unknown" } ] },
         "trigger": {
           "type": "object",
           "required": ["icon", "keyword", "text"],
@@ -65,7 +66,9 @@
               "frame":       { "$ref": "#/definitions/nonEmpty" },
               "source":      { "$ref": "#/definitions/nonEmpty" },
               "source_date": { "type": "string", "pattern": "^([0-9]{4}-[0-9]{2}(-[0-9]{2})?|unknown)$" },
-              "legibility":  { "enum": ["high", "partial"] }
+              "legibility":  { "enum": ["high", "partial"] },
+              "flavor":      { "oneOf": [ { "$ref": "#/definitions/nonEmpty" }, { "type": "null" } ] },
+              "left_edge":   { "$ref": "#/definitions/leftEdge" }
             }
           }
         },

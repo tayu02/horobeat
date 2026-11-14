@@ -6,6 +6,28 @@ import { existsSync } from "node:fs";
 import { buildAll, sameTemplate, sameShape } from "./ability.mjs";
 import { checkImages } from "./card-images.mjs";
 
+// 同じカード番号でも、刷りによって印字が違うことがある
+// （HB01-002 はフレーバーの文面が違い、HB01-014 は左辺のブーストが片方にしかない）。
+// その項目は printings の各版に印字どおりの値を書き、カード本体は unknown にする
+// （どちらの値で遊ぶのかは、どの資料にも書かれていないため）。
+export const PRINTING_FIELDS = ["flavor", "left_edge"];
+
+function checkPrintingDiffs(c) {
+  const errors = [];
+  for (const f of PRINTING_FIELDS) {
+    const has = c.printings.filter(p => f in p);
+    if (!has.length) continue;
+    if (has.length !== c.printings.length)
+      errors.push(`${c.key}: ${f} を刷りごとに書くなら、printings の全部に書く（いまは ${has.length}/${c.printings.length} 版）`);
+    const vals = new Set(has.map(p => JSON.stringify(p[f])));
+    if (vals.size < 2)
+      errors.push(`${c.key}: ${f} が刷りごとに書かれているのに、全部同じ値。違わないならカード本体にだけ書く`);
+    if (c[f] !== "unknown")
+      errors.push(`${c.key}: ${f} が刷りによって違うなら、カード本体は unknown にする（どちらで遊ぶかが未確定のため）。いまは ${JSON.stringify(c[f])}`);
+  }
+  return errors;
+}
+
 export function validateCards(path = "data/cards.json") {
   const data = JSON.parse(readFileSync(path, "utf8"));
   const schema = JSON.parse(readFileSync("data/cards.schema.json", "utf8"));
@@ -39,9 +61,14 @@ export function validateCards(path = "data/cards.json") {
         else if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${path}[${i}]`));
         else if (v && typeof v === "object") for (const k in v) walk(v[k], `${path}.${k}`);
       };
-      for (const f of ["id","name_ruby","color_mark","cost","power","family","left_edge","abilities","flavor","trigger"]) walk(c[f], f);
+      // 刷りによって印字が違う項目は、カード本体が unknown になる（下の検査で別に見る）
+      const varies = new Set(PRINTING_FIELDS.filter(f => c.printings.some(p => f in p)));
+      for (const f of ["id","name_ruby","color_mark","cost","power","family","left_edge","abilities","flavor","trigger"])
+        if (!varies.has(f)) walk(c[f], f);
       if (unk.length) errors.push(`${c.key}: legibility=high の版があるのに unknown が残っている: ${unk.join(", ")}`);
     }
+
+    errors.push(...checkPrintingDiffs(c));
   }
 
   // --- 転記ゆれの検出 ---------------------------------------------------

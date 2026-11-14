@@ -141,6 +141,12 @@ async function run(label, viewport, touch){
   lb=await lineBtns();
   ok(lb[0].dis,'オーバービート元が赤で、エナに緑がなければ重ねられない');
   await p.click('#sheet button[data-close="1"]'); await wait(100);
+  // 「このホロビトには、オーバービートできない」（シビレ提灯）: コストが足りていても重ねられない
+  await setup({hand:['HD01-012'], line:[['HB01-011']], ena:['HD01-001','HD01-001','HD01-001','HD01-001','HD01-001']});
+  await open(await hand('HD01-012'));
+  lb=await lineBtns();
+  ok(lb[0].dis && (await p.textContent('#sheet')).includes('オーバービートできません'),'シビレ提灯（コスト2）の上には、コスト5のホロビトでも重ねられない（印字の効果）');
+  await p.click('#sheet button[data-close="1"]'); await wait(100);
   // 「コストは1大きくなる」（しなずいさま）: ラインにいる間はコスト3として数える（総合ルール 6.2.5.5.1.1。印字の「コスト」はカードのコスト）
   await setup({hand:['HD02-004','HD02-005'], line:[['HD02-001']], ena:['HD02-001','HD02-001']});
   await open(await hand('HD02-004'));
