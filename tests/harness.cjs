@@ -15,13 +15,13 @@ const NAME = path.basename(require.main.filename).replace(/\.test\.cjs$/, "");
 const URL = "file://" + path.join(ROOT, "simulator.html");
 fs.mkdirSync(OUT, { recursive: true });
 
-// この環境の Chromium を優先し、無ければ Playwright の既定のものを使う
-const PINNED = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+// この環境の Chromium を優先し（作業環境によって置き場所が違うので、あるものを使う）、無ければ Playwright の既定のものを使う
+const PINNED = ["/opt/pw-browsers/chromium-1194/chrome-linux/chrome", "/opt/pw-browsers/chromium"].find(f => fs.existsSync(f));
 // 盤面の動き（カードが飛ぶ・攻撃する など。2026-10-23〜）は tests/motion.test.cjs で確かめる。
 // ほかの試験は「動きを減らす」設定で開く（動いている途中のカードを押したり、位置を測ったりしないように）。
 // 動きを見たい試験は newContext / newPage に reducedMotion: "no-preference" を渡す
 async function launch() {
-  const b = await chromium.launch(fs.existsSync(PINNED) ? { executablePath: PINNED } : {});
+  const b = await chromium.launch(PINNED ? { executablePath: PINNED } : {});
   const nc = b.newContext.bind(b), np = b.newPage.bind(b);
   b.newContext = (o = {}) => nc({ reducedMotion: "reduce", ...o });
   b.newPage = (o = {}) => np({ reducedMotion: "reduce", ...o });

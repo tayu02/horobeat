@@ -78,7 +78,7 @@ const inner = p => p.evaluate(() => {
 });
 
 // 試験で、自分の側を AI に任せる（両方の画面で）。ルールが未確定でシミュレーターが聞くことは、ai-bench と同じく最初の選択肢で答える。
-// 捨てる先（未確定）は墓地。ワザ・ブーストは、同じバトルで2回目の「使わない」を選んだら使用を終える（両方が AI だと誰も「終える」を押さないため）
+// 捨てる先（未確定）は墓地。ワザ・ブーストは、両者が続けてパスしたら終わる（総合ルール 6.3.2.4）
 function aiInstall(){
   AI_DELAY = 0; aiForce = { 0:"normal" };
   if (window.__drv) return;
@@ -87,12 +87,7 @@ function aiInstall(){
     if (force){ var f = findCard(uid); if (f) moveCard(uid, f.card.owner, "grave"); if (after) setTimeout(after, 0); return; }
     return orig.apply(null, arguments);
   };
-  var ow = aiWazaChoice, passes = {};
-  aiWazaChoice = function(p, acts, oppCan){
-    var i = ow(p, acts, oppCan), k = ol.gid + "-" + state.round + "-" + (state.battle && state.battle.line);
-    if (i === acts.length && oppCan){ passes[k] = (passes[k] || 0) + 1; if (passes[k] >= 2) return acts.length + 1; }
-    return i;
-  };
+
   window.__drv = setInterval(function(){
     if (!ol.on || state.winner !== undefined || !olHolder() || ol.wait || aiBusy || aiTimer) return;
     if (fxAsk){ var a = fxAsk; fxAsk = null; closeSheet(); a.cb(0); return; }
@@ -274,8 +269,9 @@ async function run(label, viewport, touch){
     ok(res.every(r => r.ok && r.same), 'デッキ・先手を入れ替えた6局も、最後まで進み、両方の画面で勝敗と盤面が一致する（' + res.map(r => r.fin[0].r + 'R').join('・') + '）');
     ok(L2.bad.length === 0 && bad2.length === 0 && sneak2.length === 0, '6局とも、相手の手札・山札・ハートの中身は送られず、画面の中にもない（' + s2.length + ' 回調べた）' + L2.bad.concat(bad2, sneak2).slice(0, 3).join(' / '));
     console.log('  （相手に聞いたこと: ' + JSON.stringify(kinds) + '）');
-    // 作った側が先手なら、⑥のあと作った側が入った側のエナを見せてもらう。入った側が先手なら、入った側が自分のエナを盤面と一緒に送る
-    ok((kinds.reveal || 0) >= 4, '作った側が先手の4局では、⑥のエナの中身を相手の端末に見せてもらう（' + (kinds.reveal || 0) + ' 回）');
+    // ⑥のエナのように、表向きに置かれたのに中身が分からない相手のカードは、番の端末が相手に見せてもらう。
+    // 番が先に相手に移れば、相手が自分のエナを盤面と一緒に送るので、聞く回数は局の進み方で変わる（どちらでも、終わったときの盤面は一致する。上の確認）
+    ok((kinds.reveal || 0) >= 1, '表向きに置かれたのに中身が分からないカードは、相手の端末に見せてもらう（6局で ' + (kinds.reveal || 0) + ' 回）');
     ok(await ev(A, () => !ol.on && localStorage.getItem('horobeat-online') === 'null'), '6局のあと、やめた状態に戻っている');
   }
   ok(A.__errs.length === 0 && B.__errs.length === 0 && R.errs.length === 0, 'JSエラーなし（受け取ったときのものも） ' + A.__errs.concat(B.__errs, R.errs).slice(0, 3).join(' | '));

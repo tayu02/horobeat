@@ -80,22 +80,20 @@ async function run(label, viewport, touch){
   await battle(); s=await S();
   ok((await log()).includes('自分の勝ち') && top(s,1,0).turned && s.players[1].heart[4].turned,'ダウンしている自分のホロビト（4000）も通常どおりバトルし、勝って相手のホロビトとハートにダメージを与える（よくある質問）');
 
-  // ---- 3. ダウン中に負ける → 破壊されて墓地へ。束なら下をどうするか聞く ----
+  // ---- 3. ダウン中に負ける → 破壊されて墓地へ。束なら重なっているカードも同時に墓地へ（総合ルール 7.4.1.1）----
   await setup({line:[['HB01-001']]},{line:[[{k:'HD01-001',turned:true}],[{k:'HB01-001'},{k:'HD01-001',turned:true}]]},{});
   await p.evaluate(()=>{ state.players[0].line[1].push({uid:'X1',owner:0,key:'HB01-033',up:true,turned:false,note:''}); render(); });
   await battle();
   s=await S();
   ok(!s.players[1].line[0].length && s.players[1].grave.some(c=>c.key==='HD01-001'),'ダウン中のホロビトが負ける → 破壊されて墓地へ');
-  ok((await q()).includes('下に 1 枚') && (await q()).includes('未確定'),'束の一番上が破壊されるときは、下のカードをどうするか聞く（未確定）');
-  await choose('一番上だけ');
-  s=await S();
-  ok(s.players[1].line[1].length===1 && s.players[1].line[1][0].key==='HB01-001','「一番上だけ墓地へ」→ 下のカードはラインに残る');
+  ok(!(await q()).includes('下のカード'),'束が破壊されるときも、下のカードをどうするかは聞かない');
+  ok(!s.players[1].line[1].length && s.players[1].grave.filter(c=>c.key==='HB01-001').length===1 && s.players[1].grave.length===3 && s.players[1].grave.every(c=>!c.turned),
+    '束の一番上が破壊されると、重なっていたカードも同時に墓地へ（総合ルール 7.4.1.1）');
 
   // ---- 4. 破壊されない（HD01-017）: ダウンしたまま残る ----
   await setup({line:[['HB01-065']]},{line:[[{k:'HD01-017',turned:true}]]});
   await battle();
-  ok((await q()).includes('勝ったときの効果'),'勝ったときの効果（HB01-065）があれば、ダメージとの順番を聞く');
-  await choose('ダメージを先に');
+  ok(!(await q()).includes('どちらを先に'),'勝ったときの効果（HB01-065）があっても、ダメージとの順番は聞かない（勝ったときの効果が先。総合ルール 6.3.2.7）');
   s=await S();
   ok(s.players[1].line[0].length===1 && top(s,1,0).turned && (await log()).includes('ダウンしたままラインに残る'),'HD01-017 はダウン中に負けても破壊されず、ダウンしたまま残る');
 
@@ -108,21 +106,23 @@ async function run(label, viewport, touch){
   // 依頼者の例: 一番上のハートがダウンしているなら、それが破壊されてトリガーチェック、次のハートがダウン
   await setup({line:[['HD02-006']]},{line:[['HB01-001']], heart:['HD01-001','HD01-001','HD01-001',{k:'PR-013',turned:true}]});
   await battle();
-  ok((await log()).includes('受けるダメージ：2') && (await log()).includes('1 回目') && (await q()).includes('電光攻火') && (await q()).includes('破壊されました'),
-    'ダブルダメージ: 1回目で、一番上のダウンしているハート（電光攻火）が破壊され、トリガーを使うか聞く（トリガーチェック）');
+  s=await S();
+  ok((await log()).includes('受けるダメージ：2') && (await log()).includes('2 回目') && (await q()).includes('電光攻火') && (await q()).includes('ハートから破壊された') &&
+     s.players[1].check.length===1 && s.players[1].check[0].key==='PR-013' && s.players[1].heart.length===3 && s.players[1].heart[2].turned,
+    'ダブルダメージ: 1回目で一番上のダウンしているハート（電光攻火）が破壊されてチェックゾーンへ、2回目で次のハートがダウン。そのあとチェック処理でトリガーを使うか聞く（総合ルール 7.6.2・7.7.1.1.1）');
   await choose('中断する');
   ok((await p.textContent('#flow')).includes('バトルを続ける'),'中断すると、上部に「バトルを続ける」が出る');
   await p.click('#flow button[data-flow="resume"]'); await wait(200);
-  ok((await q()).includes('電光攻火') && (await S()).players[1].heart.length===4,'「バトルを続ける」で同じ所から再開する（ダメージを入れ直さない）');
+  ok((await q()).includes('電光攻火') && (await S()).players[1].heart.length===3,'「バトルを続ける」で同じ所から再開する（ダメージを入れ直さない）');
   await choose('使わずに手札に');
   s=await S();
   ok(s.players[1].heart.length===3 && s.players[1].heart[2].turned && s.players[1].heart.slice(0,2).every(c=>!c.turned) && s.players[1].hand.some(c=>c.key==='PR-013'),
-    'ダブルダメージ: 2回目で、次のハートがダウンする（依頼者の説明どおり）');
-  ok(s.battle===null && (await log()).includes('2 回目'),'2回目まで入れて、残りのラインを処理して終わる');
-  // ハートがすべて縦向きなら: 1回目で一番上がダウン、2回目でそのハートが破壊（動画にない場面。依頼者の判断 2026-10-16「2回とも同じハートにダメージが入る」）
+    'ダブルダメージ: 電光攻火は手札に加わり、次のハートはダウンしたまま（依頼者の説明どおり）');
+  ok(s.battle===null,'チェック処理のあと、残りのラインを処理して終わる');
+  // ハートがすべて縦向きなら: 1回目で一番上がダウン、2回目でそのハートが破壊（総合ルール 7.6.1・7.6.2。依頼者の判断 2026-10-16 とも同じ）
   await setup({line:[['HD02-006']]},{line:[['HB01-001']]});
   await battle();
-  ok((await q()).includes('破壊されました') && (await S()).players[1].heart.length===5,'すべて縦向き: 1回目で一番上がダウンし、2回目でそのハートが破壊される');
+  ok((await q()).includes('ハートから破壊された') && (await S()).players[1].heart.length===4 && (await S()).players[1].check.length===1,'すべて縦向き: 1回目で一番上がダウンし、2回目でそのハートが破壊されてチェックゾーンへ');
   await choose('使わずに手札に');
   s=await S();
   ok(s.players[1].heart.length===4 && s.players[1].heart.every(c=>!c.turned),'すべて縦向き: 残りの4枚は縦向きのまま');
@@ -153,7 +153,7 @@ async function run(label, viewport, touch){
   // ドローT: 墓地へ置き、3枚引く
   await setup({line:[['HB01-001']]},{line:[['HD01-001']], heart:[{k:'PR-013',turned:true}]});
   await battle();
-  ok((await q()).includes('ダメージで破壊されました') && (await q()).includes('電光攻火') && (await opts()).some(t=>t.includes('ドローT')),'ダウンしているハートにダメージ → 破壊。カード名を示し、トリガーを使うか聞く（任意）');
+  ok((await q()).includes('ハートから破壊された') && (await q()).includes('電光攻火') && (await opts()).some(t=>t.includes('ドローT')),'ダウンしているハートにダメージ → 破壊。カード名を示し、トリガーを使うか聞く（任意）');
   await choose('トリガーを使う');
   s=await S();
   ok(s.players[1].grave.some(c=>c.key==='PR-013') && s.players[1].hand.length===3 && !s.players[1].heart.length,'ドロートリガー: 墓地へ置き、3枚引く');
@@ -216,10 +216,66 @@ async function run(label, viewport, touch){
   await setup({line:[['HB01-001']]},{line:[['HD01-001']], heart:['HD01-001',{k:'HD01-001',turned:true}]});
   await p.evaluate(()=>{ state.fxAuto=false; render(); });
   await battle();
-  ok((await opts()).some(t=>t.includes('トリガーを使う')) && (await p.textContent('#sheet h3')).includes('トリガーチェック'),'「効果: 手動」のときも、ハートが破壊されたらトリガーを使うか聞く（トリガーチェック）');
+  ok((await opts()).some(t=>t.includes('トリガーを使う')) && (await p.textContent('#sheet h3')).includes('チェック処理'),'「効果: 手動」のときも、ハートが破壊されたらトリガーを使うか聞く（トリガーチェック）');
   await choose('トリガーを使う');
   s8=await S();
   ok(s8.players[1].line[1].length===1 && s8.players[1].line[1][0].key==='HD01-001' && !s8.players[1].hand.length,'「効果: 手動」: エントリートリガーでラインに出る。レオまるの「出たとき」は手動なので引かない');
+
+  // ---- 8b. チェックゾーンに2枚: どのカードからチェック処理をするかを選ぶ（総合ルール 7.7.2.1.1）----
+  await setup({line:[['HD02-006']]},{line:[['HB01-001']], heart:['HD01-001',{k:'HD01-010',turned:true},{k:'PR-013',turned:true}]});
+  await battle();
+  s=await S();
+  ok(s.players[1].check.length===2 && s.players[1].heart.length===1 && (await q()).includes('どのカードからチェック処理') &&
+     (await opts()).some(t=>t.includes('ウキウキ学生 アカナー')) && (await opts()).some(t=>t.includes('電光攻火')),
+    'ダブルダメージで2枚とも破壊 → 2枚ともチェックゾーンに置いてから、どれから処理するかを選ぶ（破壊された順番に関係なく選べる）');
+  await choose('ウキウキ学生 アカナー');
+  ok((await q()).includes('ウキウキ学生 アカナー') && (await q()).includes('ハートから破壊された'),'選んだカード（あとに破壊されたほう）からチェック処理をする');
+  await choose('使わずに手札に');
+  ok((await q()).includes('電光攻火') && (await S()).players[1].check.length===1,'残りの1枚もチェック処理をする');
+  await choose('使わずに手札に');
+  s=await S();
+  ok(!s.players[1].check.length && s.players[1].hand.length===2,'チェックゾーンが空になるまで繰り返す');
+  // チェックゾーンのカードは、相手の画面でも中身を描かない（ハートゾーンの見出しに枚数だけ出す）
+  await setup({line:[['HD02-006']]},{line:[['HB01-001']], heart:['HD01-001',{k:'PR-013',turned:true}]});
+  await battle();
+  ok((await p.textContent('#side-1 .z-heart .zlabel')).includes('チェック 1'),'チェック処理の間、ハートゾーンの見出しにチェックゾーンの枚数を出す');
+  await choose('使わずに手札に');
+
+  // ---- 8c. バトルフェイズアクション: 先手から交互に。一方がパスし、直後にもう一方もパスしたらパワーを比べる（総合ルール 6.3.2.3・6.3.2.4）----
+  await setup({hand:['PR-013','PR-013'], ena:['HD01-001','HD01-001','HD01-001','HD01-001'], line:[['HD01-001']]},
+              {hand:['PR-013','PR-013'], ena:['HD01-001','HD01-001','HD01-001','HD01-001'], line:[['HB01-001']]},{first:0});
+  await p.evaluate(()=>{ AI_DELAY=0; });
+  await battle0();
+  ok((await q()).includes('いまは自分の番') && (await opts()).some(t=>t==='パス（相手の番へ）') && !(await opts()).some(t=>t.includes('使用を終えて')),
+    '先手（自分）から。選べるのは「ワザを使う」「パス」（「使用を終える」はない）');
+  await choose0('パス');
+  ok((await q()).includes('いまは相手の番') && (await q()).includes('自分はパスしました') && (await opts()).some(t=>t.includes('パス（自分もパスしたので、パワーを比べる）')),
+    '自分がパス → 相手の番。相手がここでパスすればパワーを比べる');
+  await choose0('電光攻火');
+  ok((await q()).includes('いまは自分の番') && !(await q()).includes('パスしました'),'相手がワザを使う → 自分の番（パスは続いていない）');
+  await choose0('パス');
+  ok((await opts()).some(t=>t.includes('パス（自分もパスしたので、パワーを比べる）')),'自分がまたパス → 相手の番（ここで相手がパスすれば終わる）');
+  await choose0('パス');
+  ok((await log()).includes('両者が続けてパスしたので、パワーを比べる') && !!(await p.$('#sheet [data-kind="result"]')) && (await log()).includes('相手 9000'),
+    '自分パス → 相手ワザ → 自分パス → 相手パス で、パワーを比べる（相手 4000＋5000）');
+  await settle();
+  // 使えるワザ・ブーストがない側は自動でパス。両方とも使えなければ、そのままパワーを比べる
+  await setup({hand:['PR-013'], ena:['HD01-001','HD01-001'], line:[['HD01-001']]},{line:[['HB01-001']]},{first:1});
+  await battle0();
+  ok((await log()).includes('相手：パス（使えるワザ・ブーストがない）') && (await q()).includes('いまは自分の番') && (await q()).includes('相手はパスしました'),
+    '先手の相手は使えるものがないので自動でパス → 自分の番');
+  await choose0('パス');
+  ok(!!(await p.$('#sheet [data-kind="result"]')),'自分もパス → パワーを比べる');
+  await settle();
+  // バトルの途中で相手のホロビトがいなくなったら、パワーを比べる時点でいる自分のホロビトの勝ち（総合ルール 6.3.2.6）
+  await setup({hand:['PR-013'], ena:['HD01-001','HD01-001'], line:[['HD01-001']]},{line:[['HB01-033']]},{first:0});
+  await battle0();
+  await p.evaluate(()=>{ const t=state.players[1].line[0][0]; moveCard(t.uid,1,'grave'); render(); });
+  await choose0('パス');
+  ok(!(await q()).includes('結果を選んで') && (await log()).includes('相手のホロビトがいなくなり') && (await S()).battle.winner===0,
+    'バトルの途中で相手のホロビトがいなくなった → 結果を聞かずに、自分のホロビトだけがいるので自分の勝ち');
+  await settle();
+  ok((await S()).players[1].heart[4].turned,'勝った自分は、相手プレイヤー（ハート）に1ダメージ');
 
   // ---- 9. バトルのダメージでダウン → 「ダウンしたとき」（HD02-016） ----
   await setup({line:[['HD01-016']]},{line:[['HD02-016']]});
@@ -229,11 +285,10 @@ async function run(label, viewport, touch){
   // ---- 10. HB01-065: 勝ったとき正面を破壊（パワーの比は計算した値で判定）→ 1バリアは発動しない（印字） ----
   await setup({line:[['HB01-065']]},{line:[['HD02-002']]});
   await battle();
-  await choose('勝ったときの効果を先に');
   s=await S();
   ok(s.players[1].grave.some(c=>c.key==='HD02-002') && !(await q()).includes('倍以上ですか'),'HB01-065: パワー 14000 は正面の 2000 の2倍以上 → 聞かずに正面を破壊');
   ok((await log()).includes('1バリアは発動しない') && (await log()).includes('受けるダメージ：2'),'HB01-065: 破壊した相手の1バリアは発動しない（印字）。ダブルダメージで2');
-  ok((await q()).includes('破壊されました'),'HB01-065: 2ダメージ（1ダメージを2回）で、一番上のハートがダウンしてから破壊される');
+  ok((await q()).includes('ハートから破壊された'),'HB01-065: 2ダメージ（1ダメージを2回）で、一番上のハートがダウンしてから破壊される（勝ったときの効果が先なので、正面の1バリアは働かない。総合ルール 6.3.2.7〜6.3.2.9）');
   await choose('使わずに手札に');
 
   // ---- 11. 常時の効果のパワー: 判定できれば足す（疾風のカマイチ 第2ライン +2500） ----
@@ -256,10 +311,13 @@ async function run(label, viewport, touch){
   await tap(top(s,0,0).uid);
   ok(!top(await S(),0,0).turned,'HD01-014: 選んだ自分（ダウン中）が回復する');
 
-  // ---- 13. 両者ともいない第1ライン → 次の先手は聞く。途中でフェイズ送り → 確かめてから進む ----
-  await setup({line:[[],['HB01-001']]},{line:[[],['HD01-001']]});
-  await battle();
-  ok((await q()).includes('次のラウンドの先手') && (await q()).includes('B-1'),'第1ラインにバトルがないときの次の先手は手引書にないので聞く');
+  // ---- 13. 両者ともいない第1ライン → 次の先手は入れ替わる（総合ルール 6.3.7.3）。途中でフェイズ送り → 確かめてから進む ----
+  await setup({hand:['PR-013'], ena:['HD01-001','HD01-001'], line:[[],['HB01-001']]},{line:[[],['HD01-001']]});
+  await battle0();
+  s=await S();
+  ok(s.nextFirst===1 && (await log()).includes('第1ラインのバトルが行われなかった') && !(await q()).includes('次のラウンドの先手'),
+    '第1ラインにバトルがない → 聞かずに、次のラウンドは先手と後手が入れ替わる（いまの先手は自分 → 次は相手。総合ルール 6.3.7.3）');
+  ok((await q()).includes('第2ライン') || (await p.textContent('#sheet h3')).includes('第2ライン'),'第1ラインは飛ばして、第2ラインのバトルへ');
   await choose('中断する');
   await p.click('#btnPhase'); await wait(100);
   ok((await p.textContent('#sheet')).includes('バトルの途中です'),'バトルの途中でフェイズ送り → 画面の中で確かめる（ブラウザの確認窓は公開先で出ないので使わない）');
@@ -292,14 +350,14 @@ async function run(label, viewport, touch){
   ok(await p.evaluate(u=>picHTML(findCard(u).card,'','').includes('images/cards/HB01-001.webp'),top(s,0,0).uid),'カードの画像は images/cards/<番号>.webp を使う（画像がなければ名前とパワーを文字で出す）');
   ok(await p.evaluate(([a,b])=>[a,b].every(u=>{ const e=document.querySelector('.card[data-cid="'+u+'"]'); return e && e.classList.contains('fx-bat') && e.querySelector('.fxtag').textContent==='バトル'; }),[top(s,0,0).uid,top(s,1,0).uid]),
     '盤面でも、バトルしている2枚に太い枠と「バトル」の札を付ける');
-  await choose0('ワザの使用を終えて');
+  await choose0('パス');
   hd=await head();
   ok(!!(await p.$('#sheet [data-kind="result"]')) && (await p.textContent('#sheet h3')).includes('結果') && (await q()).includes('パワー 自分 4000 対 相手 2000 → 自分の勝ち'),'パワーを比べたら、結果の画面を出す');
   ok(hd.length===2 && hd[0].cls.includes('win') && hd[0].t.includes('勝ち') && hd[0].t.includes('パワー 4000') && hd[1].cls.includes('lose') && hd[1].t.includes('負け'),'結果の画面: 両者のカードを並べ、勝ち・負けとパワーを出す');
   await choose0('続ける');
   hd=await head();
-  ok((await p.textContent('#sheet h3')).includes('トリガーチェック') && hd.length===1 && hd[0].cls.includes('tgt') && hd[0].t.includes('トリガーチェック') && hd[0].cid===s.players[1].heart[1].uid,
-    'ハートが破壊されたら、そのカードの画像を出してトリガーチェックする');
+  ok((await p.textContent('#sheet h3')).includes('チェック処理') && hd.length===1 && hd[0].cls.includes('tgt') && hd[0].t.includes('チェック処理') && hd[0].cid===s.players[1].heart[1].uid,
+    'ハートが破壊されたら、チェック処理でそのカードの画像を出す');
   ok(await p.evaluate(u=>{ const e=document.querySelector('.card[data-cid="'+u+'"]'); return e && e.classList.contains('fx-tgt') && e.querySelector('.fxtag').textContent==='対象'; },s.players[1].heart[1].uid),
     '盤面でも、破壊されたハートに赤い太い枠と「対象」の札を付ける');
   await choose('使わずに手札に');

@@ -112,8 +112,9 @@ async function run(label, viewport, touch, full){
   await p.click('#btnPhase'); await settle();
   ok((await log()).includes('使っても上回れない') && (await S()).players[1].hand.some(c=>c.key==='HD02-008'),'使っても上回れない（4000+5000 対 18000）ならワザは使わない');
   // 人の番は人が選ぶ（自分が先手なら、ワザの質問が自分に出る）
-  await setup({line:[['HD01-004']], hand:['PR-013'], ena:['HD01-001','HD01-001']},{line:[['HD02-003']]},{phase:1,first:0,prep:'done'});
-  await p.evaluate(()=>{ state.phase=0; state.first=0; render(); });  // 自分が先手の召喚フェイズ → 送ると AI（後手）の召喚フェイズ
+  // 自分が先手の召喚フェイズから始める（送ると AI（後手）の召喚フェイズ）。
+  // 以前は AI の召喚フェイズの盤面を作ってから自分の番に書き換えていて、その間に AI が動いてバトルまで進むことがあった
+  await setup({line:[['HD01-004']], hand:['PR-013'], ena:['HD01-001','HD01-001']},{line:[['HD02-003']]},{phase:0,first:0,prep:'done'});
   await p.click('#btnPhase');
   ok(await until(()=>state.phase===2,6000),'AI（後手）が召喚フェイズを終えると、バトルフェイズに入る');
   ok(await until(()=>sheetWrap.classList.contains('on'),3000) && (await q()).includes('いまは自分の番'),'バトルのワザの番が自分なら、自分に聞く');
@@ -140,7 +141,8 @@ async function run(label, viewport, touch, full){
   ok(await until(()=>state.phase===2,6000),'AI が召喚フェイズを送る');
   await settle();
   s=await S();
-  ok(top(s,1,2)&&top(s,1,2).key==='HD02-004' && (await log()).includes('エントリートリガー'),'エントリートリガー: 空いているラインの1番前（第3ライン）に出す');
+  ok(top(s,1,2)&&top(s,1,2).key==='HD02-004' && (await log()).includes('エントリーT を使う'),
+     'エントリートリガー: 空いているラインの1番前（第3ライン）に出す（しなずいさまはラインにいるとコスト3なので、コスト3の怪鳥ふらり火と理系インテは重ねられない。総合ルール 6.2.5.5.1.1）');
   // オーバートリガー: ダウンしているホロビトの上に重ねる
   await setup({line:[['HB01-061'],['HB01-061']]},{line:[['HD02-001'],[{k:'HD02-003',turned:true}],['HD02-001'],['HD02-001'],['HD02-001']], heart:['HD02-003','HD02-003','HD02-003','HD02-003',{k:'HD02-005',turned:true}], flags:{enaCharged:true}},{phase:1,first:0});
   ok(await until(()=>state.phase===2,6000),'AI が召喚フェイズを送る');
@@ -148,15 +150,14 @@ async function run(label, viewport, touch, full){
   s=await S();
   ok((await log()).includes('「ヒトダマモルン」を「つくものジャンボ」の上にオーバービートで出す'),'オーバートリガー: ダウンしているホロビト（つくものジャンボ）の上に重ねる');
 
-  // ---- 7. ルールが未確定のことは、AI の番でも人に聞く ----
-  await setup({line:[['HB01-061']]},{line:[['HD02-001',{k:'HD02-004',turned:true}]], flags:{enaCharged:true}},{phase:1,first:0});
+  // ---- 7. 判定できないことは、AI の番でも人に聞く（AI のホロビトのパワーの条件。ラインに未確定カードがあると数が決まらない）----
+  await setup({line:[['HB01-061']]},{line:[['HD01-015'],['HD02-001'],['HD02-001'],[{k:null}]], flags:{enaCharged:true}},{phase:1,first:0});
   ok(await until(()=>state.phase===2,6000),'AI が召喚フェイズを送る');
-  await settle();   // バトルの結果（人が「続ける」を押す）
-  ok(await until(()=>sheetWrap.classList.contains('on')&&document.querySelector('#sheet .fxq')?.textContent.includes('下に 1 枚'),6000),'AI のホロビト（束）が破壊されるとき、下のカードの扱い（未確定）は人に聞く');
+  ok(await until(()=>sheetWrap.classList.contains('on')&&document.querySelector('#sheet .fxq')?.textContent.includes('4体以上'),6000),'AI のホロビトのパワーの条件が判定できなければ、人に聞く');
   await wait(400);
-  ok(await sheetOpen() && (await q()).includes('未確定'),'AI はその質問に答えない（しばらく待っても開いたまま）');
-  await p.waitForTimeout(450); await p.locator('#sheet button[data-fxa]',{hasText:'一番上だけ'}).click(); await settle();
-  ok((await S()).players[1].line[0].length===1,'人が答えると続く（一番上だけ墓地へ）');
+  ok(await sheetOpen() && (await q()).includes('4体以上'),'AI はその質問に答えない（しばらく待っても開いたまま）');
+  await p.waitForTimeout(450); await p.locator('#sheet button[data-fxa]',{hasText:'満たしていない'}).click(); await settle();
+  ok((await log()).includes('相手 6000'),'人が答えると続く（満たしていない → 6000）');
 
   // ---- 8. 「戻す」のあと、AI の番なら止める（「AIを進める」で続ける）----
   await delay(500);
@@ -213,7 +214,8 @@ async function run(label, viewport, touch, full){
   ok(!s.players[1].hand.some(c=>c.key==='HD02-009') && top(s,0,1).turned && !top(s,1,1).turned,'第2ラインでブーストを使って勝つ（相手の第2ラインのホロビトがダウン）');
   ok(top(s,1,0).turned && s.players[0].heart.filter(c=>c.turned).length===1,'第1ラインは負け、第2ラインの勝ちで相手のハートにダメージ');
   // 出し方: 負けているラインに重ねて勝ちに変える（不戦勝のラインに重ねるより伸びる）
-  await setup({line:[['HB01-001']]},{hand:['HD02-004'], ena:['HD02-001'], line:[['HD02-001'],['HD02-003']], flags:{enaCharged:true}},{phase:1,first:0});
+  // （第1ラインはすやすやジャンボ（コスト2）。しなずいさまはラインにいるとコスト3なので、コスト3の怪鳥ふらり火と理系インテは重ねられない。総合ルール 6.2.5.5.1.1）
+  await setup({line:[['HB01-001']]},{hand:['HD02-004'], ena:['HD02-001'], line:[['HD02-009'],['HD02-003']], flags:{enaCharged:true}},{phase:1,first:0});
   ok(await until(()=>state.phase===2,6000),'AI が召喚フェイズを終える');
   s=await S();
   ok(s.players[1].line[0].length===2 && top(s,1,0).key==='HD02-004','「ふつう」: 負けている第1ライン（2000 対 4000）に重ねて勝ちに変える（5000）');

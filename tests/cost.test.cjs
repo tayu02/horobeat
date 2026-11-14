@@ -105,18 +105,52 @@ async function run(label, viewport, touch){
   s=await S();
   ok(s.players[0].line[2].length===2 && s.players[0].line[0].length===1 && s.players[0].line[1].length===1 && await turned()===3,'第3ラインのホロビトを選んで重ねられる（第1ラインでなくてよい）');
 
-  // ---- 色: 同じ色が足りなければ、払うエナを選ぶ ----
+  // ---- 色（総合ルール 7.2.2.1）: 選んだエナかオーバービート元の色に、カードの色が含まれていればよい ----
+  // 緑のカード（コスト2）を、緑1・赤2のエナで出す → 色の内訳が何通りかあるので、おすすめか自分で選ぶかを聞く
   await setup({hand:['HD02-001'], ena:['HD02-001','HD01-001','HD01-001']});
   await toLine(await hand('HD02-001'),0);
-  ok((await q()).includes('何枚が緑である必要があるかは未確定'),'緑のカードで緑のエナが1枚 → 色の決まりは未確定と示す');
-  await btn('支払うエナを選ぶ');
+  ok((await q()).includes('7.2.2.1') && (await q()).includes('緑が含まれていれば'),'色の決まり（選んだエナに緑が含まれていればよい）を示す');
+  ok(await p.evaluate(()=>[...document.querySelectorAll('#sheet button')].some(b=>b.textContent==='おすすめで支払う（緑1・赤1）')),'おすすめは「緑1・赤1」（緑を1枚含め、残りはほかの色から）');
+  await btn('支払うエナを自分で選ぶ');
   let pk=await p.evaluate(()=>[...document.querySelectorAll('.card.pickable')].map(e=>e.dataset.cid));
-  ok(pk.length===3,'未使用のエナ3枚が光る');
+  ok(pk.length===3,'1枚目は、未使用のエナ3枚のどれでも選べる');
   s=await S();
+  await p.evaluate(u=>{ const pk=picking; picking=null; render(); pk.pick(u); },s.players[0].ena[1].uid); await wait(80);
+  pk=await p.evaluate(()=>[...document.querySelectorAll('.card.pickable')].map(e=>e.dataset.cid));
+  ok(pk.length===1 && pk[0]===s.players[0].ena[0].uid,'1枚目に赤を選ぶと、2枚目は緑だけが光る（赤2枚では緑が含まれない）');
   await p.evaluate(u=>{ const pk=picking; picking=null; render(); pk.pick(u); },s.players[0].ena[0].uid); await wait(80);
-  await p.evaluate(u=>{ const pk=picking; picking=null; render(); pk.pick(u); },s.players[0].ena[2].uid); await wait(80);
   s=await S();
-  ok(s.players[0].line[0].length===1 && s.players[0].ena[0].turned && !s.players[0].ena[1].turned && s.players[0].ena[2].turned,'選んだ2枚が使用済みになって出る');
+  ok(s.players[0].line[0].length===1 && s.players[0].ena[0].turned && s.players[0].ena[1].turned && !s.players[0].ena[2].turned,'選んだ2枚（緑1・赤1）が使用済みになって出る');
+  // 緑のカードを、赤のエナだけでは出せない
+  await setup({hand:['HD02-001'], ena:['HD01-001','HD01-001','HD01-001']});
+  await open(await hand('HD02-001'));
+  lb=await lineBtns();
+  ok(lb.every(b=>b.dis) && (await p.textContent('#sheet')).includes('7.2.2.1'),'緑のカードは、未使用のエナに緑がなければ出せない（理由に総合ルール 7.2.2.1）');
+  await p.click('#sheet button[data-close="1"]'); await wait(100);
+  ok((await p.evaluate(()=>!!document.querySelector('#side-0 .z-hand .card .cant'))),'手札にも「使えない」の帯');
+  // オーバービート元が同じ色なら、エナは何色でもよい（場のつくものジャンボ（緑2）に、ケサランパサラン（緑3）を赤のエナ1枚で）
+  await setup({hand:['HD02-010'], line:[['HD02-003']], ena:['HD01-001']});
+  await toLine(await hand('HD02-010'),0);
+  ok((await q()).includes('コスト 3 − 下の「つくものジャンボ」のコスト 2 ＝ 1') && (await q()).includes('赤1'),'オーバービート元が緑なので、赤のエナ1枚で払える（総合ルール 7.2.2.1）');
+  await btn('支払って出す');
+  s=await S();
+  ok(s.players[0].line[0].length===2 && s.players[0].ena[0].turned,'赤のエナ1枚で、緑のホロビトに緑のホロビトを重ねる');
+  // オーバービート元が違う色なら、エナに同じ色が要る（場の雷獣 レオ（赤2）に、ケサランパサラン（緑3）を赤のエナ1枚では重ねられない）
+  await setup({hand:['HD02-010'], line:[['HB01-001']], ena:['HD01-001']});
+  await open(await hand('HD02-010'));
+  lb=await lineBtns();
+  ok(lb[0].dis,'オーバービート元が赤で、エナに緑がなければ重ねられない');
+  await p.click('#sheet button[data-close="1"]'); await wait(100);
+  // 「コストは1大きくなる」（しなずいさま）: ラインにいる間はコスト3として数える（総合ルール 6.2.5.5.1.1。印字の「コスト」はカードのコスト）
+  await setup({hand:['HD02-004','HD02-005'], line:[['HD02-001']], ena:['HD02-001','HD02-001']});
+  await open(await hand('HD02-004'));
+  lb=await lineBtns();
+  ok(lb[0].dis && (await p.textContent('#sheet')).includes('コスト 3'),'しなずいさま（印字2・ラインにいるので3）の上に、コスト3のホロビトは重ねられない');
+  await p.click('#sheet button[data-close="1"]'); await wait(100);
+  await toLine(await hand('HD02-005'),0);
+  ok((await q()).includes('コスト 4 − 下の「しなずいさま」のコスト 3（印字 2。ラインに出ているので「コストは1大きくなる」） ＝ 1'),'コスト4のホロビトは重ねられ、支払うエナは 4 − 3 ＝ 1 枚');
+  await btn('支払って出す');
+  ok(await turned()===1,'エナ1枚を使用済みにして重ねる');
 
   // ---- 未確定カードはコストが分からないので聞かずに動かす ----
   await setup({hand:[{k:null}]});

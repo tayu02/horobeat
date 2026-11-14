@@ -8,18 +8,18 @@
 //   AI_WORKERS=4                        … 同時に動かすブラウザの数（既定 3）
 //
 // 公平にするため、A と B の「どちらの側か」「どちらのスタートデッキか」「どちらが先手か」を順に入れ替える（8通り）。
-// ルールが未確定でシミュレーターが人に聞くこと（束の下のカードの扱い など）は、この測定の中だけ、いつも最初の選択肢で答える
+// ルールが未確定でシミュレーターが人に聞くこと（「手札に戻す」の行き先 など）は、この測定の中だけ、いつも最初の選択肢で答える
 // （両者に同じ答え方をするので勝率の比較には影響しない。ルールの答えとして使うものではない）。
 // 捨てる効果の「捨てる先」（未確定）も、この測定の中だけ墓地に置く。
-// ワザ・ブーストの使用がいつ終わるか（未確定。B-1）は、ふだんは人が「使用を終える」を押して決める。両方が AI だと誰も押さないので、
-// この測定の中だけ、両者が続けて「使わない」を選んだら終える。
+// ワザ・ブーストは、両者が続けてパスしたら終わる（総合ルール 6.3.2.4。2026-11-14 までは未確定で、この測定の中だけこの決まりで終えていた）。
 const path = require("node:path");
 const fs = require("node:fs");
 const { chromium } = require("playwright");
 
 const ROOT = path.resolve(__dirname, "..");
 const URL = "file://" + path.join(ROOT, "simulator.html");
-const PINNED = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+// この環境の Chromium（作業環境によって置き場所が違うので、あるものを使う）
+const PINNED = ["/opt/pw-browsers/chromium-1194/chrome-linux/chrome", "/opt/pw-browsers/chromium"].find(f => fs.existsSync(f));
 
 // ページの中で、渡された番号の局をすべて行う
 async function pageGames(idx, A, B, WA, WB){
@@ -33,13 +33,6 @@ async function pageGames(idx, A, B, WA, WB){
     return origOpen.apply(null, arguments);
   };
   AI_DELAY = 0;
-  var origWaza = aiWazaChoice, lastPass = {};
-  aiWazaChoice = function(p, acts, oppCan){
-    var i = origWaza(p, acts, oppCan), key = state.round + "-" + state.battle.line;
-    if (i === acts.length && oppCan){ if (lastPass[key] === 1 - p) return acts.length + 1; lastPass[key] = p; }
-    else lastPass[key] = null;
-    return i;
-  };
   var tick = function(){ return new Promise(function(r){ setTimeout(r, 0); }); };
   var decks = ["HB-SD01", "HB-SD02"];
   async function game(lv, ws, dk, first){
@@ -84,7 +77,7 @@ async function bench({ N = 400, A = "normal", B = "easy", W = null, WA = null, W
   const parts = Array.from({ length: workers }, (_, k) => Array.from({ length: N }, (_, g) => g).filter(g => g % workers === k));
   const results = await Promise.all(parts.map(async idx => {
     if (!idx.length) return [];
-    const browser = await chromium.launch(fs.existsSync(PINNED) ? { executablePath: PINNED } : {});
+    const browser = await chromium.launch(PINNED ? { executablePath: PINNED } : {});
     try {
       const page = await browser.newPage();
       page.on("pageerror", e => errs.push(String(e)));

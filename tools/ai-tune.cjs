@@ -14,8 +14,9 @@ const KEYS = ["down", "destroy", "cost", "board", "draw", "card"];   // hit（10
   // いまの重みをページから読む
   const { chromium } = require("playwright");
   const fs = require("node:fs"), path = require("node:path");
-  const PINNED = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
-  const b = await chromium.launch(fs.existsSync(PINNED) ? { executablePath: PINNED } : {});
+  // この環境の Chromium（作業環境によって置き場所が違うので、あるものを使う）
+  const PINNED = ["/opt/pw-browsers/chromium-1194/chrome-linux/chrome", "/opt/pw-browsers/chromium"].find(f => fs.existsSync(f));
+  const b = await chromium.launch(PINNED ? { executablePath: PINNED } : {});
   const p = await b.newPage(); await p.goto("file://" + path.join(__dirname, "..", "simulator.html"));
   let best = await p.evaluate(() => Object.assign({}, AI_W)); await b.close();
   console.log("はじめ:", JSON.stringify(best));

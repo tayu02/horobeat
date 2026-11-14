@@ -201,6 +201,8 @@ main{padding:8px 8px 24px;max-width:1400px;margin:0 auto}
 #motion .mg.flip > .card.mback{transform:rotateY(180deg)}
 #motion .burst{position:fixed;border-radius:50%;border:3px solid #ffd36b;box-shadow:0 0 18px 6px rgba(255,120,60,.7),inset 0 0 12px rgba(255,200,120,.8)}
 .card.mhide{opacity:0}
+.chkwrap{position:relative;margin-top:8px;flex:0 0 auto}
+.chktag{position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);background:#ff4d4d;color:#fff;font-size:9px;font-weight:800;border-radius:4px;padding:0 4px;white-space:nowrap;pointer-events:none}
 #ghost{position:fixed;z-index:200;pointer-events:none;transform:translate(-50%,-50%) scale(1.15);opacity:.92;filter:drop-shadow(0 6px 12px rgba(0,0,0,.6))}
 .pile{
   width:var(--cw);height:var(--ch);border-radius:5px;
@@ -523,8 +525,8 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
     <p><b>画面</b>：上部の<b>「🔍 カード」</b>でカードの画像の一覧から −／＋ でデッキに入れ（名前・効果テキスト・色・コストなどで絞り込めます。選べる値は印字にあるものだけで、読めない値は「unknown（読めない）」）、<b>「📋 デッキ」</b>でいまのデッキの枚数・種別・色・コスト別の枚数を確かめ、<b>「🎮 試遊」</b>で盤面に戻ります。同名のカードは番号が違っても合計4枚、デッキは50枚までです。「📋 デッキ」の「💾 保存」でデッキに名前を付けて保存でき、「📂 保存したデッキ」で開くとデッキリストがカードの画像で並びます。「コード」を送ると、相手も「📥 コードから読み込む」で同じデッキを使えます（保存はこの端末のブラウザなので、大事なデッキはコードを控えてください）。デッキを変えても遊んでいる途中の盤面は消えません（試遊で配るか、デッキの画面の「このデッキで盤面を組み直す」で反映）。</p>
     <p><b>操作</b>：カードを<b>タップ</b>＝印字内容とメニュー（移動・向き・表裏・メモ）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
     <p><b>進行</b>（公式の手引書のラウンドの進行どおり）：準備 → 召喚フェイズ（先手）→ 召喚フェイズ（後手）→ バトルフェイズ → エンドフェイズ → 次のラウンド。準備は、先手を選んで配り、両者が引き直すかを決めると自動で終わります。上部の欄に、いまのフェイズと誰の番かが出ます。</p>
-    <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートはコストが小さいホロビトの上だけ。同じコストには重ねられません。重ねるラインは、条件を満たしていればどのラインでも選べます）。<b>エナが足りないときは使えません</b>。</p>
-    <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます（いつ終わるかは手引書に書かれていないので、「ワザの使用を終えて、パワーを比べる」を押して終えます）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。ダウンしているホロビトも通常どおりバトルし、勝てば通常どおりダメージを与えます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、負けたホロビトとハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）にダメージを与えます。ダウンしていれば破壊（ホロビトは墓地、ハートは手札。ハートは手札に加える代わりにトリガーを使えます）。ダブルダメージの2ダメージは、1ダメージを2回、上から順に入れます。引き分けは、お互いのホロビトにそれぞれ1ダメージ（ダウンしていなければダウン、すでにダウンしていれば破壊）で、ハートはダメージを受けません。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインの結果で次の先手が決まります。途中でやめても、上部の「バトルを続ける」で再開できます。バトルのたびに両者のカードの画像を並べて出し、パワーを比べたら結果（勝ち・負け）を見せます（「続ける」で次へ）。ハートが破壊されたときは、そのカードの画像を出してトリガーチェックします。</p>
+    <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートは、出すホロビトのコスト<b>未満</b>のホロビトの上だけで、支払うエナはその分少なくなります。同じコストには重ねられません。「コストは1大きくなる」ホロビトは、ラインにいる間はそのコストで数えます。重ねるラインは、条件を満たしていればどのラインでも選べます）。<b>支払うエナには、カードの色が1枚以上含まれている必要があります</b>（オーバービート元が同じ色なら、エナは何色でもかまいません。総合ルール 7.2.2.1）。色の内訳が何通りかあるときは「おすすめで支払う」か「自分で選ぶ」を選べます。<b>エナが足りない・色がないときは使えません</b>。</p>
+    <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます。使わないときは「パス」。<b>両者が続けてパスしたら、パワーを比べます</b>（総合ルール 6.3.2.4。使えるカードがない・ホロビトがいないときは自動でパス）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。ダウンしているホロビトも通常どおりバトルし、勝てば通常どおりダメージを与えます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、勝ったときの効果 → 負けたときの効果 → ダメージの計算 → 負けたホロビトへのダメージ → ハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）へのダメージ、の順に進めます（総合ルール 6.3.2.7〜6.3.2.11）。ダウンしていれば破壊（ホロビトは重なっているカードごと墓地へ。ハートはチェックゾーンへ）。ダブルダメージの2ダメージは、そのときの一番上のハートに1ダメージを2回入れます（縦向きなら1回目でダウン、2回目で破壊）。破壊されたハートは、ダメージを入れ終えてから「チェック処理」で1枚ずつ、トリガーを使う（相手にも見せる）か手札に加える（見せない）かを選びます。引き分けは、お互いのホロビトにそれぞれ1ダメージ（ダウンしていなければダウン、すでにダウンしていれば破壊）で、ハートはダメージを受けません。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインのバトルに勝ったプレイヤーが次の先手。引き分けか、第1ラインにバトルがなかったら、先手と後手が入れ替わります。途中でやめても、上部の「バトルを続ける」で再開できます。バトルのたびに両者のカードの画像を並べて出し、パワーを比べたら結果（勝ち・負け）を見せます（「続ける」で次へ）。チェック処理では、そのカードの画像を出します。</p>
     <p><b>相手をAIにする</b>：上部の「相手: 人」を押して「AI ふつう」か「AI かんたん」を選ぶと、相手の番に AI が自動で動きます（引き直すか、エナチャージ、どのホロビトをどのラインに出すか、ワザ・ブーストを使うか、ハートのトリガー、効果で選ぶカード）。<b>ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます</b>（AI にルールを決めさせないため）。AI が何をしたかは下の記録に残ります。「戻す」で AI の番に戻ったときは AI が止まるので、「AIを進める」で続けます。「かんたん」は、その場でいちばん強くなる出し方をします。「ふつう」は、第1ラインから順にバトルの結果（どのラインで勝ち負けし、ハートに何回ダメージが入るか、トドメになるか）を見通し、エナを使うと次のエナドローで引ける枚数が減ることやカードの効果も数えて、出し方・ワザ・ブースト（5つのラインへの配り方）・トリガーを選びます（AI どうしで800回対戦させると、「ふつう」が「かんたん」に約86%勝ちます）。AI はあなたの手札の中身を見ません（盤面と枚数だけを見ます）。AI の手札も裏向きで表示します（相手を選ぶシートで「見せる」にもできます。勝敗が決まったら見せます）。</p>
     <p><b>オンライン対戦</b>：上部の「🌐 対戦」で部屋を作り、出た6文字のコードを相手に伝えます。相手は同じシミュレーターを開いて「部屋に入る」にコードを入れます。作った人が先手を選んで始めます。デッキは、それぞれのいまの「自分のデッキ」です。あなたの手札・山札・ハートの中身は相手の端末には送りません（場に出たカード・表になったカードだけが届きます）。相手が決めること（引き直す・ワザ・ブースト・ハートのトリガー・効果で選ぶカードなど）は、相手の画面に出ます。自分の番でないときは、自分の側も操作できません。「戻す」と AI は使えません。読み込み直すと、同じ部屋の続きに戻ります。使えるのは、claude.ai で公開したシミュレーターを、ログインして開いたときだけです。相手は、このシミュレーターに「編集者」としてメールで招待されている必要があります（リンクで共有していないとき）。1人で試すときは、同じアカウントのまま別の端末（またはパソコンの別のブラウザ）で開けば、招待なしで試せます（同じブラウザの2つのタブでは試せません）。</p>
     <p><b>カードの動き</b>：カードを動かすと、前の場所から新しい場所へ飛んで見えます（山札から引くと裏から表に返りながら手札へ、手札から出すときは持ち上げてから、墓地へは傾きながら落ちる）。バトルの結果が出ると、勝ったホロビトが相手に飛び込み（攻撃）、ダメージを受けたホロビトとハートは揺れて赤く光ります。動いている間に出る質問は、動き終わってから出ます。端末の設定で動きを減らしている（iPhone の「視差効果を減らす」など）ときは動かしません。見せ方だけで、盤面の中身は変わりません。</p>
@@ -534,7 +536,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
     <p><b>効果</b>：ヘッダーが「効果: 自動」のとき、確定している部分だけ自動で処理し、未確定の部分は聞くか手で処理してもらいます。</p>
     <p><b>「横向き」について</b>：エナでは「使用済み」、ホロビト・ハートでは「ダウン状態」と呼ばれますが（出典: 2026-08 公式ティザー）、この2つが同じ状態かは未確定のため、区別せず<b>向きだけ</b>を保持しています。</p>
     <p><b>カードデータ</b>：<code>data/cards.json</code> の印字内容をそのまま表示します。読めない項目は <code>unknown</code> と出ます。</p>
-    <p><b>手で処理するもの</b>（手引書・ルール動画に書かれていない・未確定のため）：束の下のカードの扱い／効果の「コストは1大きくなる」が何のコストか。トリガーで「コストは支払わない」で出すときは、ハートゾーンからラインへ直接動かせます（支払いは聞きません）。</p>
+    <p><b>手で処理するもの</b>（総合ルール・手引書・ルール動画に書かれていない・未確定のため）：効果の「手札に戻す」の行き先／いなくなったホロビトの1バリア。トリガーで「コストは支払わない」で出すときは、ハートゾーンからラインへ直接動かせます（支払いは聞きません）。</p>
     <p>※ 元情報は「開発中の画像」であり、製品版と異なる場合があります。</p>
   </details>
 
@@ -602,7 +604,7 @@ var PHASES     = ["召喚フェイズ（先手）","召喚フェイズ（後手�
 var LINE_COUNT = 5;                                    // 確定: 第1〜第5ライン（順序付き）
 var SIDE_NAME  = ["自分","相手"];
 var ZONE_NAME  = { heart:"ハートゾーン", line:"バトルライン", waza:"ワザゾーン",
-                   ena:"エナゾーン", hand:"手札", deck:"山札", grave:"墓地" };
+                   ena:"エナゾーン", hand:"手札", deck:"山札", grave:"墓地", check:"チェックゾーン" };   // チェックゾーン: ハートから破壊されたカードを一時的に置く（総合ルール 4.7）
 var STORE_KEY  = "horobeat-sim-v2";
 var STATE_V    = 3;                                    // 3: 召喚フェイズを先手・後手に分けた（フェイズの番号が変わった）
 
@@ -645,7 +647,7 @@ function buildDeck(pi, decklist){
   return a;
 }
 function newPlayer(pi, decklist){
-  return { heart:[], waza:[], ena:[], hand:[], grave:[],
+  return { heart:[], waza:[], ena:[], hand:[], grave:[], check:[],
            deck: buildDeck(pi, decklist), line:[[],[],[],[],[]],
            decklist: decklist ? JSON.parse(JSON.stringify(decklist)) : {} };
 }
@@ -667,7 +669,7 @@ function load(){
     if (!s || !s.players || s.players.length !== 2) return null;
     s.players.forEach(function(P){
       if (!P.decklist) P.decklist = {};
-      ["heart","waza","ena","hand","grave","deck"].forEach(function(z){ if (!Array.isArray(P[z])) P[z] = []; });
+      ["heart","waza","ena","hand","grave","deck","check"].forEach(function(z){ if (!Array.isArray(P[z])) P[z] = []; });
       if (!Array.isArray(P.line) || P.line.length !== LINE_COUNT) P.line = [[],[],[],[],[]];
     });
     // 以前の保存（フェイズが3つ）: 召喚0・バトル1・エンド2 → 召喚（先手）0・バトル2・エンド3
@@ -686,7 +688,7 @@ function allLists(){
   var out = [];
   for (var p = 0; p < 2; p++){
     var P = state.players[p];
-    out.push(P.heart, P.waza, P.ena, P.hand, P.grave, P.deck);
+    out.push(P.heart, P.waza, P.ena, P.hand, P.grave, P.deck, P.check || []);
     for (var i = 0; i < LINE_COUNT; i++) out.push(P.line[i]);
   }
   return out;
@@ -879,7 +881,7 @@ function endPhase(){
     var back = P.ena.filter(function(c){ return c.turned; }).length;
     P.ena.forEach(function(c){ c.turned = false; });
     fxLog(SIDE_NAME[pi] + "：エナドローで " + k + " 枚引いた（未使用のエナ " + n + " 枚）" +
-      (k < n ? "。山札が足りない（山札が尽きたときの扱いは未確定）" : "") +
+      (k < n ? "。山札が足りないので、引ける " + k + " 枚だけ引いた（ドローステップ以外で山札が0枚になっても負けない。総合ルール 6.2.2.1.1・4.2.3）" : "") +
       "／使用済みのエナ " + back + " 枚を未使用に戻した");
   });
 }
@@ -981,31 +983,30 @@ var PART_FX = {
     cond:function(x){ return x.card.turned ? NO : YES; } },
   did_so:                  { how:"自動", why:"直前の「〜てもよい」を実際に行ったか",
     cond:function(x){ return x.didSo === true ? YES : NO; } },
-  on_line:                 { how:"自動", why:"束の一番上ならライン上。束の下にある場合は未確定（§10）なので聞く",
+  on_line:                 { how:"自動", why:"束の一番上ならライン上。束の下のカードはホロビトとして扱われない（総合ルール 4.9.3.7）ので当たらない",
     cond:function(x){
       if (x.loc.zone !== "line") return NO;
-      return x.loc.top ? YES : ASK("このホロビトは束の下にあります。下にあるカードが「ラインに出ている」に当たるかは未確定です。当たるとして扱いますか？"); } },
-  own_count_on_line:       { how:"自動", why:"数える。束の下を数えるかは未確定（§10）なので、数え方で結論が割れたときだけ聞く",
+      return x.loc.top ? YES : NO; } },
+  own_count_on_line:       { how:"自動", why:"数える。束は一番上のカードだけがホロビト（総合ルール 4.9.3.7）。色・種別が未確定のカードで結論が割れたときだけ聞く",
     cond:function(x, a){
-      var P = state.players[x.pi], tops = [], all = [];
-      P.line.forEach(function(st){ if (st.length){ tops.push(st[st.length - 1]); all = all.concat(st); } });
+      var P = state.players[x.pi], tops = [];
+      P.line.forEach(function(st){ if (st.length) tops.push(st[st.length - 1]); });
       // 色が書かれていなければ、色を問わずホロビトを数える（HD01-015「自分のホロビトが4体以上」）
       var count = a.color ? function(l){ return colorCount(l, a.color); } : holoCount;
-      var t = count(tops), b = count(all), what = a.color ? a.color + "の" : "";
-      var r = { min:Math.min(t.min, b.min), max:Math.max(t.max, b.max) };
-      return atLeast(r, a.n, "自分の" + what + "ホロビトは、束の一番上だけ数えると" + t.min + "体、束の下も数えると" + b.min +
-        "体です（" + (a.color ? "色" : "種別") + "が未確定のカードを除く）。どう数えるかは未確定です。" + a.n + "体以上として扱いますか？"); } },
+      var t = count(tops), what = a.color ? a.color + "の" : "";
+      return atLeast(t, a.n, "自分の" + what + "ホロビトは確実に" + t.min + "体、" + (a.color ? "色" : "種別") + "が未確定のカードを含めると" + t.max +
+        "体です。" + a.n + "体以上として扱いますか？"); } },
   power_ratio_vs_front:    { how:"自動", why:"バトル中は、シミュレーターが比べたパワーで判定する。パワーを計算できなかったとき・バトルの外では聞く",
     cond:function(x, a){
       if (x.pw && typeof x.pw.me === "number" && typeof x.pw.front === "number")
         return x.pw.me >= x.pw.front * a.n ? YES : NO;
       return ASK("このホロビトのパワーは、正面のホロビトの" + a.n + "倍以上ですか？（このバトルのパワーを計算できていないため聞きます）"); } },
-  front_cost_le:           { how:"質問", why:"正面＝相手の同じ番号のライン（手引書）。コストの増減は計算しないので、印字のコストを示して聞く",
+  front_cost_le:           { how:"自動", why:"正面＝相手の同じ番号のライン（手引書）。いまのコスト（印字のコスト＋条件を満たしている「コストはN大きくなる」）で判定する。判定できなければ聞く",
     cond:function(x, a){
       if (!x.front) return FRONT;
-      var d = cardDef(x.front);
-      return ASK("正面のホロビト「" + nm(x.front) + "」の印字のコストは " + (d ? d.cost : "unknown") + " です。コストが" + a.n +
-        "以下として扱いますか？（コストの増減はシミュレーターでは計算しません）"); } },
+      var d = cardDef(x.front), c = curCost(x.front);
+      if (c !== null) return c <= a.n ? YES : NO;
+      return ASK("正面のホロビト「" + nm(x.front) + "」のコストが分かりません（印字 " + (d ? d.cost : "unknown") + "）。コストが" + a.n + "以下として扱いますか？"); } },
   boost_used_on_this:      { how:"自動", why:"バトル中に、このホロビトにブーストを使ったか（シミュレーターが記録する。バトルが終わると消す）",
     cond:function(x){ return boostUsesOf(x.card).length ? YES : NO; } },
   boost_used_by_this:      { how:"質問", why:"ブーストを使っていなければ満たさない。使っていれば、「このホロビトが使っている」が「このホロビトに使っている」と同じ意味かは印字から分からないので聞く",
@@ -1025,7 +1026,7 @@ var PART_FX = {
       var k = P.hand.length - before;
       fxLog(SIDE_NAME[x.pi] + "はカードを" + k + "枚引いた" + (k < a.n ? "（" + a.n + "枚のはずが、山札が足りない）" : ""));
       next(); } },
-  destroy:                 { how:"自動", why:"正面＝相手の同じ番号のライン（手引書）。破壊されたホロビトは墓地へ（§9-1）。束の下の扱いは未確定なので聞く。正面が「このホロビトは破壊されない」を持つなら破壊しない",
+  destroy:                 { how:"自動", why:"正面＝相手の同じ番号のライン（手引書）。破壊されたホロビトは、重なっているカードも同時に墓地へ（総合ルール 7.4.1.1）。正面が「このホロビトは破壊されない」なら破壊しない", why:"正面＝相手の同じ番号のライン（手引書）。破壊されたホロビトは墓地へ（§9-1）。束の下の扱いは未確定なので聞く。正面が「このホロビトは破壊されない」を持つなら破壊しない",
     run:function(x, a, next, stop){
       if (a.target !== "正面のホロビト") return fxManual(a, "destroy", next);
       needFront(x, function(){
@@ -1039,14 +1040,11 @@ var PART_FX = {
             ["破壊されない（破壊しない）", "破壊する"], function(i){ if (i === 0) keep(); else go(); }, stop);
         go();
         function go(){
-        var put = function(cards){
-          cards.forEach(function(c){ moveCard(c.uid, c.owner, "grave"); });
-          fxLog(nm(x.front) + " を破壊し、墓地に置いた" + (cards.length > 1 ? "（束の " + cards.length + " 枚）" : ""));
-          next(); };
-        if (st.length === 1) return put([x.front]);
-        fxChoose("正面のホロビトの下に " + (st.length - 1) + " 枚あります。破壊したとき下のカードをどうするかは未確定です。",
-          ["一番上だけ墓地へ", "束ごと墓地へ", "何もしない（手で処理する）"], function(i){
-            if (i === 0) put([x.front]); else if (i === 1) put(st.slice()); else { fxLog("破壊は手で処理してください"); next(); } }, stop);
+        // 重なっているカードも同時に墓地へ（総合ルール 7.4.1.1）
+        var cards = st.slice();
+        cards.forEach(function(c){ moveCard(c.uid, c.owner, "grave"); c.turned = false; });
+        fxLog(nm(x.front) + " を破壊し、墓地に置いた" + (cards.length > 1 ? "（重なっていたカードも同時に。束の " + cards.length + " 枚。総合ルール 7.4.1.1）" : ""));
+        next();
         }
       }, stop, next); } },
   return_top_to_hand:      { how:"質問", why:"正面＝相手の同じ番号のライン（手引書）。「その一番上のカード」は印字どおり束の一番上。誰の手札かは印字されていないので選ばせる（→ A-24）",
@@ -1056,11 +1054,24 @@ var PART_FX = {
         fxChoose("「" + nm(c) + "」を手札に戻します。誰の手札に戻すかは印字されていません（→ A-24）。",
           [SIDE_NAME[c.owner] + "（このカードの持ち主）の手札に戻す", "手で処理する"], function(i){
             if (i === 1){ fxLog("「" + nm(c) + "」を手札に戻す処理は手で行ってください"); return next(); }
+            var loc = locOf(c), st = loc && loc.zone === "line" ? loc.stack : null, under = st && loc.top && st.length > 1 ? st[st.length - 2] : null;
+            var wasDown = c.turned, B = state.battle, wu = c.wazaUsed, bu = c.boostUsed;
             moveCard(c.uid, c.owner, "hand"); c.up = true; c.turned = false;
-            fxLog(nm(c) + " を" + SIDE_NAME[c.owner] + "の手札に戻した"); next(); }, stop);
+            fxLog(nm(c) + " を" + SIDE_NAME[c.owner] + "の手札に戻した");
+            // 一番上のカードだけを移す効果: 下のホロビトが一番上になり、元の一番上のダウン・ダウンしていない状態のまま、その場に残る。
+            // ほかの情報は新しく一番上になったカードのものを使う（総合ルール 9.10.3）。バトル中なら、そのホロビトがバトルを続ける
+            if (under){
+              under.turned = wasDown;
+              if (B && B.users[loc.pi] === c.uid){
+                B.users[loc.pi] = under.uid;
+                if (wu) under.wazaUsed = wu; if (bu) under.boostUsed = bu;   // ワザゾーンのワザ・ブーストのパワーは、そのラインのホロビトに加算され続ける（4.9.4.4）
+              }
+              fxLog("下の「" + nm(under) + "」が一番上になり、" + (wasDown ? "ダウンしたまま" : "ダウンしていない状態で") + "その場に残る（総合ルール 9.10.3）" + (B && B.users[loc.pi] === under.uid ? "。このホロビトがバトルを続ける" : ""));
+            }
+            next(); }, stop);
       }, stop, next); } },
   cost_bigger:             { how:"表示", why:"コストの計算はしない。条件を満たしている間、印を付ける", badge:function(a){ return "コスト+" + a.n; } },
-  select_own:              { how:"選択", why:"エナならエナゾーンから、ホロビトならラインの一番上から選ばせる（束の下のカードを選べるかは未確定なので候補に入れない）",
+  select_own:              { how:"選択", why:"エナならエナゾーンから、ホロビトならラインの一番上から選ばせる（束の下のカードはホロビトとして扱われない。総合ルール 4.9.3.7）",
     run:function(x, a, next, stop){
       var P = state.players[x.pi];
       if (a.what === "ホロビト"){
@@ -1071,7 +1082,7 @@ var PART_FX = {
         if (isRemote(x.pi) && hs.length) return olAsk("pick", { what:"ホロビト", uids:hs, prompt:"あなたのカードの効果：自分のホロビトを" + a.n + "体選んでください", optional:true }, function(r){
           if (r.cancel || !findCard(r.uid)){ x.sel = null; fxLog("選ぶ処理は手で行う"); return next(); }
           pickH(r.uid); });
-        return startPick(hs, "自分のホロビトを" + a.n + "体選んでください（ラインの一番上のホロビトから。束の下のカードを選べるかは未確定なので候補に入れていません）",
+        return startPick(hs, "自分のホロビトを" + a.n + "体選んでください（ラインの一番上のホロビトから。束の下のカードはホロビトとして扱われません）",
           pickH,
           function(){ x.sel = null; fxLog("選ぶ処理は手で行う"); next(); }, "手で処理する");
       }
@@ -1160,12 +1171,12 @@ var PART_FX = {
   // ---- キーワード ----
   double_damage:           { how:"表示", why:"印を付ける。バトルに勝ったとき、相手プレイヤーへのダメージを2にする。2ダメージは1ダメージを2回（遊び方動画）。1回ずつ、そのときの重なりの一番上のハートに入れる", badge:function(){ return "ダブルダメージ"; } },
   barrier:                 { how:"表示", why:"印を付ける。バトルに負けたとき、プレイヤーが受けるダメージをその数だけ減らす（ホロビトが受けるダメージは減らない。手引書）", badge:function(a){ return a.n + "バリア"; } },
-  kyomei:                  { how:"質問", why:"種族はカード名の下の行（手引書③）。印字が指定と同じ文字列なら満たす。「ライガ・ファミリー」が「ライガ」を満たすかは未確定（→ A-22）なので聞く",
+  kyomei:                  { how:"自動", why:"種族はカード名の下の行（手引書③）。ワザを使ったラインのホロビトの種族が、指定の文字列を含んでいれば満たす（総合ルール 9.9.2「その種族に〇〇を含んでいれば」）。種族が読めていなければ聞く",
     cond:function(x, a){
       var u = x.user, ud = u && cardDef(u), fam = ud ? ud.family : "unknown";
-      if (fam === a.tribe) return YES;
-      return ASK((u ? "このワザを使ったホロビト「" + nm(u) + "」の種族は「" + fam + "」です（カード名の下の行。手引書③）。" : "このワザを使ったホロビトが分かりません。") +
-        "共鳴の指定は「" + a.tribe + "」です。指定の種族を持っているとして扱いますか？（「" + fam + "」が「" + a.tribe + "」に当たるかは未確定です。→ A-22）"); } },
+      if (u && ud && typeof fam === "string" && fam !== "unknown") return fam.indexOf(a.tribe) >= 0 ? YES : NO;
+      return ASK((u ? "このワザを使ったホロビト「" + nm(u) + "」の種族は印字から読めていません（" + fam + "）。" : "このワザを使ったホロビトが分かりません。") +
+        "共鳴の指定は「" + a.tribe + "」です。種族に「" + a.tribe + "」を含んでいるとして扱いますか？"); } },
   ena_yomi:                { how:"自動", why:"エナゾーンの色つきの枚数を数える",
     cond:function(x, a){
       var cnt = colorCount(state.players[x.pi].ena, a.color);
@@ -1401,37 +1412,95 @@ function fxAfterTurn(uid, wasTurned){
 }
 
 // ---- ホロビトを出すときのコストの支払い（依頼者の指示 2026-10-12）----
-// 確定（手引書 メインステップ）: 「必要なエナを支払い（使用済みにし）、ホロビトをラインに出します」
+// 確定（手引書 メインステップ、総合ルール 6.2.5 7.2）:
 //   新しいラインに出す: ホロビトのコスト分のエナを支払う
-//   オーバービートで出す: すでに出ている**コストが小さい**ホロビトの上に重ね、支払うエナは下のホロビトのコスト分だけ少なくなる
-//   コストは「必要なエナの色と数」（手引書②）。何枚がその色である必要があるかは未確定（rules_guess.md B-3）
+//   オーバービートで出す: 出すホロビトのコスト**未満**のコストを持つ自分のホロビトの上に重ね、支払うエナはオーバービート元のコスト分だけ少なくなる
+//   支払い: 未使用のエナをコストの枚数分選ぶ。選んだエナかオーバービート元のホロビトの色に、出すカードの色が全て含まれている必要がある（7.2.2.1）
 // 足りなければ「使えない」と出す。トリガーや効果で「コストは支払わない」で出すときのために、払わずに出すこともできる
 function untappedEna(pi){ return state.players[pi].ena.filter(function(c){ return !c.turned; }); }
-// 「コストは1大きくなる」の印が付いているか（何のコストかは未確定。→ B-8）
-function costUpOf(card){
-  var n = 0;
+function colorOf(c){ var d = cardDef(c); return d ? d.color_mark : "unknown"; }
+// 支払いの色の条件を満たせるか（総合ルール 7.2.2.1）。col: 支払うカードの色 / srcCol: オーバービート元の色（なければ null）
+// 色が読めていないカードは判定しない（true。支払いは手で選ぶ）
+function colorPayable(pi, need, col, srcCol){
+  if (!col || col === "unknown" || need <= 0 || srcCol === col) return true;
+  return untappedEna(pi).some(function(e){ return colorOf(e) === col; });
+}
+// 支払うエナの案。unique: どう選んでも色の内訳が同じ（聞かずに払える）/ def: おすすめ（必要な色を1枚含め、残りはほかの色から）/ manual: 色が読めていないので選ばせる
+function payPlan(pi, need, col, srcCol){
+  var free = untappedEna(pi);
+  if (need > free.length) return { cant:true };
+  if (!col || col === "unknown") return { manual:true };
+  if (!colorPayable(pi, need, col, srcCol)) return { cant:true, color:true };
+  var same = free.filter(function(e){ return colorOf(e) === col; }), other = free.filter(function(e){ return colorOf(e) !== col; });
+  var covered = srcCol === col, def = [];
+  if (!covered && need > 0) def.push(same[0]);
+  other.concat(same).forEach(function(e){ if (def.length < need && def.indexOf(e) < 0) def.push(e); });
+  var kinds = {}; free.forEach(function(e){ kinds[colorOf(e)] = 1; });
+  return { def:def, unique: need === free.length || Object.keys(kinds).length <= 1, covered:covered };
+}
+function payBreakdown(list){
+  var m = {}; list.forEach(function(e){ var c = colorOf(e); m[c] = (m[c] || 0) + 1; });
+  return Object.keys(m).map(function(c){ return (c === "unknown" ? "色不明" : c) + m[c]; }).join("・");
+}
+// 支払うエナを、おすすめで払うか自分で選ぶかを聞いて決める（色の内訳が1通りなら確かめるだけ）。
+// done(list) 払うエナ / stop() やめた。title・head は質問の画面の見出し
+function askPay(pi, need, col, srcCol, lead, title, done, stop, confirmUnique){
+  var plan = payPlan(pi, need, col, srcCol);
+  var rule = "（選んだエナか" + (srcCol ? "オーバービート元" : "") + (srcCol ? "の" : "") + "色に、" + col + "が含まれていればよく、残りは何色でもかまいません。総合ルール 7.2.2.1）";
+  var manual = function(){
+    var chosen = [];
+    (function pickOne(){
+      if (chosen.length === need) return done(chosen);
+      var rest = untappedEna(pi).filter(function(e){ return chosen.indexOf(e) < 0; });
+      // 最後の1枚で色の条件を満たせなくならないように、候補を絞る
+      if (col && col !== "unknown" && srcCol !== col && chosen.length === need - 1 && !chosen.some(function(e){ return colorOf(e) === col; }))
+        rest = rest.filter(function(e){ return colorOf(e) === col; });
+      startPick(rest.map(function(e){ return e.uid; }), "支払うエナを選んでください（" + (chosen.length + 1) + " / " + need + " 枚目）",
+        function(u){ chosen.push(findCard(u).card); pickOne(); }, stop);
+    })();
+  };
+  if (plan.manual)
+    return fxChoose(lead + "このカードの色が印字から読めていないので、支払うエナを選んでください。", ["支払うエナを選ぶ", "やめる"],
+      function(i){ if (i === 0) manual(); else stop(); }, stop, title);
+  if (plan.unique && !confirmUnique) return done(plan.def);
+  if (plan.unique)
+    return fxChoose(lead + "エナ " + need + " 枚（" + payBreakdown(plan.def) + "）を使用済み（横向き）にします。", [typeof confirmUnique === "string" ? confirmUnique : "支払う", "やめる"],
+      function(i){ if (i === 0) done(plan.def); else stop(); }, stop, title);
+  fxChoose(lead + "支払うエナを選びます" + rule + "。", ["おすすめで支払う（" + payBreakdown(plan.def) + "）", "支払うエナを自分で選ぶ", "やめる"],
+    function(i){ if (i === 0) done(plan.def); else if (i === 1) manual(); else stop(); }, stop, title);
+}
+// ラインにいるホロビトの、いまのコスト。印字のコストに、条件を満たしている「コストはN大きくなる」を足す
+// （この「コスト」はカードのコスト。総合ルールはブーストのコストを「ブーストコスト」と別に呼ぶ（2.3 2.8.2））。判定できなければ null
+function curCost(card){
+  var d = card && card.up ? cardDef(card) : null;
+  if (!d || typeof d.cost !== "number") return null;
+  var n = 0, unsure = false;
   (ABILITY_MAP[card.key] || []).forEach(function(ab){
     (contEval(ctxOf(card), ab) || []).forEach(function(i){
-      var m = /^コスト\+(\d+)$/.exec(i.t); if (m && (i.st === "on" || i.st === "q")) n += +m[1]; });
+      var m = /^コスト\+(\d+)$/.exec(i.t); if (!m) return;
+      if (i.st === "on") n += +m[1]; else if (i.st !== "off") unsure = true;
+    });
   });
-  return n;
+  return unsure ? null : Math.max(0, d.cost + n);
 }
 // ラインに出すときに必要なエナの枚数。idx のラインに出す場合。印字のコストで計算する
 // { ok:false, why } … 出せない（重ねられない）／ { need, mode, under, unsure } … unsure は下に「コストは1大きくなる」があるとき
+// ラインに出すときに必要なエナの枚数。idx のラインに出す場合
+// { ok:false, why } … 出せない（重ねられない）／ { need, mode, under, ucost, ucol }
 function playCost(card, pi, idx){
   var d = cardDef(card);
   if (!d || typeof d.cost !== "number") return { unknown:true, why:"このカードのコストが印字から読めていません（" + (d ? d.cost : "未確定カード") + "）" };
   var st = state.players[pi].line[idx], top = st[st.length - 1];
   if (!top) return { need:d.cost, mode:"new" };
-  var ud = top.up ? cardDef(top) : null;
-  if (!ud || ud.type !== "ホロビト" || typeof ud.cost !== "number")
+  var ud = top.up ? cardDef(top) : null, uc = curCost(top);
+  if (!ud || ud.type !== "ホロビト" || uc === null)
     return { unknown:true, why:"下のカード（" + nm(top) + "）のコストが分からないため、オーバービートで支払う枚数を計算できません" };
-  if (ud.cost >= d.cost)
-    return { ok:false, why:"オーバービートできるのは、コストが小さいホロビトの上だけです（手引書）。下の「" + ud.name + "」はコスト " + ud.cost + "、このカードはコスト " + d.cost + " です" };
-  return { need:d.cost - ud.cost, mode:"over", under:top, unsure:costUpOf(top) };
+  var upTxt = uc !== ud.cost ? "（印字 " + ud.cost + "。ラインに出ているので「コストは" + (uc - ud.cost) + "大きくなる」）" : "";
+  if (uc >= d.cost)
+    return { ok:false, why:"オーバービートできるのは、出すホロビトのコスト未満のホロビトの上だけです（総合ルール 6.2.5.5.1.1）。下の「" + ud.name + "」はコスト " + uc + upTxt + "、このカードはコスト " + d.cost + " です" };
+  return { need:d.cost - uc, mode:"over", under:top, ucost:uc, ucol:ud.color_mark, upTxt:upTxt };
 }
 // idx のラインに出せるか。can:false なら使えない（ボタンを押せない・ドラッグでも置けない）
-// viaUp: 印字のコストでは足りないが、下のホロビトの「コストはN大きくなる」が下のホロビト自身のコストのことなら足りる（未確定）
 // 新しいラインに出すときのライン: 自分のホロビトがいないラインのうち、第1ラインに最も近いライン（確定: 手引書 メインステップ）
 function firstEmptyLine(pi){
   var L = state.players[pi].line;
@@ -1445,27 +1514,33 @@ function lineVerdict(card, pi, idx){
     return { can:false, pc:pc, have:have, why:"新しいラインに出すときは、自分のホロビトがいないラインのうち第1ラインに最も近いライン（第" + (fe + 1) + "ライン）に出します（手引書）" };
   if (pc.unknown) return { can:true, pc:pc, have:have };              // コストが分からない → 支払いは手で
   if (pc.ok === false) return { can:false, pc:pc, have:have, why:pc.why };
-  if (pc.need <= have) return { can:true, pc:pc, have:have };
-  if (pc.unsure && pc.need - pc.unsure <= have) return { can:true, viaUp:true, pc:pc, have:have };
   var how = pc.mode === "new" ? "新しいラインに出すにはコスト " + pc.need : "オーバービートで出すにはエナ " + pc.need + " 枚";
-  return { can:false, pc:pc, have:have, why: how + " が必要ですが、未使用のエナが " + have + " 枚しかありません" };
+  if (pc.need > have) return { can:false, pc:pc, have:have, why: how + " が必要ですが、未使用のエナが " + have + " 枚しかありません" };
+  var col = cardDef(card).color_mark;
+  if (!colorPayable(pi, pc.need, col, pc.mode === "over" ? pc.ucol : null))
+    return { can:false, pc:pc, have:have, why: how + "（" + col + "）。未使用のエナに" + col + "がありません" + (pc.mode === "over" ? "（オーバービート元も" + col + "ではありません）" : "") +
+      "。選んだエナかオーバービート元の色に、カードの色が含まれている必要があります（総合ルール 7.2.2.1）" };
+  return { can:true, pc:pc, have:have };
 }
 // 手札のカードを、いまのエナで使えるか。no: 使えない / q: 未確定の効果しだい / ok / null: 判定しない
+// 手札のカードを、いまのエナで使えるか。no: 使えない / ok / null: 判定しない
 function affordState(card){
   var d = cardDef(card); if (!d || typeof d.cost !== "number" || !card.up) return null;
   var pi = card.owner, have = untappedEna(pi).length;
-  if (d.type === "ワザ") return have >= d.cost ? { st:"ok", need:d.cost, have:have } :
-    { st:"no", need:d.cost, have:have, why:"コスト " + d.cost + " に対して、未使用のエナが " + have + " 枚しかありません" };
+  if (d.type === "ワザ"){
+    if (have < d.cost) return { st:"no", need:d.cost, have:have, why:"コスト " + d.cost + " に対して、未使用のエナが " + have + " 枚しかありません" };
+    if (!colorPayable(pi, d.cost, d.color_mark, null)) return { st:"no", need:d.cost, have:have, why:"未使用のエナに" + d.color_mark + "がありません（支払うエナに、カードの色が含まれている必要があります。総合ルール 7.2.2.1）" };
+    return { st:"ok", need:d.cost, have:have };
+  }
   if (d.type !== "ホロビト") return null;
   var vs = [], i;
   for (i = 0; i < LINE_COUNT; i++) vs.push(lineVerdict(card, pi, i));
-  if (vs.some(function(v){ return v.can && !v.viaUp; })) return { st:"ok", have:have };
-  if (vs.some(function(v){ return v.can; })) return { st:"q", have:have,
-    why:"下のホロビトの「コストは大きくなる」しだいで出せる場合があります（何のコストかは未確定）" };
+  if (vs.some(function(v){ return v.can; })) return { st:"ok", have:have };
   var best = null;
-  vs.forEach(function(v){ if (v.pc.need !== undefined && (best === null || v.pc.need < best)) best = v.pc.need; });
+  vs.forEach(function(v){ if (v.pc.need !== undefined && v.pc.ok !== false && (best === null || v.pc.need < best)) best = v.pc.need; });
   return { st:"no", have:have, why: best === null
-    ? "出せるラインがありません（空いたラインがなく、コストが小さいホロビトもいません）"
+    ? "出せるラインがありません（空いたラインがなく、コスト未満のホロビトもいません）"
+    : best <= have ? "未使用のエナにこのカードの色（" + d.color_mark + "）がなく、同じ色のホロビトに重ねることもできません（総合ルール 7.2.2.1）"
     : "いちばん安い出し方でもエナ " + best + " 枚が必要ですが、未使用のエナが " + have + " 枚しかありません" };
 }
 function affordTag(card){
@@ -1484,7 +1559,7 @@ function playPhaseWhy(pi){
   if (activeOf() !== pi) return "手札のホロビトをラインに出せるのは、自分の召喚フェイズ（メインステップ）だけです（手引書）";
   return "";
 }
-// auto: AI が出すとき。同じ色のエナで払えるなら、確かめずに払う（色の決まりが未確定で聞く場合は、いつもどおり人に聞く）
+// auto: AI が出すとき。確かめずに、おすすめの払い方で払う
 function playFromHand(uid, pi, idx, auto){
   var f = findCard(uid); if (!f) return;
   var c = f.card, d = cardDef(c), before = zoneOfCard(c);
@@ -1503,43 +1578,17 @@ function playFromHand(uid, pi, idx, auto){
         snap(); fxClear(); fxLog("「" + nm(c) + "」を" + where + "に出した（支払いは手で）");
         moveCard(uid, pi, "line", idx, false); state.players[pi].mainStarted = true; render(); fxAfterMove(uid, before, true); }, cancel, T);
   var how = pc.mode === "new" ? "新しいラインに出す：コスト " + pc.need
-          : "オーバービート：コスト " + d.cost + " − 下の「" + nm(pc.under) + "」のコスト " + (d.cost - pc.need) + " ＝ " + pc.need;
-  var upNote = pc.unsure && !v.viaUp ? "（下のホロビトに「コストは" + pc.unsure + "大きくなる」の印があります。何のコストかは未確定なので、印字のコストで計算しています）" : "";
-  if (v.viaUp)
-    return fxChoose("印字のコストでは " + how + " ですが、未使用のエナは " + v.have + " 枚です。下の「" + nm(pc.under) + "」の「コストは" + pc.unsure +
-      "大きくなる」が下のホロビト自身のコストのことなら、エナ " + (pc.need - pc.unsure) + " 枚で出せます（何のコストかは未確定。→ B-8）。",
-      ["そのとおりとして エナ " + (pc.need - pc.unsure) + " 枚で出す", "やめる"],
-      function(i){ if (i === 0) pay(pc.need - pc.unsure, how + "（下のコストを " + pc.unsure + " 大きいとして " + (pc.need - pc.unsure) + "）"); else cancel(); }, cancel, T);
-  pay(pc.need, how);
-
-  function pay(need, how){
-    if (need <= 0){ snap(); fxClear(); fxLog("「" + nm(c) + "」を" + where + "に出した（" + how + "）");
-      moveCard(uid, pi, "line", idx, false); state.players[pi].mainStarted = true; render(); fxAfterMove(uid, before, true); return; }
-    var have = untappedEna(pi);
-    var paid = function(list){
-      var log = "「" + nm(c) + "」を" + where + "に出した（" + how + "。エナ " + list.map(nm).join("・") + " を使用済みにした）";
-      snap(); fxClear(); list.forEach(function(e){ e.turned = true; }); fxLog(log);
-      moveCard(uid, pi, "line", idx, false); state.players[pi].mainStarted = true; render(); fxAfterMove(uid, before, true);
-    };
-    var col = d.color_mark, same = have.filter(function(e){ var x = cardDef(e); return x && x.color_mark === col; });
-    if (col !== "unknown" && same.length >= need && auto) return paid(same.slice(0, need));
-    if (col !== "unknown" && same.length >= need)
-      return fxChoose(how + "（" + col + "）。" + col + "の未使用のエナを " + need + " 枚、使用済み（横向き）にして出します。" + upNote,
-        ["支払って出す", "やめる"], function(i){ if (i === 0) paid(same.slice(0, need)); else cancel(); }, cancel, T);
-    // 同じ色だけでは足りない: 何枚がその色である必要があるかは未確定なので、払うエナを選ばせる
-    fxChoose(how + "（" + col + "）。必要なエナの色と数（手引書②）のうち、何枚が" + col + "である必要があるかは未確定です（→ B-3）。" +
-      col + "の未使用のエナは " + same.length + " 枚です。支払うエナを選んでください。" + upNote,
-      ["支払うエナを選ぶ", "やめる"], function(i){
-        if (i !== 0) return cancel();
-        var chosen = [];
-        (function pickOne(){
-          if (chosen.length === need) return paid(chosen);
-          var rest = untappedEna(pi).filter(function(e){ return chosen.indexOf(e) < 0; });
-          startPick(rest.map(function(e){ return e.uid; }), "支払うエナを選んでください（" + (chosen.length + 1) + " / " + need + " 枚目）",
-            function(u){ chosen.push(findCard(u).card); pickOne(); }, cancel);
-        })();
-      }, cancel, T);
-  }
+          : "オーバービート：コスト " + d.cost + " − 下の「" + nm(pc.under) + "」のコスト " + pc.ucost + (pc.upTxt || "") + " ＝ " + pc.need;
+  var placed = function(list){
+    var log = "「" + nm(c) + "」を" + where + "に出した（" + how + (list.length ? "。エナ " + list.map(nm).join("・") + " を使用済みにした" : "") + "）";
+    snap(); fxClear(); list.forEach(function(e){ e.turned = true; }); fxLog(log);
+    moveCard(uid, pi, "line", idx, false); state.players[pi].mainStarted = true; render(); fxAfterMove(uid, before, true);
+  };
+  if (pc.need <= 0) return placed([]);
+  var srcCol = pc.mode === "over" ? pc.ucol : null;
+  // AI: おすすめの払い方で（必要な色を1枚含め、残りはほかの色から）
+  if (auto){ var plan = payPlan(pi, pc.need, d.color_mark, srcCol); if (plan.def) return placed(plan.def); }
+  askPay(pi, pc.need, d.color_mark, srcCol, how + "（" + d.color_mark + "）。", T, placed, cancel, "支払って出す");
 }
 
 // ---- エナチャージ（確定: 手引書 召喚フェイズ）----
@@ -1567,9 +1616,9 @@ function enaCharge(uid, pi){
 }
 
 // ---- バトル中にエナで払う（ワザ・ブースト）----
-// コストは「必要なエナの色と数」（手引書②）。同じ色のエナだけで払えば、何枚がその色である必要があるか
-// （未確定。B-3）に関係なく条件を満たすので、そのときは同じ色のエナで自動で払う。足りなければ払うエナを選ばせる。
-// paid: 払えた / stop: やめた / cant: 未使用のエナが足りない
+// コストの枚数分、未使用のエナを選ぶ。選んだエナに、カードの色が含まれている必要がある（総合ルール 7.2.2.1。ブーストも同じ 6.3.5.1.2）。
+// 色の内訳が1通りなら聞かずに払う。何通りかあるときは、おすすめか自分で選ぶかを聞く（AI はおすすめ）。
+// paid: 払えた / stop: やめた / cant: 払えない（エナが足りない・色がない）
 function payEna(pi, cost, col, title, paid, stop, cant){
   // オンライン対戦: 相手が使ったワザ・ブーストのエナは、相手の端末で決めたものを払う
   if (olPayPreset && olPayPreset.pi === pi){
@@ -1585,30 +1634,18 @@ function payEna(pi, cost, col, title, paid, stop, cant){
     return fxChoose("コストが印字から読めていません（" + cost + "）。エナの支払いは手で行ってください。",
       ["支払いは手で行って使う", "使わない"], function(i){ if (i === 0) paid(); else stop(); }, stop, title);
   if (cost === 0) return paid();
-  var free = untappedEna(pi);
-  if (free.length < cost){ fxLog("使えない：コスト " + cost + " に対して、未使用のエナが " + free.length + " 枚しかありません（使用にはエナが必要。ティザー⑫）"); return cant(); }
-  var same = free.filter(function(c){ var e = cardDef(c); return e && e.color_mark === col; });
-  if (col !== "unknown" && same.length >= cost){
-    same.slice(0, cost).forEach(function(c){ c.turned = true; });
-    fxLog("コスト " + cost + "（" + col + "）：" + col + "のエナ " + cost + " 枚を使用済み（横向き）にした");
-    return paid();
+  var plan = payPlan(pi, cost, col, null);
+  if (plan.cant){
+    fxLog("使えない：コスト " + cost + "（" + col + "）。" + (plan.color ? "未使用のエナに" + col + "がありません（総合ルール 7.2.2.1）" : "未使用のエナが " + untappedEna(pi).length + " 枚しかありません"));
+    return cant();
   }
-  fxChoose("コスト " + cost + "（" + col + "）：必要なエナの色と数（手引書②）のうち、何枚が" + col + "である必要があるかは未確定です（→ B-3）。" +
-    col + "の未使用のエナは " + same.length + " 枚です。支払うエナを選んでください。",
-    ["支払うエナを選ぶ", "使わない"], function(i){
-      if (i !== 0) return stop();
-      var chosen = [];
-      (function pickOne(){
-        if (chosen.length === cost){
-          chosen.forEach(function(e){ e.turned = true; });
-          fxLog("エナ " + chosen.map(nm).join("・") + " を使用済みにした");
-          return paid();
-        }
-        var rest = untappedEna(pi).filter(function(e){ return chosen.indexOf(e) < 0; });
-        startPick(rest.map(function(e){ return e.uid; }), "支払うエナを選んでください（" + (chosen.length + 1) + " / " + cost + " 枚目）",
-          function(u){ chosen.push(findCard(u).card); pickOne(); }, stop);
-      })();
-    }, stop, title);
+  var done = function(list){
+    list.forEach(function(e){ e.turned = true; });
+    fxLog("コスト " + cost + "（" + col + "）：エナ " + list.map(nm).join("・") + "（" + payBreakdown(list) + "）を使用済み（横向き）にした");
+    paid();
+  };
+  if (isAI(pi) && plan.def) return done(plan.def);
+  askPay(pi, cost, col, null, "コスト " + cost + "（" + col + "）。", title, done, stop, false);
 }
 
 // ---- ブースト（ルール動画 2026-10-15 受領・手引書⑦）----
@@ -1630,7 +1667,7 @@ function useBoost(uid, user, done){
   if (!b) return done(false);
   var stop = function(){ fxLog("「" + d.name + "」をブーストで使うのをやめた"); render(); done(false); };
   fxLog("【" + nm(c) + "】" + nm(user) + " のバトルでブーストとして使う（" + (typeof b.cost === "number" ? b.cost + "エナ" : "コスト " + b.cost) + "・" + b.mod + "）");
-  // 丸数字の色はカードの色で印字されている（例: ケサランパサラン は緑）。何枚がその色である必要があるかは未確定（B-3）
+  // 丸数字の色はカードの色で印字されている（例: ケサランパサラン は緑）。色の条件はワザと同じ（総合ルール 6.3.5.1.2 7.2.2.1）
   payEna(pi, b.cost, d.color_mark, "ブーストのコスト", function(){
     moveCard(c.uid, pi, "waza"); c.up = true; c.turned = true; c.usedBy = user.uid;
     user.boostUsed = boostUsesOf(user).concat([{ uid:c.uid, key:c.key, mod:b.mod }]);
@@ -1643,7 +1680,7 @@ function useBoost(uid, user, done){
 // 確定していること: ワザは手札から使う（入門⑪）／バトル中のホロビトが使う（手引書）／
 //   コストは「必要なエナの色と数」で、使用済み（横向き）にして払う（手引書②・入門⑥）／
 //   使ったワザはワザゾーンに横向きで置き、バトルが終わったとき墓地へ（手引書）／左辺の +N はワザのパワー（手引書⑧）
-// 選ばせること: コストの色で、何枚がその色である必要があるか（未確定。B-3）
+// 支払い: 選んだエナに、ワザの色が含まれていればよい（総合ルール 7.2.2.1）
 function wazaUsesOf(c){ return (c && c.wazaUsed) || []; }
 function abBrief(ab){
   var s = "";
@@ -1718,8 +1755,12 @@ function useWaza(uid, user, done){
    - 使ったワザはバトルが終わったとき墓地。第1ラインのバトルに勝ったプレイヤーが次の先手、引き分けなら先手後手が入れ替わる
    ルール動画: ハートは「上から順番に」ダメージが入る。図では、重なりの一番上（持ち主にいちばん近い端）の1枚。
    シミュレーターでは、あとから置いたカードほど上に重ねて表示するので、配列の最後（heart[heart.length - 1]）
-   決めずに聞く・手で処理してもらうもの（未確定）: ワザの使用をいつ終えるか（プレイヤーが終える）／
-   束の下のカード（B-4）／勝ったときの効果とダメージの順番／ブースト（操作がない）
+   総合ルール Ver.26.11.14（2026-11-14）で確定し、そのとおりに進めるもの（rules_confirmed.md §19-7 §19-10）:
+   - バトルフェイズアクション: 先手から交互に「ワザを使う」「ブーストする」「パス」。一方がパスし、直後にもう一方もパスしたらパワーを比べる（6.3.2.3 6.3.2.4）
+   - パワーを比べる時点でいるホロビトで勝敗を決める。一方だけなら勝ち（6.3.2.5 6.3.2.6）
+   - 勝利したとき → 敗北したとき → ダメージの計算 → ホロビトへ → プレイヤーへ → バトル終了 → ワザゾーンを墓地へ（6.3.2.7〜6.3.2.13）
+   - 破壊されたホロビトは重なっているカードごと墓地へ（7.4.1.1）。破壊されたハートはチェックゾーンへ置き、ダメージの処理が終わってからチェック処理（7.7）
+   - 第1ラインのバトルが行われなかったら、次のラウンドは先手と後手が入れ替わる（6.3.7.3）
    途中でやめても state.battle に進み具合が残るので、「バトルを続ける」で再開できる */
 function newBattle(line){ return { line:line, stage:"start", turn:state.first, users:[null, null], used:[[], []], boosts:[[], []], ask:{}, done:{} }; }
 function startBattle(){ state.battle = newBattle(0); fxLog("バトルフェイズ：第1ラインから順にバトルする（手引書）"); }
@@ -1751,7 +1792,7 @@ function battleRun(){
   ({ start:bStart, waza:bWaza, judge:bJudge, after:bAfter, end:bEnd })[b.stage]();
 }
 function askNextFirst(why, cont){
-  fxChoose(why + "この場合の次のラウンドの先手は、手引書に書かれていません（→ B-1）。次のラウンドの先手を選んでください。",
+  fxChoose(why + "この場合の次のラウンドの先手は、総合ルールに書かれていません（→ B-1）。次のラウンドの先手を選んでください。",
     [SIDE_NAME[0] + "が先手", SIDE_NAME[1] + "が先手"], function(k){
       snap(); state.nextFirst = k; fxLog("次のラウンドの先手：" + SIDE_NAME[k] + "（プレイヤーが選んだ）"); cont(); }, battlePause, "次のラウンドの先手");
 }
@@ -1760,12 +1801,15 @@ function bStart(){
   var b = state.battle, i = b.line, t = [lineTop(0, i), lineTop(1, i)], L = "第" + (i + 1) + "ライン";
   b.users = [t[0] ? t[0].uid : null, t[1] ? t[1].uid : null];
   b.used = [[], []]; b.boosts = [[], []]; b.ask = {}; b.done = {}; b.turn = state.first;
-  delete b.winner; delete b.order; delete b.noBarrier; delete b.pw; delete b.dmg; delete b.dmgHits; delete b.shown;
+  delete b.winner; delete b.noBarrier; delete b.pw; delete b.dmg; delete b.dmgHits; delete b.shown; delete b.passed;
   if (!t[0] && !t[1]){
+    // いずれかのプレイヤーのホロビトがいるラインだけを処理する（総合ルール 6.3.1.2）
     fxLog(L + "：両者ともホロビトがいないので、バトルはない");
-    var skip = function(){ state.battle.line++; battleRun(); };
-    if (i === 0 && state.nextFirst === undefined) return askNextFirst("第1ラインに両者ともホロビトがいないため、バトルがありません。", skip);
-    return skip();
+    if (i === 0 && state.nextFirst === undefined){
+      state.nextFirst = 1 - state.first;
+      fxLog("第1ラインのバトルが行われなかったので、次のラウンドは先手と後手が入れ替わる（" + SIDE_NAME[state.nextFirst] + "が先手。総合ルール 6.3.7.3）");
+    }
+    state.battle.line++; return battleRun();
   }
   t.forEach(function(c){ if (c){ delete c.wazaUsed; delete c.boostUsed; } });
   if (!t[0] || !t[1]){
@@ -1774,7 +1818,8 @@ function bStart(){
   } else fxLog(L + "：" + SIDE_NAME[0] + "「" + nm(t[0]) + "」 対 " + SIDE_NAME[1] + "「" + nm(t[1]) + "」");
   b.stage = "waza"; battleRun();
 }
-// ---- ワザ・ブースト: 先手から交互に1枚ずつ（手引書・ルール動画）。いつ終えるかは書かれていないので、プレイヤーが終える ----
+// ---- バトルフェイズアクション（総合ルール 6.3.2.3 6.3.2.4 6.3.3）: 先手から交互に「ワザを使う」「ブーストする」「パス」から1つ。
+//      一方がパスし、直後にもう一方もパスしたら、パワーを比べる。ホロビトがいない・使えるカードがないときはパスだけ ----
 function usableWaza(p){
   if (!battler(p)) return [];
   return state.players[p].hand.filter(function(c){
@@ -1787,7 +1832,8 @@ function usableBoosts(p){
   if (!battler(p)) return [];
   return state.players[p].hand.filter(function(c){
     var b = boostOf(c); if (!b) return false;
-    return typeof b.cost !== "number" || untappedEna(p).length >= b.cost;
+    // ブーストのコストも、色の条件を満たす必要がある（総合ルール 6.3.5.1.2）
+    return typeof b.cost !== "number" || (untappedEna(p).length >= b.cost && colorPayable(p, b.cost, cardDef(c).color_mark, null));
   });
 }
 function battleActs(p){
@@ -1803,31 +1849,34 @@ function bWaza(){
   if (ol.on) return olWaza();   // オンライン対戦: 相手の手札は分からないので、相手の番は相手の端末に聞く
   var b = state.battle, can = [battleActs(0), battleActs(1)];
   if (!can[0].length && !can[1].length){
-    fxLog("ワザ・ブースト：両者とも使えるものがない（手札にない・エナが足りない・バトルしているホロビトがいない）");
-    b.stage = "judge"; return battleRun();
+    fxLog("ワザ・ブースト：両者とも使えるものがない（手札にない・エナが足りない・バトルしているホロビトがいない）ので、両者パス。パワーを比べる");
+    delete b.passed; b.stage = "judge"; return battleRun();
   }
-  var p = b.turn;
-  if (!can[p].length){ fxLog(SIDE_NAME[p] + "：使えるワザ・ブーストがない"); p = b.turn = 1 - p; }
-  var o = 1 - p, user = battler(p);
-  var labels = can[p].map(actLabel), nUse = labels.length;
-  if (can[o].length) labels.push("使わない（" + SIDE_NAME[o] + "の番へ）");
-  labels.push("ワザの使用を終えて、パワーを比べる");
+  var p = b.turn, o = 1 - p;
+  if (!can[p].length) return bPass(p, "（使えるワザ・ブーストがない）");
+  var user = battler(p), labels = can[p].map(actLabel), nUse = labels.length;
+  labels.push(b.passed === o ? "パス（" + SIDE_NAME[o] + "もパスしたので、パワーを比べる）" : "パス（" + SIDE_NAME[o] + "の番へ）");
   var choose = function(i){
     if (i < nUse){
       var a = can[p][i]; snap(); fxClear();
       return (a.kind === "boost" ? useBoost : useWaza)(a.c.uid, user, function(used){
         var B = state.battle; if (!B) return render();
-        if (used){ (a.kind === "boost" ? B.boosts : B.used)[p].push(a.c.uid); B.turn = o; }
+        if (used){ (a.kind === "boost" ? B.boosts : B.used)[p].push(a.c.uid); B.turn = o; delete B.passed; }
         battleRun(); });
     }
-    snap();
-    if (can[o].length && i === nUse){ fxLog(SIDE_NAME[p] + "：使わない"); state.battle.turn = o; return battleRun(); }
-    fxLog("ワザ・ブーストの使用を終えた"); state.battle.stage = "judge"; battleRun();
+    snap(); bPass(p, "");
   };
-  if (isAI(p)) return aiLater(function(){ choose(aiWazaChoice(p, can[p], can[o].length > 0)); });
-  fxChoose(sideBrief(0) + " 対 " + sideBrief(1) + "。ワザとブーストは先手から交互に1枚ずつ使えます（手引書・ルール動画）。いまは" + SIDE_NAME[p] + "の番です。" +
-    "（いつ終わるかは手引書に書かれていないので、終えるときは「ワザの使用を終えて、パワーを比べる」を押します）",
+  if (isAI(p)) return aiLater(function(){ choose(aiWazaChoice(p, can[p], true)); });
+  fxChoose(sideBrief(0) + " 対 " + sideBrief(1) + "。ワザ・ブーストは先手から交互に1枚ずつ使えます。使わないときは「パス」。" +
+    "両者が続けてパスしたら、パワーを比べます（総合ルール 6.3.2.3・6.3.2.4）。いまは" + SIDE_NAME[p] + "の番です" + (b.passed === o ? "（" + SIDE_NAME[o] + "はパスしました）" : "") + "。",
     labels, choose, battlePause, bTitle());
+}
+// パス。直前に相手もパスしていたら、パワーを比べる（総合ルール 6.3.2.4）
+function bPass(p, why){
+  var B = state.battle;
+  fxLog(SIDE_NAME[p] + "：パス" + why);
+  if (B.passed === 1 - p){ fxLog("両者が続けてパスしたので、パワーを比べる"); delete B.passed; B.stage = "judge"; return battleRun(); }
+  B.passed = p; B.turn = 1 - p; battleRun();
 }
 // ---- パワー ----
 // 条件の答えを合わせる。st: YES / NO / "q"（聞く）。qs: 聞く文
@@ -1890,7 +1939,7 @@ function powerOf(p, cb){
   (function next(){
     if (!asks.length){
       var tot = 0; parts.forEach(function(q){ tot += q.n; });
-      return cb(tot, parts.map(function(q){ return q.t; }).join("＋") + (under ? "。束の下のカードは数えない（扱いは未確定。B-4）" : ""));
+      return cb(tot, parts.map(function(q){ return q.t; }).join("＋") + (under ? "。束の下のカードは数えない（一番上のカードだけがホロビト。総合ルール 4.9.3.7）" : ""));
     }
     var a = asks.shift(), key = c.uid + "|" + a.q;
     var take = function(yes){ if (yes) parts.push({ t:a.t, n:a.n }); next(); };
@@ -1905,15 +1954,16 @@ function bJudge(){
   var b = state.battle, c = [battler(0), battler(1)];
   // manual: プレイヤーが結果を選んだとき（結果の画面は出さない）
   var go = function(w, manual){ var B = state.battle; B.winner = w; if (manual) B.shown = true; B.stage = "after"; motionAttack(w); battleRun(); };
-  if (b.users[0] && b.users[1] && (!c[0] || !c[1]))
-    return fxChoose("バトルの途中で、" + [0, 1].filter(function(p){ return !c[p]; }).map(function(p){ return SIDE_NAME[p]; }).join("と") +
-      "のホロビトがラインの一番上からいなくなりました。このときのバトルの結果は手引書に書かれていません。結果を選んでください。",
-      [SIDE_NAME[0] + "の勝ち", SIDE_NAME[1] + "の勝ち", "引き分け", "バトルなし（ダメージなし）"], function(k){
-        snap(); fxLog("結果：" + (k === 3 ? "バトルなし" : resultText(k === 2 ? -1 : k)) + "（プレイヤーが選んだ）");
-        if (k === 3){ state.battle.stage = "end"; return battleRun(); }
-        go(k === 2 ? -1 : k, true); }, battlePause, bTitle());
-  if (!c[0] && !c[1]){ fxLog("バトルするホロビトがいない"); b.stage = "end"; return battleRun(); }
-  if (!c[0] || !c[1]){ var w = c[0] ? 0 : 1; fxLog("結果：" + SIDE_NAME[w] + "の勝ち（不戦勝）"); return go(w); }
+  // パワーを比べる時点でいるホロビトで決める。両方いれば比べ、一方だけならそのホロビトが勝つ（総合ルール 6.3.2.5 6.3.2.6）
+  if (!c[0] && !c[1]){
+    fxLog(b.users[0] || b.users[1] ? "パワーを比べる時点で、両者ともバトルしていたホロビトがいない（勝ち負けも引き分けもない。ダメージもない）" : "バトルするホロビトがいない");
+    b.stage = "end"; return battleRun();
+  }
+  if (!c[0] || !c[1]){
+    var w = c[0] ? 0 : 1;
+    fxLog("結果：" + SIDE_NAME[w] + "の勝ち（" + (b.users[1 - w] ? SIDE_NAME[1 - w] + "のホロビトがいなくなり、" + SIDE_NAME[w] + "のホロビトだけがいる。総合ルール 6.3.2.6" : "不戦勝") + "）");
+    return go(w);
+  }
   powerOf(0, function(p0, d0, why0){ powerOf(1, function(p1, d1, why1){
     var B = state.battle; B.pw = [p0, p1];
     if (p0 === null || p1 === null)
@@ -1941,7 +1991,13 @@ function winTriggers(){
 // バトルの結果を、両者のカードの画像と並べて見せる（依頼者の指示 2026-10-16「各バトル時、そのカードの画像を並べて出して」）
 function resultMsg(){
   var b = state.battle, w = b.winner, c = [cardByUid(b.users[0]), cardByUid(b.users[1])], L = "第" + (b.line + 1) + "ライン：";
-  if (!b.users[0] || !b.users[1])
+  var q = winTriggers();
+  if (q.length) return resultMsg0() + "先に、勝ったときの効果（" + q.map(function(t){ return nm(t.card); }).join("・") + "）を処理し、そのあとダメージ（総合ルール 6.3.2.7〜6.3.2.11）。";
+  return resultMsg0();
+}
+function resultMsg0(){
+  var b = state.battle, w = b.winner, c = [cardByUid(b.users[0]), cardByUid(b.users[1])], L = "第" + (b.line + 1) + "ライン：";
+  if (!b.users[0] || !b.users[1] || (w >= 0 && !c[1 - w]))
     return L + SIDE_NAME[w] + "の「" + nm(c[w]) + "」だけがいるので、不戦勝（勝ち）。" + SIDE_NAME[1 - w] + "のハート（重なりの一番上）にダメージ。";
   var pw = b.pw && typeof b.pw[0] === "number" && typeof b.pw[1] === "number" ? "パワー " + SIDE_NAME[0] + " " + b.pw[0] + " 対 " + SIDE_NAME[1] + " " + b.pw[1] + " → " : "";
   if (w === -1) return L + pw + "引き分け。お互いのホロビトがダメージを受け、ハートはダメージを受けない。";
@@ -1950,23 +2006,10 @@ function resultMsg(){
 function bAfter(){
   var b = state.battle;
   if (b.winner === undefined){ b.stage = "end"; return battleRun(); }
-  if (!b.shown){
-    var q0 = winTriggers(), T = bTitle() + "の結果", head = battleHeadHTML(true);
-    // 勝ったときの効果があれば、ダメージとどちらを先に処理するかも同じ画面で聞く
-    if (q0.length)
-      return fxChoose(resultMsg() + "勝ったときの効果（" + q0.map(function(t){ return nm(t.card); }).join("・") +
-        "）と、負けた側へのダメージのどちらを先に処理するかは、手引書に書かれていません。どちらを先に処理しますか？",
-        ["勝ったときの効果を先に", "ダメージを先に"], function(k){ snap(); var B = state.battle; B.shown = true; B.order = k; battleRun(); }, battlePause, T, head);
-    return fxChoose(resultMsg(), ["続ける"], function(){ var B = state.battle; B.shown = true; B.order = 1; battleRun(); }, battlePause, T, head, "result");
-  }
-  if (b.order === undefined){
-    var q = winTriggers();
-    if (!q.length) b.order = 1;
-    else return fxChoose(resultText(b.winner) + "。勝ったときの効果（" + q.map(function(t){ return nm(t.card); }).join("・") +
-      "）と、負けた側へのダメージのどちらを先に処理するかは、手引書に書かれていません。どちらを先に処理しますか？",
-      ["勝ったときの効果を先に", "ダメージを先に"], function(k){ snap(); state.battle.order = k; battleRun(); }, battlePause, bTitle());
-  }
-  var steps = b.order === 0 ? ["win", "dmg"] : ["dmg", "win"];
+  if (!b.shown)
+    return fxChoose(resultMsg(), ["続ける"], function(){ var B = state.battle; B.shown = true; battleRun(); }, battlePause, bTitle() + "の結果", battleHeadHTML(true), "result");
+  // 勝利したとき → 敗北したとき（Xバリアは、ダメージの計算に含める）→ ダメージの計算 → ホロビトへ → プレイヤーへ（総合ルール 6.3.2.7〜6.3.2.11）
+  var steps = ["win", "dmg"];
   (function step(k){
     var B = state.battle; if (!B || state.winner !== undefined) return render();
     if (k >= steps.length){ B.stage = "end"; return battleRun(); }
@@ -1988,17 +2031,21 @@ function doWin(next){
 }
 function doDamage(next){
   var w = state.battle.winner, losers = w === -1 ? [0, 1] : [1 - w];
-  (function step(k){
-    var B = state.battle; if (!B || state.winner !== undefined) return render();
-    if (k < losers.length){
-      var p = losers[k];
-      if (B.done["h" + p]) return step(k + 1);
-      return holoDamage(p, function(){ step(k + 1); });
-    }
-    if (w === -1){ fxLog("引き分けなので、ハートはダメージを受けない（手引書）"); B.done.dmg = true; return next(); }
-    if (B.done.heart){ B.done.dmg = true; return next(); }
-    playerDamage(1 - w, function(){ var B2 = state.battle; if (!B2) return render(); B2.done.heart = true; B2.done.dmg = true; next(); });
-  })(0);
+  // ホロビトへのダメージより前に、プレイヤーへのダメージ（ダブルダメージ・Xバリアなど）を計算する（総合ルール 6.3.2.9）
+  var calc = function(cb){ if (w === -1) return cb(); playerDamage(1 - w, cb, true); };
+  calc(function(){
+    (function step(k){
+      var B = state.battle; if (!B || state.winner !== undefined) return render();
+      if (k < losers.length){
+        var p = losers[k];
+        if (B.done["h" + p]) return step(k + 1);
+        return holoDamage(p, function(){ step(k + 1); });
+      }
+      if (w === -1){ fxLog("引き分けなので、ハートはダメージを受けない（手引書）"); B.done.dmg = true; return next(); }
+      if (B.done.heart){ B.done.dmg = true; return next(); }
+      playerDamage(1 - w, function(){ var B2 = state.battle; if (!B2) return render(); B2.done.heart = true; B2.done.dmg = true; next(); });
+    })(0);
+  });
 }
 // 負けたホロビトへのダメージ: 縦向きならダウン、ダウンしていれば破壊（墓地へ）。「破壊されない」ならダウンしたまま残る
 function holoDamage(p, next){
@@ -2024,16 +2071,11 @@ function holoDamage(p, next){
   go();
 }
 function destroyHolo(p, c, next){
-  var st = locOf(c).stack;
-  var put = function(cards){
-    cards.forEach(function(x){ moveCard(x.uid, x.owner, "grave"); x.turned = false; });
-    fxLog(SIDE_NAME[p] + "「" + nm(c) + "」はダウン状態でダメージを受けたので破壊され、墓地に置いた" + (cards.length > 1 ? "（束の " + cards.length + " 枚）" : ""));
-    render(); next(); };
-  if (st.length === 1) return put([c]);
-  fxChoose("「" + nm(c) + "」が破壊されます。下に " + (st.length - 1) + " 枚あります。破壊されたとき下のカードをどうするかは未確定です（→ B-4）。",
-    ["一番上だけ墓地へ", "束ごと墓地へ", "手で処理する"], function(i){
-      if (i === 0) put([c]); else if (i === 1) put(st.slice());
-      else { fxLog("「" + nm(c) + "」の破壊は手で処理してください"); next(); } }, battlePause, bTitle());
+  // 重なっているカードも同時に墓地へ（総合ルール 7.4.1.1）。下のカードは「破壊された」とはみなさない（7.4.2.1）
+  var cards = locOf(c).stack.slice();
+  cards.forEach(function(x){ moveCard(x.uid, x.owner, "grave"); x.turned = false; });
+  fxLog(SIDE_NAME[p] + "「" + nm(c) + "」はダウン状態でダメージを受けたので破壊され、墓地に置いた" + (cards.length > 1 ? "（重なっていたカードも同時に。束の " + cards.length + " 枚）" : ""));
+  render(); next();
 }
 // 聞いて答えを覚える（再開したときに聞き直さない）
 function askOnce(key, q, yes, no, cb){
@@ -2061,9 +2103,10 @@ function hasDoubleDamage(card){
   return has;
 }
 // 負けたプレイヤーへのダメージ（1。ダブルダメージなら2。ワザの「ダメージを+N」は聞いて足す。1バリアで減らす）
-function playerDamage(p, next){
+// calcOnly: 計算だけして（state.battle.dmg に残して）next。ホロビトへのダメージより前に計算する（総合ルール 6.3.2.9）
+function playerDamage(p, next, calcOnly){
   var B = state.battle, w = 1 - p, wf = findCard(B.users[w]), W = wf && wf.card, lf = B.users[p] && findCard(B.users[p]), L = lf && lf.card;
-  if (B.dmg) return apply(B.dmg.n, B.dmg.hearts, B.dmg.why);
+  if (B.dmg) return calcOnly ? next() : apply(B.dmg.n, B.dmg.why);
   var why = ["基本 1"], dd = false, plus = 0, bar = 0;
   (function dbl(){
     if (!W) return add();
@@ -2096,7 +2139,7 @@ function playerDamage(p, next){
     if (!L || !(ABILITY_MAP[L.key] || []).some(function(ab){ return ab.keyword && refOf(ab.keyword).part === "barrier"; })) return total();
     if (B.noBarrier){ fxLog("負けた「" + nm(L) + "」は勝ったときの効果で破壊されたので、1バリアは発動しない（印字「バリアや敗北時の効果は発動しない」）"); return total(); }
     if (!battler(p))
-      return askOnce("bar", "負けた「" + nm(L) + "」は、もうラインの一番上にいません。この場合に1バリアが働くかは手引書に書かれていません。プレイヤーが受けるダメージを1減らしますか？",
+      return askOnce("bar", "負けた「" + nm(L) + "」は、もうラインの一番上にいません。この場合に1バリアが働くかは総合ルールに書かれていません（→ B-1）。プレイヤーが受けるダメージを1減らしますか？",
         "減らす", "減らさない", function(y){ if (y){ bar = 1; why.push("1バリア −1"); } total(); });
     var s = stOfBadge(L, /^(\d+)バリア$/);
     if (s.st === "on"){ bar = s.n; why.push(s.n + "バリア −" + s.n); return total(); }
@@ -2107,27 +2150,32 @@ function playerDamage(p, next){
   function total(){
     if (dd) why[0] = "ダブルダメージ 2";
     var n = Math.max(0, (dd ? 2 : 1) + plus - bar);
-    state.battle.dmg = { n:n, hearts:state.players[p].heart.length, why:why.join("・") };
-    apply(n, state.battle.dmg.hearts, state.battle.dmg.why);
+    state.battle.dmg = { n:n, why:why.join("・") };
+    if (calcOnly) return next();
+    apply(n, state.battle.dmg.why);
   }
-  function apply(n, hearts, w0){
-    fxLog(SIDE_NAME[p] + "が受けるダメージ：" + n + "（" + w0 + "）");
+  function apply(n, w0){
+    var B0 = state.battle;
+    // ダメージを与え始めたときのハートの枚数（途中で中断して再開しても、自分で減らしたハートでトドメにしない）
+    if (B0.dmg.hearts === undefined) B0.dmg.hearts = state.players[p].heart.length;
+    var hearts = B0.dmg.hearts;
+    if (!B0.dmgHits) fxLog(SIDE_NAME[p] + "が受けるダメージ：" + n + "（" + w0 + "）");
     if (n <= 0){ fxLog("ダメージは0なので、ハートは何も起きない"); return next(); }
     if (!hearts){
       setWinner(w, "勝利条件①：" + SIDE_NAME[p] + "のハートが0枚のときに、ダメージ（トドメ）を与えた");
       return render();
     }
-    // 2ダメージは、そのまま2回分（遊び方動画。依頼者の説明 2026-10-15）。1ダメージずつ、そのときの重なりの一番上に入れる。
-    // 一番上が縦向きなら、同じハートが1回目でダウン、2回目で破壊される（動画にない場面。依頼者の判断 2026-10-16。rules_guess.md B-2）。
-    // 途中でハートが0枚になっても、ハートが残っていたときのダメージなのでトドメにはならない（手引書「相手のハートが残っている時は、
-    // 何ダメージ与えてもトドメを刺せません」）。何回目まで入れたかは state.battle.dmgHits に残す（中断して再開しても入れ直さない）
+    // ダメージの値に等しい回数、そのときの一番上のハートに1ダメージずつ入れる（総合ルール 7.6.1 7.6.2。遊び方動画「2点ダメージはそのまま2回分」とも合う）。
+    // 一番上が縦向きなら、同じハートが1回目でダウン、2回目で破壊される。途中でハートが0枚になったら終える（7.6.2.1。トドメにはならない）。
+    // 何回目まで入れたかは state.battle.dmgHits に残す（中断して再開しても入れ直さない）
+    // チェック処理は、プレイヤーへのダメージの処理が終わってから（総合ルール 7.7.1.1）
     (function hit(){
       var B = state.battle; if (!B) return render();
       var k = B.dmgHits || 0;
-      if (k >= n) return next();
+      if (k >= n) return checkProcess(p, next);
       if (!state.players[p].heart.length){
-        fxLog("ハートが0枚になった。ハートが残っていたときのダメージなので、残りの " + (n - k) + " ダメージでトドメにはならない（手引書）");
-        B.dmgHits = n; return next();
+        fxLog("ハートが0枚になった。ハートが残っていたときのダメージなので、残りの " + (n - k) + " ダメージでトドメにはならない（手引書。総合ルール 7.6.2.1）");
+        B.dmgHits = n; return checkProcess(p, next);
       }
       if (n > 1) fxLog(n + " ダメージのうち " + (k + 1) + " 回目（2ダメージは1ダメージを2回。遊び方動画）");
       heartDamage(p, hit, function(){ state.battle.dmgHits = k + 1; });
@@ -2138,7 +2186,7 @@ function playerDamage(p, next){
 // mark: ダメージが入った（カードを動かした）ときに呼ぶ。中断して再開したときに入れ直さないため
 function topHeart(p){ var H = state.players[p].heart; return H[H.length - 1]; }
 function heartDamage(p, next, mark){
-  var h = topHeart(p);
+  var h = topHeart(p), P = state.players[p];
   if (!h){ fxLog(SIDE_NAME[p] + "のハートがない（手で動かした？）。ハートへのダメージは手で処理してください"); return next(); }
   motionFx({ k:"hit", u:h.uid });
   if (!h.turned){
@@ -2146,56 +2194,79 @@ function heartDamage(p, next, mark){
     fxLog(SIDE_NAME[p] + "のハート（重なりの一番上）がダメージを受けてダウンした（横向き）");
     render(); return next();
   }
-  heartBreak(p, h, next, mark);
+  // ダウンしていたハートは破壊され、チェックゾーンへ。チェック処理は、プレイヤーへのダメージの処理が終わってから（総合ルール 7.6.1.1 7.7.1.1）
+  if (!P.check) P.check = [];
+  moveCard(h.uid, p, "check"); h.turned = false; mark();
+  fxLog(SIDE_NAME[p] + "のハート（重なりの一番上）はダウンしていたので破壊され、チェックゾーンに置いた（チェック処理はダメージの処理のあと）");
+  render(); next();
 }
-// ダウンしているハートが破壊された: 手札に加わる。その際、加える代わりにトリガーを使える（任意。手引書）
-// トリガーチェックの画面に出す、そのハートのカードの画像（表にして見せる）
-function heartHead(p, h){ return '<div class="fxcards">' + picHTML(h, '<b>' + SIDE_NAME[p] + 'のハート</b>トリガーチェック', "tgt", true) + '</div>'; }
-function heartBreak(p, h, next0, mark){
-  var d = cardDef(h), kw = d && d.trigger && d.trigger !== "unknown" ? d.trigger.keyword : null, P = state.players[p];
-  var commit = function(){ if (state.battle) mark(); };
-  // 盤面でも、破壊されたハートを「対象」として示す。処理を終えたら印を消す
-  fxFocus = { src:null, tgt:[h.uid] };
-  var next = function(){ focusReset(); render(); next0(); };
-  var toHand = function(){
-    commit(); moveCard(h.uid, p, "hand"); h.up = true; h.turned = false;
-    // トリガーを使えない・使わないときは、相手に見せずに手札に加える（依頼者の判断 2026-10-22。rules_guess.md B-2）。
-    // AI の手札を伏せているときは、記録にもカードの名前を出さない
-    fxLog(SIDE_NAME[p] + "のハートが破壊され、" + (aiHideHand(p) || isRemote(p) ? "カードを1枚" : "「" + nm(h) + "」を") + "手札に加えた（トリガーは使わない。相手には見せない）",
-          SIDE_NAME[p] + "のハートが破壊され、カードを1枚手札に加えた（トリガーは使わない）");
-    render(); next(); };
-  // オンライン対戦: 相手のハートは中身が分からないので、トリガーを使うか（とその出し先）を相手の端末に聞く
-  if (isRemote(p)) return olAsk("heart", { uid:h.uid }, function(r){
-    if (!r.use) return toHand();
+// チェック処理（総合ルール 7.7.2）: チェックゾーンのカードを、破壊された順番に関係なく好きな順に1枚ずつ。
+// トリガー効果を発動するなら公開してから発動する。発動しなければ持ち主の手札へ（公開しない）。残っていれば繰り返す
+function checkProcess(p, next){
+  var C = (state.players[p].check || []).slice();
+  if (!C.length) return next();
+  var again = function(){ checkProcess(p, next); };
+  // オンライン対戦: 相手のチェックゾーンの中身はこの端末に届かないので、どれから処理するか・トリガーを使うか（と出し先）を相手の端末に聞く
+  if (isRemote(p)) return olAsk("heart", { uids:C.map(function(c){ return c.uid; }) }, function(r){
+    var f = r.uid && findCard(r.uid), h = f && zoneOfCard(f.card).zone === "check" ? f.card : C[0];
+    if (!r.use) return checkToHand(p, h, again);
     if (CARDS[r.key]) h.key = r.key;
     h.up = true;
-    fxLog(SIDE_NAME[p] + "：ハートの「" + nm(h) + "」の " + r.kw + " を使う");
-    olTrig(p, h, r, commit, next);
+    fxLog(SIDE_NAME[p] + "：チェックゾーンの「" + nm(h) + "」を公開し、" + r.kw + " を使う");
+    olTrig(p, h, r, function(){}, again);
   });
+  if (C.length === 1) return heartBreak(p, C[0], again);
+  if (isAI(p)) return aiLater(function(){ heartBreak(p, aiCheckPick(p, C), again); });
+  fxChoose(SIDE_NAME[p] + "のチェックゾーンに " + C.length + " 枚あります。どのカードからチェック処理をしますか？（破壊された順番に関係なく選べます。総合ルール 7.7.2.1.1）",
+    C.map(function(c){ var d = cardDef(c); return "「" + nm(c) + "」" + (d && d.trigger && d.trigger !== "unknown" ? "（" + d.trigger.keyword + "）" : ""); }),
+    function(i){ heartBreak(p, C[i], again); }, battlePause, "チェック処理",
+    '<div class="fxcards">' + C.slice(0, 3).map(function(c){ return picHTML(c, '<b>' + SIDE_NAME[p] + 'のチェックゾーン</b>', "tgt", true); }).join("") + '</div>');
+}
+// トリガー効果を発動しないカードを、持ち主の手札へ（相手には見せない。総合ルール 7.7.2.3）
+function checkToHand(p, h, next){
+  moveCard(h.uid, p, "hand"); h.up = true; h.turned = false;
+  // AI の手札を伏せているとき・オンライン対戦の相手のカードは、記録にもカードの名前を出さない
+  fxLog(SIDE_NAME[p] + "：チェック処理で、" + (aiHideHand(p) || isRemote(p) ? "カードを1枚" : "「" + nm(h) + "」を") + "手札に加えた（トリガーは使わない。相手には見せない）",
+        SIDE_NAME[p] + "：チェック処理で、カードを1枚手札に加えた（トリガーは使わない）");
+  render(); next();
+}
+// ダウンしているハートが破壊された: 手札に加わる。その際、加える代わりにトリガーを使える（任意。手引書）
+// チェック処理の画面に出す、そのカードの画像（持ち主に表にして見せる）
+function heartHead(p, h){ return '<div class="fxcards">' + picHTML(h, '<b>' + SIDE_NAME[p] + 'のハートから</b>チェック処理', "tgt", true) + '</div>'; }
+// チェック処理の1枚（総合ルール 7.7.2.2 7.7.2.3）: トリガー効果を発動するか（任意。発動するなら公開して）、発動せずに持ち主の手札へ
+function heartBreak(p, h, next0){
+  var d = cardDef(h), kw = d && d.trigger && d.trigger !== "unknown" ? d.trigger.keyword : null;
+  var commit = function(){};
+  // 盤面でも、チェック処理中のカードを「対象」として示す。処理を終えたら印を消す
+  fxFocus = { src:null, tgt:[h.uid] };
+  var next = function(){ focusReset(); render(); next0(); };
+  var toHand = function(){ checkToHand(p, h, next); };
   var trig = HEART_TRIGGERS[kw], labels = [], acts = [];
-  // トリガーはハートが破壊されたときのルール（手引書 用語解説）なので、「効果: 手動」のときも選べる。
+  // トリガーはハートから破壊されたときのルール（総合ルール 8.3.1.1）なので、「効果: 手動」のときも選べる。
   // 出たカードの「出たとき」などの能力欄の効果は、いつもどおり「効果: 自動」のときだけ処理する
   if (trig && trig.can(p, h)){
-    labels.push("トリガーを使う：" + kw + "「" + d.trigger.text + "」");
-    acts.push(function(){ fxLog(SIDE_NAME[p] + "：ハートの「" + nm(h) + "」の " + kw + " を使う"); trig.run(p, h, commit, next); });
+    labels.push("トリガーを使う：" + kw + "「" + d.trigger.text + "」（相手にも見せる）");
+    acts.push(function(){ h.up = true; fxLog(SIDE_NAME[p] + "：チェックゾーンの「" + nm(h) + "」を公開し、" + kw + " を使う"); trig.run(p, h, commit, next); });
   }
-  labels.push("トリガーを使わずに手札に加える"); acts.push(toHand);
+  labels.push("トリガーを使わずに手札に加える（相手には見せない）"); acts.push(toHand);
   var note = !d ? "（未確定カードなので、トリガーは分かりません）"
            : kw === "unknown" ? "（このカードのトリガーは印字から読めていません）"
            : trig && !trig.can(p, h) ? "（" + kw + " は、いまは使えません：" + trig.cant(p, h) + "）"
            : !trig ? "（このカードのトリガーはシミュレーターでは処理できません。使うなら手で処理してください）" : "";
   if (isAI(p)) return aiLater(function(){ acts[aiTrigChoice(p, h, kw, acts.length > 1)](); });
-  fxChoose(SIDE_NAME[p] + "のハート（重なりの一番上）はダウンしていたので、ダメージで破壊されました。カードは「" + nm(h) + "」です。" +
-    "手札に加わります。その際、加える代わりにトリガーを使えます（使用は任意。手引書）。" + note, labels, function(i){ acts[i](); }, battlePause, "ハートが破壊された（トリガーチェック）", heartHead(p, h));
+  fxChoose("チェック処理：" + SIDE_NAME[p] + "のハートから破壊されたカードは「" + nm(h) + "」です。" +
+    "トリガー効果を発動できます（任意。発動するなら公開してから。総合ルール 7.7.2.2）。発動しなければ手札に加えます。" + note,
+    labels, function(i){ acts[i](); }, battlePause, "チェック処理（トリガー）", heartHead(p, h));
 }
-// オーバービートの下にできる、自分のラインの一番上のホロビト（コストが小さいもの。手引書 メインステップ）。
+// オーバービートの下にできる、自分のラインの一番上のホロビト（コストが出すホロビトのコスト未満のもの。総合ルール 6.2.5.5.1.1）。
+// トリガーや効果で出すときもこの条件はある（8.3.2 8.3.3 8.3.5。コストの支払いだけがない）。
 // どのラインのものでもよく、一番数字が小さいラインでなくてよい（公式「よくある質問」）
 function overTargets(p, h){
   var d = cardDef(h); if (!d || typeof d.cost !== "number") return [];
   var out = [];
   state.players[p].line.forEach(function(st){
-    var t = st[st.length - 1], td = t && t.up ? cardDef(t) : null;
-    if (td && td.type === "ホロビト" && typeof td.cost === "number" && td.cost < d.cost) out.push(t);
+    var t = st[st.length - 1], td = t && t.up ? cardDef(t) : null, tc = t ? curCost(t) : null;
+    if (td && td.type === "ホロビト" && tc !== null && tc < d.cost) out.push(t);
   });
   return out;
 }
@@ -2303,7 +2374,7 @@ function bEnd(){
   if (B.line === 0 && state.nextFirst === undefined){
     if (B.winner === -1){ state.nextFirst = 1 - state.first; fxLog("第1ラインは引き分けなので、次のラウンドは先手後手が入れ替わる（" + SIDE_NAME[state.nextFirst] + "が先手。手引書）"); }
     else if (B.winner !== undefined){ state.nextFirst = B.winner; fxLog("第1ラインのバトルに勝った" + SIDE_NAME[B.winner] + "が、次のラウンドの先手（手引書）"); }
-    else return askNextFirst("第1ラインのバトルの結果がありません。", fin);
+    else return askNextFirst("第1ラインのバトルの途中で、両者ともバトルしていたホロビトがいなくなり、勝ち負けも引き分けもありません。", fin);
   }
   fin();
 }
@@ -2499,9 +2570,12 @@ function zoneHTML(pi, zone, cls, extraClass, tappable){
   return '<div class="zone ' + cls + lockCls(pi) + '" data-drop="' + zone + '" data-pi="' + pi + '">' +
            '<div class="zlabel' + (tappable ? ' tappable" data-zsheet="' + zone + '" data-pi="' + pi : "") + '">' +
              // 狭い列では「ハート／ゾーン」のように語の切れ目で折り返す
-             ZONE_NAME[zone].replace(/^(.+)(ゾーン)$/, '<span><span class="nw">$1</span><span class="nw">$2</span></span>') + ' <span class="zcount">(' + arr.length + ')</span></div>' +
+             ZONE_NAME[zone].replace(/^(.+)(ゾーン)$/, '<span><span class="nw">$1</span><span class="nw">$2</span></span>') + ' <span class="zcount">(' + arr.length + ')</span>' +
+             (zone === "heart" && (state.players[pi].check || []).length ? ' <span class="zcount">チェック ' + state.players[pi].check.length + '</span>' : "") + '</div>' +
            // 手札は、エナが足りず使えないカードに「使えない」の帯を付ける
-           '<div class="strip' + (extraClass || "") + '">' + (zone === "hand" && aiHideHand(pi) ? hiddenStripHTML(arr) : stripHTML(arr, zone === "hand" ? affordTag : null)) + '</div>' +
+           '<div class="strip' + (extraClass || "") + '">' + (zone === "hand" && aiHideHand(pi) ? hiddenStripHTML(arr) : stripHTML(arr, zone === "hand" ? affordTag : null)) +
+             // チェックゾーン（ハートから破壊されたカードを一時的に置く。総合ルール 4.7）は、ハートの並びのあとに「チェック」の札を付けて出す
+             (zone === "heart" ? (state.players[pi].check || []).map(function(c){ return '<div class="chkwrap">' + cardHTML(c) + '<span class="chktag">チェック</span></div>'; }).join("") : "") + '</div>' +
          '</div>';
 }
 function lineHTML(pi){
@@ -2584,7 +2658,7 @@ function starterButtonHTML(pi, id, label, on, keep){
 function boardMatchesDeck(pi){
   var m = {}, dl = state.players[pi].decklist, add = function(c){ if (c.owner === pi && c.key) m[c.key] = (m[c.key] || 0) + 1; };
   state.players.forEach(function(P){
-    ["deck", "hand", "heart", "ena", "waza", "grave"].forEach(function(z){ P[z].forEach(add); });
+    ["deck", "hand", "heart", "ena", "waza", "grave", "check"].forEach(function(z){ (P[z] || []).forEach(add); });
     P.line.forEach(function(l){ l.forEach(add); });
   });
   var ks = Object.keys(dl).filter(function(k){ return (dl[k] | 0) > 0; });
@@ -3053,7 +3127,7 @@ function motionLayer(){ return mo.layer || (mo.layer = document.getElementById("
 function motionLocs(){
   var m = {};
   state.players.forEach(function(P, pi){
-    ["hand", "deck", "heart", "ena", "waza", "grave"].forEach(function(z){ P[z].forEach(function(c){ m[c.uid] = { pi:pi, z:z }; }); });
+    ["hand", "deck", "heart", "ena", "waza", "grave", "check"].forEach(function(z){ (P[z] || []).forEach(function(c){ m[c.uid] = { pi:pi, z:z }; }); });
     P.line.forEach(function(st, i){ st.forEach(function(c){ m[c.uid] = { pi:pi, z:"line", i:i }; }); });
   });
   return m;
@@ -3062,10 +3136,11 @@ function motionLocs(){
 function motionEls(){ return document.querySelectorAll("#side-0 .card[data-cid], #side-1 .card[data-cid], #side-0 .card[data-mcid], #side-1 .card[data-mcid]"); }
 function motionUid(el){ return el.dataset.cid || el.dataset.mcid; }
 function motionRect(r){ return { left:r.left, top:r.top, width:r.width, height:r.height }; }
-var MOTION_ZONES = ["deck", "hand", "grave", "heart", "ena", "waza"];
+var MOTION_ZONES = ["deck", "hand", "grave", "heart", "ena", "waza", "check"];
 // 置き場の位置（カード1枚の大きさ）。山札は山の位置、ほかは置き場の左上
 function motionZoneRect(pi, z){
-  var el = z === "deck" ? document.querySelector("#side-" + pi + " [data-pile]") : document.querySelector("#side-" + pi + ' .zone[data-drop="' + z + '"] .strip');
+  // チェックゾーンは盤面に描かないので、ハートゾーンの位置を使う
+  var el = z === "deck" ? document.querySelector("#side-" + pi + " [data-pile]") : document.querySelector("#side-" + pi + ' .zone[data-drop="' + (z === "check" ? "heart" : z) + '"] .strip');
   if (!el) return null;
   var r = el.getBoundingClientRect(); if (!r.width) return null;
   if (z === "deck") return motionRect(r);
@@ -3419,10 +3494,9 @@ function aiChargePick(pi){
   rest.sort(function(a, b){ return cost(a) - cost(b) || aiPw(a) - aiPw(b); });
   return { c:rest[0], why:"手札でいちばんコストが小さい" + (keep ? "。「" + nm(keep) + "」は出すために残す" : "") };
 }
-// 同じ色のエナだけで払えるか（色の決まりは未確定なので、人に聞くことになる払い方は AI はしない。→ B-3）
-function aiSameColor(pi, d, need){
-  if (d.color_mark === "unknown") return false;
-  return untappedEna(pi).filter(function(e){ var x = cardDef(e); return x && x.color_mark === d.color_mark; }).length >= need;
+// AI が聞かずに払えるか（色が読めていて、色の条件を満たせる。総合ルール 7.2.2.1）
+function aiCanPay(pi, d, need, srcCol){
+  return d.color_mark !== "unknown" && need <= untappedEna(pi).length && colorPayable(pi, need, d.color_mark, srcCol);
 }
 // AI が選べる出し方（人に聞かずに出せるもの）
 function aiPlays(pi){
@@ -3433,8 +3507,8 @@ function aiPlays(pi){
     for (var i = 0; i < LINE_COUNT; i++){
       if (m.bad[c.uid + "@" + i]) continue;
       var v = lineVerdict(c, pi, i);
-      if (!v.can || v.viaUp || v.pc.unknown) continue;
-      if (v.pc.need > 0 && !aiSameColor(pi, d, v.pc.need)) continue;
+      if (!v.can || v.pc.unknown) continue;
+      if (v.pc.need > 0 && !aiCanPay(pi, d, v.pc.need, v.pc.mode === "over" ? v.pc.ucol : null)) continue;
       out.push({ c:c, idx:i, top:lineTop(pi, i), need:v.pc.need });
     }
   });
@@ -3666,10 +3740,10 @@ function aiLineValue(p, my, op, W){
   var v = aiHoloLoss(L, W) + (kill ? W.kill : n * W.hit);
   return win ? v : -v;
 }
-// 返すのは bWaza の選択肢の番号（acts.length は「使わない」か「使用を終える」）
+// 返すのは bWaza の選択肢の番号（acts.length は「パス」。総合ルール 6.3.3）
 function aiWazaChoice(p, acts, oppCan){
   var o = 1 - p, my = aiPow(p), op = battler(o) ? aiPow(o) : -1, pass = acts.length, m = aiMemoNow();
-  var no = function(why){ aiSay(p, why + (oppCan ? "、ワザ・ブーストは使わない" : "、ワザ・ブーストの使用を終える")); return pass; };
+  var no = function(why){ aiSay(p, why + "、パス"); return pass; };
   if (my === null) return no("自分のパワーを計算できないので");
   if (op === null) return no("相手のパワーを計算できないので");
   if (my > op) return no("パワーで上回っている（" + my + " 対 " + op + "）ので");
@@ -3698,6 +3772,14 @@ function aiWazaChoice(p, acts, oppCan){
 // ---- ハートのトリガー ----
 // 考え方: 使えるトリガーは使う（エントリー・オーバー・ラストオーバーはコストを払わずに出せる、ドローは3枚引ける）。
 // ただしドロートリガーは、山札が少ない（3枚以下）ときは使わない
+// チェックゾーンに2枚以上あるとき、どれから処理するか（総合ルール 7.7.2.1.1）。いま使えるトリガーを持つカードから
+function aiCheckPick(p, C){
+  for (var i = 0; i < C.length; i++){
+    var d = cardDef(C[i]), kw = d && d.trigger && d.trigger !== "unknown" ? d.trigger.keyword : null, t = HEART_TRIGGERS[kw];
+    if (t && t.can(p, C[i])) return C[i];
+  }
+  return C[0];
+}
 function aiTrigChoice(p, h, kw, can){
   // 使わないときは、どのカードか・どのトリガーかを記録に出さない（相手に見せずに手札に加える。依頼者の判断 2026-10-22）
   if (!can){ aiSay(p, "ハートのカードを手札に加える"); return 0; }
@@ -3892,7 +3974,7 @@ function olLocked(){ return ol.on && (ol.loading || !olHolder() || !!ol.wait); }
 function olLockMsg(){ return ol.loading ? "部屋の盤面を読み込んでいます…" : ol.wait ? "相手が選んでいます…" : "相手の番です（相手の端末で操作しています）"; }
 function olRand(n){ var s = "", a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; for (var i = 0; i < n; i++) s += a[Math.floor(Math.random() * a.length)]; return s; }
 function olEachCard(P, fn){
-  ["hand", "deck", "heart", "ena", "waza", "grave"].forEach(function(z){ P[z].forEach(function(c){ fn(c, z); }); });
+  ["hand", "deck", "heart", "check", "ena", "waza", "grave"].forEach(function(z){ (P[z] || []).forEach(function(c){ fn(c, z); }); });
   P.line.forEach(function(st){ st.forEach(function(c){ fn(c, "line"); }); });
 }
 // 共有の盤面: 手札・山札・ハートと裏向きのカードの中身を消し、デッキの中身を消す
@@ -3900,7 +3982,7 @@ function olPublic(st){
   var S = JSON.parse(JSON.stringify(st));
   S.players.forEach(function(P){
     delete P.decklist;
-    olEachCard(P, function(c, z){ if (z === "hand" || z === "deck" || z === "heart" || !c.up) c.key = null; });
+    olEachCard(P, function(c, z){ if (z === "hand" || z === "deck" || z === "heart" || z === "check" || !c.up) c.key = null; });
   });
   return S;
 }
@@ -4023,12 +4105,12 @@ var OL_ANSWER = {
       return f.card.owner === 0 && f.card.up && z && z.zone !== "hand" && z.zone !== "deck" && z.zone !== "heart"; });
     olAnswer(req, { keys:olMyCardKeys(ok) });
   },
-  // ワザ・ブーストの番
+  // バトルフェイズアクションの番（ワザを使う／ブーストする／パス。総合ルール 6.3.3）
   waza: function(req, d){
     var acts = battleActs(0).filter(function(a){ return (d.failed || []).indexOf(a.c.uid) < 0; });
-    if (!acts.length) return olAnswer(req, { none:true });
+    if (!acts.length) return olAnswer(req, { pass:true, none:true });
     var send = function(i){
-      if (i >= acts.length) return olAnswer(req, i === acts.length ? { pass:true } : { end:true });
+      if (i >= acts.length) return olAnswer(req, { pass:true });
       var a = acts[i], cost = a.kind === "boost" ? boostOf(a.c).cost : cardDef(a.c).cost, col = cardDef(a.c).color_mark;
       olPickPay(cost, col, function(uids){
         if (!uids) return send(acts.length);
@@ -4036,34 +4118,36 @@ var OL_ANSWER = {
       });
     };
     if (isAI(0)) return send(aiWazaChoice(0, acts, true));
-    var labels = acts.map(actLabel).concat(["使わない（相手の番へ）", "ワザの使用を終えて、パワーを比べる"]);
-    fxChoose(sideBrief(0) + " 対 " + sideBrief(1) + "。あなたのワザ・ブーストの番です（先手から交互に1枚ずつ）。", labels, send,
-      function(){ send(acts.length); }, "バトル（あなたの番）");
+    var labels = acts.map(actLabel).concat([d.oppPassed ? "パス（相手もパスしたので、パワーを比べる）" : "パス（相手の番へ）"]);
+    fxChoose(sideBrief(0) + " 対 " + sideBrief(1) + "。あなたの番です。ワザ・ブーストは先手から交互に1枚ずつ。両者が続けてパスしたら、パワーを比べます" +
+      (d.oppPassed ? "（相手はパスしました）" : "") + "。", labels, send, function(){ send(acts.length); }, "バトル（あなたの番）");
   },
-  // ハートが破壊された: トリガーを使うか（持ち主だけが中身を見る）
+  // チェック処理（持ち主だけが中身を見る）: チェックゾーンのどのカードから処理するか、トリガーを使うか（と出し先）
   heart: function(req, d){
-    var f = findCard(d.uid); if (!f) return olAnswer(req, { use:false });
-    var h = f.card, df = cardDef(h), kw = df && df.trigger && df.trigger !== "unknown" ? df.trigger.keyword : null, trig = HEART_TRIGGERS[kw];
+    var uids = (d.uids || (d.uid ? [d.uid] : [])).filter(function(u){ var f = findCard(u); return f && f.card.owner === 0; });
+    if (!uids.length) return olAnswer(req, { use:false });
+    var one = function(u){
+    var h = findCard(u).card, df = cardDef(h), kw = df && df.trigger && df.trigger !== "unknown" ? df.trigger.keyword : null, trig = HEART_TRIGGERS[kw];
     var can = !!(trig && trig.can(0, h));
-    var finish = function(useIt, extra){ olAnswer(req, useIt ? Object.assign({ use:true, key:h.key, kw:kw }, extra || {}) : { use:false }); };
+    var finish = function(useIt, extra){ olAnswer(req, useIt ? Object.assign({ uid:u, use:true, key:h.key, kw:kw }, extra || {}) : { uid:u, use:false }); };
     // 使うときの出し先を決める
     var place = function(){
       if (kw === "ドローT") return finish(true);
       var ov = overTargets(0, h), fe = firstEmptyLine(0);
       if (kw === "ラストオーバーT"){
-        var n = state.players[0].heart.length - 1;
+        var n = state.players[0].heart.length;   // チェックゾーンに移ったので、いまのハートの枚数（総合ルール 8.3.5.1「その時点の自分のハート」）
         if (n > 1 || !ov.length) return finish(true, { over:null });
         if (isAI(0)){ var t0 = aiOverTarget(0, h, ov); return finish(true, { over:t0.uid }); }
         return fxChoose("自分のハートが " + n + " 枚（1枚以下）なので、「" + nm(h) + "」をオーバービートで出せます（コストは支払わない）。出しますか？",
           ["オーバービートで出す（下にするホロビトを選ぶ）", "出さない"], function(i){
             if (i === 1) return finish(true, { over:null });
-            startPick(ov.map(function(c){ return c.uid; }), "下にするホロビトを選んでください", function(u){ finish(true, { over:u }); }, function(){ finish(true, { over:null }); });
-          }, function(){ finish(true, { over:null }); }, "ハートが破壊された（トリガー）", heartHead(0, h));
+            startPick(ov.map(function(c){ return c.uid; }), "下にするホロビトを選んでください", function(x){ finish(true, { over:x }); }, function(){ finish(true, { over:null }); });
+          }, function(){ finish(true, { over:null }); }, "チェック処理（トリガー）", heartHead(0, h));
       }
       var pickOv = function(){
         if (isAI(0)) return finish(true, { over:aiOverTarget(0, h, ov).uid });
         startPick(ov.map(function(c){ return c.uid; }), "「" + nm(h) + "」をオーバービートで出します。下にするホロビトを選んでください",
-          function(u){ finish(true, { over:u }); }, function(){ finish(false); });
+          function(x){ finish(true, { over:x }); }, function(){ finish(false); });
       };
       if (kw === "オーバーT") return pickOv();
       // エントリーT
@@ -4071,13 +4155,19 @@ var OL_ANSWER = {
       if (fe < 0) return pickOv();
       if (isAI(0)){ var ch = aiEntryChoice(0, h, fe, ov); return ch.over ? finish(true, { over:ch.over.uid }) : finish(true, { line:fe }); }
       fxChoose("エントリートリガー：「" + nm(h) + "」をどう出しますか？（コストは支払わない）", ["空いているラインの1番前（第" + (fe + 1) + "ライン）に出す", "オーバービートで出す（下にするホロビトを選ぶ）"],
-        function(i){ if (i === 0) finish(true, { line:fe }); else pickOv(); }, function(){ finish(false); }, "ハートが破壊された（トリガー）", heartHead(0, h));
+        function(i){ if (i === 0) finish(true, { line:fe }); else pickOv(); }, function(){ finish(false); }, "チェック処理（トリガー）", heartHead(0, h));
     };
     if (isAI(0)){ var ai = can ? aiTrigChoice(0, h, kw, true) : 0; return (can && ai === 0) ? place() : finish(false); }
-    var labels = can ? ["トリガーを使う：" + kw + "「" + df.trigger.text + "」", "トリガーを使わずに手札に加える（相手には見せない）"] : ["手札に加える（相手には見せない）"];
-    fxChoose("あなたのハート（重なりの一番上）はダウンしていたので、ダメージで破壊されました。カードは「" + nm(h) + "」です（いまはあなたにだけ見えています）。" +
-      (can ? "手札に加える代わりにトリガーを使えます（任意）。使うと相手にも見せます。" : "このトリガーは、いまは使えません。"),
-      labels, function(i){ if (can && i === 0) place(); else finish(false); }, function(){ finish(false); }, "ハートが破壊された（トリガーチェック）", heartHead(0, h));
+    var labels = can ? ["トリガーを使う：" + kw + "「" + df.trigger.text + "」（相手にも見せる）", "トリガーを使わずに手札に加える（相手には見せない）"] : ["手札に加える（相手には見せない）"];
+    fxChoose("チェック処理：あなたのハートから破壊されたカードは「" + nm(h) + "」です（いまはあなたにだけ見えています）。" +
+      (can ? "トリガー効果を発動できます（任意）。発動するなら相手にも見せます。" : "このトリガーは、いまは使えません。"),
+      labels, function(i){ if (can && i === 0) place(); else finish(false); }, function(){ finish(false); }, "チェック処理（トリガー）", heartHead(0, h));
+    };
+    // 2枚以上あるときは、どれから処理するかを選ぶ（総合ルール 7.7.2.1.1）
+    if (uids.length === 1) return one(uids[0]);
+    if (isAI(0)) return one(aiCheckPick(0, uids.map(function(u){ return findCard(u).card; })).uid);
+    fxChoose("チェックゾーンに " + uids.length + " 枚あります。どのカードからチェック処理をしますか？（破壊された順番に関係なく選べます）",
+      uids.map(function(u){ return "「" + nm(findCard(u).card) + "」"; }), function(i){ one(uids[i]); }, function(){ one(uids[0]); }, "チェック処理");
   },
   // 効果で自分のカードを選ぶ（相手の効果ではなく、自分のカードの効果。番の端末が処理している）
   pick: function(req, d){
@@ -4106,17 +4196,12 @@ var OL_ANSWER = {
 // 自分で払うエナを決める（同じ色だけで払えれば自動。色の決まりが未確定で選ぶときは、自分で選ぶ）
 function olPickPay(cost, col, cb){
   if (typeof cost !== "number") return cb([]);
-  var free = untappedEna(0); if (free.length < cost) return cb(null);
-  var same = free.filter(function(c){ var e = cardDef(c); return e && e.color_mark === col; });
-  if (col !== "unknown" && same.length >= cost) return cb(same.slice(0, cost).map(function(c){ return c.uid; }));
-  if (isAI(0)) return cb(free.slice(0, cost).map(function(c){ return c.uid; }));
-  var chosen = [];
-  (function one(){
-    if (chosen.length === cost) return cb(chosen);
-    var rest = untappedEna(0).filter(function(e){ return chosen.indexOf(e.uid) < 0; });
-    startPick(rest.map(function(e){ return e.uid; }), "支払うエナを選んでください（" + (chosen.length + 1) + " / " + cost + " 枚目。何枚が" + col + "である必要があるかは未確定。→ B-3）",
-      function(u){ chosen.push(u); one(); }, function(){ cb(null); });
-  })();
+  if (cost === 0) return cb([]);
+  var plan = payPlan(0, cost, col, null);
+  if (plan.cant) return cb(null);
+  var uids = function(list){ return cb(list.map(function(c){ return c.uid; })); };
+  if (isAI(0) && plan.def) return uids(plan.def);
+  askPay(0, cost, col, null, "コスト " + cost + "（" + col + "）。", "支払うエナ", uids, function(){ cb(null); }, false);
 }
 // 表向きに置かれたのに中身が分からない相手のカード（準備⑥のエナなど）を、相手に見せてもらう
 function olRevealMissing(){
@@ -4296,11 +4381,11 @@ function olResume(){
 function olWaza(){
   var b = state.battle, p = b.turn, mine = battleActs(0);
   if (p === 1){
-    return olAsk("waza", { failed:b.olFailed || [] }, function(r){
+    return olAsk("waza", { failed:b.olFailed || [], oppPassed:b.passed === 0 }, function(r){
       var B = state.battle; if (!B) return render();
       if (r.use){
         var f = findCard(r.use.uid);
-        if (!f){ B.turn = 0; return battleRun(); }
+        if (!f){ return bPass(1, ""); }
         if (!f.card.key && CARDS[r.use.key]) f.card.key = r.use.key;
         f.card.up = true;
         olPayPreset = { pi:1, uids:r.pay || [] };
@@ -4308,41 +4393,31 @@ function olWaza(){
         return (r.use.kind === "boost" ? useBoost : useWaza)(r.use.uid, battler(1), function(used){
           olPayPreset = null;
           var B2 = state.battle; if (!B2) return render();
-          if (used){ (r.use.kind === "boost" ? B2.boosts : B2.used)[1].push(r.use.uid); B2.turn = 0; B2.olNone1 = false; }
+          if (used){ (r.use.kind === "boost" ? B2.boosts : B2.used)[1].push(r.use.uid); B2.turn = 0; delete B2.passed; }
           else (B2.olFailed = B2.olFailed || []).push(r.use.uid);
           battleRun();
         });
       }
-      snap();
-      var what = r.none ? "使えるワザ・ブーストがない" : r.end ? "ワザ・ブーストの使用を終えた" : "使わない";
-      if (r.none) B.olNone1 = true;
-      fxLog(SIDE_NAME[1] + "：" + what);
-      if (r.end || !mine.length){ B.stage = "judge"; return battleRun(); }
-      B.turn = 0; battleRun();
+      snap(); bPass(1, r.none ? "（使えるワザ・ブーストがない）" : "");
     });
   }
-  if (!mine.length){
-    if (b.olNone1){ fxLog("ワザ・ブースト：両者とも使えるものがない"); b.stage = "judge"; return battleRun(); }
-    fxLog(SIDE_NAME[0] + "：使えるワザ・ブーストがない"); b.turn = 1; return battleRun();
-  }
-  var user = battler(0), labels = mine.map(actLabel), nUse = labels.length, oppMay = !b.olNone1;
-  if (oppMay) labels.push("使わない（" + SIDE_NAME[1] + "の番へ）");
-  labels.push("ワザの使用を終えて、パワーを比べる");
+  if (!mine.length) return bPass(0, "（使えるワザ・ブーストがない）");
+  var user = battler(0), labels = mine.map(actLabel), nUse = labels.length;
+  labels.push(b.passed === 1 ? "パス（" + SIDE_NAME[1] + "もパスしたので、パワーを比べる）" : "パス（" + SIDE_NAME[1] + "の番へ）");
   var choose = function(i){
     if (i < nUse){
       var a = mine[i]; snap(); fxClear();
       return (a.kind === "boost" ? useBoost : useWaza)(a.c.uid, user, function(used){
         var B = state.battle; if (!B) return render();
-        if (used){ (a.kind === "boost" ? B.boosts : B.used)[0].push(a.c.uid); B.turn = 1; }
+        if (used){ (a.kind === "boost" ? B.boosts : B.used)[0].push(a.c.uid); B.turn = 1; delete B.passed; }
         battleRun(); });
     }
-    snap();
-    if (oppMay && i === nUse){ fxLog(SIDE_NAME[0] + "：使わない"); state.battle.turn = 1; return battleRun(); }
-    fxLog("ワザ・ブーストの使用を終えた"); state.battle.stage = "judge"; battleRun();
+    snap(); bPass(0, "");
   };
-  if (isAI(0)) return aiLater(function(){ choose(aiWazaChoice(0, mine, oppMay)); });
-  fxChoose(sideBrief(0) + " 対 " + sideBrief(1) + "。ワザとブーストは先手から交互に1枚ずつ使えます（手引書・ルール動画）。いまは" + SIDE_NAME[0] + "の番です。" +
-    "（いつ終わるかは手引書に書かれていないので、終えるときは「ワザの使用を終えて、パワーを比べる」を押します）", labels, choose, battlePause, bTitle());
+  if (isAI(0)) return aiLater(function(){ choose(aiWazaChoice(0, mine, true)); });
+  fxChoose(sideBrief(0) + " 対 " + sideBrief(1) + "。ワザ・ブーストは先手から交互に1枚ずつ使えます。使わないときは「パス」。" +
+    "両者が続けてパスしたら、パワーを比べます（総合ルール 6.3.2.3・6.3.2.4）。いまは" + SIDE_NAME[0] + "の番です" + (b.passed === 1 ? "（" + SIDE_NAME[1] + "はパスしました）" : "") + "。",
+    labels, choose, battlePause, bTitle());
 }
 // 相手のハートのトリガー（相手の端末で決めた出し先で）を処理する
 function olTrig(p, h, r, commit, next){
@@ -4453,8 +4528,7 @@ function destHTML(uid, pi){
     if (playWhy){ b += '<button data-mv="line" data-idx="' + i + '" data-cid="' + uid + '" disabled>第' + (i+1) + 'ライン<small class="lnsub">使えない</small></button>'; continue; }
     // 手札のホロビト: ラインごとに必要なエナを出し、足りないラインは押せない
     var v = lineVerdict(c, pi, i);
-    var sub = !v.can ? "使えない" : v.pc.unknown ? "支払いは手で" : v.viaUp ? "エナ " + (v.pc.need - v.pc.unsure) + "?"
-            : (v.pc.mode === "over" ? "重ねる・" : "") + "エナ " + v.pc.need;
+    var sub = !v.can ? "使えない" : v.pc.unknown ? "支払いは手で" : (v.pc.mode === "over" ? "重ねる・" : "") + "エナ " + v.pc.need;
     b += '<button data-mv="line" data-idx="' + i + '" data-cid="' + uid + '"' + (v.can ? "" : " disabled") + '>第' + (i+1) + 'ライン<small class="lnsub">' + sub + '</small></button>';
   }
   b += '<button data-mv="waza"  data-cid="' + uid + '">ワザ</button>';
@@ -4479,7 +4553,7 @@ function openCardSheet(uid, pi, force, after){
   if (!force && activeOf() !== null && pi !== activeOf()) pi = activeOf();
   sheetPi = pi; sheetForce = !!force; sheetAfter = after || null;
   var lock = loc && !force ? lockOf(loc.pi) : "";
-  // 手札のカードは横向きにできない（依頼者の指示。→ docs/rules_guess.md A-16）。
+  // 手札のカードは横向きにできない（依頼者の指示。手札は状態を持たないゾーン: 総合ルール 3.1.1・4.5。rules_guess.md §C の A-16）。
   // ただし既に横向きなら、直す手段として「縦向きに戻す」は出す。
   var canTurn = !(loc && loc.zone === "hand") || c.turned;
   var btns = [];
