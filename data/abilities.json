@@ -85,7 +85,8 @@
         "part": "ena_yomi",
         "args": {
           "n": 3,
-          "color": "緑"
+          "color": "緑",
+          "subject": "このホロビト"
         }
       },
       "sub": [
@@ -462,7 +463,8 @@
         "part": "ena_yomi",
         "args": {
           "n": 3,
-          "color": "緑"
+          "color": "緑",
+          "subject": "このホロビト"
         }
       },
       "sub": [
@@ -500,7 +502,8 @@
         "part": "ena_yomi",
         "args": {
           "n": 3,
-          "color": "赤"
+          "color": "赤",
+          "subject": "このホロビト"
         }
       },
       "sub": [
@@ -773,7 +776,8 @@
         "part": "ena_yomi",
         "args": {
           "n": 3,
-          "color": "赤"
+          "color": "赤",
+          "subject": "このホロビト"
         }
       },
       "sub": [
@@ -874,7 +878,8 @@
         "part": "ena_yomi",
         "args": {
           "n": 3,
-          "color": "赤"
+          "color": "赤",
+          "subject": "このホロビト"
         }
       },
       "sub": [
@@ -1234,7 +1239,8 @@
         "part": "ena_yomi",
         "args": {
           "n": 3,
-          "color": "緑"
+          "color": "緑",
+          "subject": "このホロビト"
         }
       },
       "sub": [
@@ -1357,7 +1363,8 @@
         "part": "ena_yomi",
         "args": {
           "n": 3,
-          "color": "緑"
+          "color": "緑",
+          "subject": "このホロビト"
         }
       },
       "sub": [
@@ -1656,7 +1663,8 @@
         "part": "ena_yomi",
         "args": {
           "n": 3,
-          "color": "緑"
+          "color": "緑",
+          "subject": "このホロビト"
         }
       },
       "sub": [
@@ -1700,7 +1708,12 @@
   "HB01-067": [
     {
       "conditions": [
-        "waza_used_by_this"
+        {
+          "part": "waza_used_by_this",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
       ],
       "effects": [
         {
@@ -1755,6 +1768,275 @@
   "HB01-073": [
     {
       "keyword": "double_damage"
+    }
+  ],
+  "HB01-075": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "青",
+          "subject": "このワザ"
+        }
+      },
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_battle",
+            "event": "ended"
+          },
+          "effects": [
+            {
+              "part": "select_own",
+              "args": {
+                "what": "エナ",
+                "n": 1,
+                "unit": "枚"
+              }
+            },
+            "make_unused"
+          ]
+        }
+      ]
+    }
+  ],
+  "HB01-076": [
+    {
+      "effects": [
+        {
+          "part": "only_cards_under_le_waza",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-077": [
+    {
+      "trigger": {
+        "subject": "this_holobito_battle",
+        "event": "ended"
+      },
+      "effects": [
+        {
+          "part": "select_waza_in_this_battle",
+          "args": {
+            "n": 1,
+            "m": 1
+          },
+          "then": "。"
+        },
+        "may_use_on_next_line"
+      ],
+      "note": "note_no_waza_without_holobito"
+    }
+  ],
+  "HB01-078": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "may_discard_waza_from_hand",
+          "args": {
+            "n": 2,
+            "m": 1
+          },
+          "then": "。"
+        },
+        {
+          "part": "select_own",
+          "args": {
+            "what": "エナ",
+            "n": 1,
+            "unit": "枚"
+          },
+          "if": [
+            "did_so"
+          ]
+        },
+        {
+          "part": "make_unused",
+          "if": [
+            "did_so"
+          ]
+        }
+      ]
+    }
+  ],
+  "HB01-079": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "青",
+          "subject": "このホロビト"
+        }
+      },
+      "sub": [
+        {
+          "conditions": [
+            {
+              "part": "waza_used_by_this",
+              "conj": "ば"
+            }
+          ],
+          "effects": [
+            {
+              "part": "power_plus",
+              "args": {
+                "n": 3000
+              }
+            },
+            {
+              "part": "gain_keyword",
+              "args": {
+                "keyword": "ダブルダメージ"
+              }
+            }
+          ],
+          "note": {
+            "part": "note_double_damage_held",
+            "sep": "\n"
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-080": [
+    {
+      "conditions": [
+        {
+          "part": "is_down",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 3000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-081": [
+    {
+      "keyword": "double_damage"
+    }
+  ],
+  "HB01-082": [
+    {
+      "trigger": {
+        "subject": "this_holobito_battle",
+        "event": "ended"
+      },
+      "effects": [
+        {
+          "part": "both_select_grave_waza",
+          "args": {
+            "n": 1
+          }
+        },
+        "may_put_to_ena_used"
+      ]
+    }
+  ],
+  "HB01-083": [
+    {
+      "keyword": "double_damage"
+    }
+  ],
+  "HB01-084": [
+    {
+      "keyword": {
+        "part": "kyomei",
+        "args": {
+          "tribe": "ジャスティス"
+        }
+      },
+      "sub": [
+        {
+          "effects": [
+            {
+              "part": "power_plus",
+              "args": {
+                "target": "このワザ",
+                "n": 3000
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "HB01-085": [
+    {
+      "trigger": {
+        "subject": "this_waza",
+        "particle": "を",
+        "event": "used"
+      },
+      "effects": [
+        "each_player_top_to_ena_used"
+      ]
+    }
+  ],
+  "HB01-087": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "青",
+          "subject": "このホロビト"
+        }
+      },
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_holobito",
+            "event": "entered"
+          },
+          "effects": [
+            {
+              "part": "look_top_n_of_deck",
+              "args": {
+                "n": 5
+              },
+              "then": "。"
+            },
+            {
+              "part": "may_reveal_waza_to_hand",
+              "args": {
+                "n": 1
+              },
+              "then": "。"
+            },
+            "rest_to_bottom_any_order"
+          ]
+        }
+      ]
+    }
+  ],
+  "HB01-088": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "destroyed"
+      },
+      "effects": [
+        "instead_of_grave_to_ena_unused"
+      ]
     }
   ]
 }

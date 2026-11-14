@@ -22,6 +22,8 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
       const P=(spec,o)=>{ const pl={heart:[],waza:[],ena:[],hand:[],grave:[],deck:[],line:[[],[],[],[],[]],decklist:{}};
         for(let i=0;i<10;i++) pl.deck.push(mk(null,o,{up:false}));
         for(const z of ['hand','ena','grave','heart','waza']) (spec[z]||[]).forEach(k=>pl[z].push(typeof k==='string'?mk(k,o):mk(k.k,o,k)));
+        // deck は山札の上から順。指定しなければ中身の分からないカード10枚だけ
+        (spec.deck||[]).slice().reverse().forEach(k=>pl.deck.unshift(typeof k==='string'?mk(k,o,{up:false}):mk(k.k,o,Object.assign({up:false},k))));
         (spec.line||[]).forEach((st,i)=>st.forEach(k=>pl.line[i].push(typeof k==='string'?mk(k,o):mk(k.k,o,k))));
         return pl; };
       state={round:1,phase:0,first:0,fxAuto:true,players:[P(me,0),P(opp,1)]};
@@ -688,6 +690,128 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await choose('+1 する');
   ok((await log()).includes('受けるダメージ：2') && (await q()).includes('ハートから破壊された') && (await q()).includes('レオまる'),'うつし身の撃: ダメージは2。1ダメージを2回入れるので、一番上のハートがダウンしてから破壊される');
   await choose('使わずに手札に');
+
+  // ===== 第7便（青。HB01-074〜HB01-088）=====
+  const B=()=>'HB01-074';   // 青のカード（骸のガシャ）。エナの色を青にするために使う
+
+  // HB01-080 カワエロ: このホロビトがダウンしているなら、このホロビトのパワーを+3000する
+  await setup({line:[[{k:'HB01-080',turned:true}]]});
+  ok((await badges(0,0)).includes('+3000'),'HB01-080: ダウンしている → +3000 の印が出る');
+  await setup({line:[['HB01-080']]});
+  ok(!(await badges(0,0)).includes('+3000'),'HB01-080: ダウンしていない → 印は出ない');
+
+  // HB01-088 来たる！ 恐怖の蜘蛛: 破壊されたとき、墓地に置くかわりに自分のエナに未使用で置く
+  await setup({line:[[{k:'HB01-088',turned:true}]], heart:H5},{line:[['HB01-001']], heart:H5});
+  await battle();
+  s=await S();
+  ok(!s.players[0].grave.some(c=>c.key==='HB01-088') && s.players[0].ena.some(c=>c.key==='HB01-088'&&!c.turned),
+     'HB01-088: ダウン中に負けて破壊された → 墓地ではなく自分のエナに未使用（縦向き）で置かれる');
+  await close();
+
+  // HB01-078 ナグレと用心棒ヘッドブル: 出たとき、手札からコスト2以上のワザ1枚を捨ててもよい。
+  // そうしたなら、自分のエナを1枚選び、未使用にする
+  await setup({line:[['HB01-078']], hand:['HB01-085'], ena:[{k:B(),turned:true},{k:B(),turned:true}]});
+  await tap(await top(0,0)); await fxbtn('出たとき');
+  pk=await picks();
+  ok(pk.length===1,'HB01-078: 出たとき、手札のコスト2以上のワザだけを候補に出す');
+  await tap(pk[0]);
+  pk=await picks();
+  ok(pk.length===2,'HB01-078: 捨てたので「そうしたなら」を満たし、自分のエナを選ばせる');
+  await tap(pk[0]);
+  s=await S();
+  ok(s.players[0].grave.some(c=>c.key==='HB01-085') && s.players[0].ena.filter(c=>!c.turned).length===1,
+     'HB01-078: 捨てたワザは墓地へ、選んだエナは未使用（縦向き）になる');
+  await close();
+  // 捨てなければ、「そうしたなら」を満たさないのでエナは未使用にならない
+  await setup({line:[['HB01-078']], hand:['HB01-085'], ena:[{k:B(),turned:true}]});
+  await tap(await top(0,0)); await fxbtn('出たとき');
+  await p.click('#pickCancel'); await wait(460);
+  ok((await S()).players[0].ena.every(c=>c.turned) && (await log()).includes('満たさないため'),
+     'HB01-078: 捨てなければ「そうしたなら」を満たさず、エナは未使用にならない');
+  await close();
+
+  // HB01-082 闘牛合 ヘッドナグル: バトルが終わったとき、お互いのプレイヤーは自分の墓地のワザを1枚選び、
+  // エナに使用済みで置いてもよい
+  await setup({line:[['HB01-082']], grave:['HB01-085']},{grave:['HB01-084']});
+  await tap(await top(0,0)); await fxbtn('バトルが終わったとき');
+  pk=await picks();
+  ok(pk.length===1,'HB01-082: まず自分の墓地のワザを選ばせる');
+  await tap(pk[0]);
+  pk=await picks();
+  ok(pk.length===1,'HB01-082: 続けて相手の墓地のワザを選ばせる（「お互いのプレイヤーは」）');
+  await tap(pk[0]);
+  s=await S();
+  ok(s.players[0].ena.some(c=>c.key==='HB01-085'&&c.turned) && s.players[1].ena.some(c=>c.key==='HB01-084'&&c.turned),
+     'HB01-082: 両方のエナに、選んだワザが使用済み（横向き）で置かれる');
+  await close();
+
+  // HB01-087 豆腐ナイスガイ: エナ詠み③（青）→ 出たとき、山札の上から5枚を見て、ワザ1枚を手札に加えてもよい。
+  // 残りを好きな順で山札の一番下に置く
+  await setup({line:[['HB01-087']], ena:[B(),B(),B()], deck:['HB01-085','HB01-074']});
+  await tap(await top(0,0)); await fxbtn('出たとき');
+  ok((await opts()).some(t=>t.includes('魂のまにまに')),'HB01-087: 見た5枚の中のワザだけを、手札に加える候補に出す');
+  await ans(0);
+  await ans(0);   // 残りは見た順のまま一番下へ
+  s=await S();
+  ok(s.players[0].hand.length===1 && s.players[0].hand[0].key==='HB01-085','HB01-087: 選んだワザが手札に加わる');
+  ok(s.players[0].deck.length===11 && s.players[0].deck[0].key!=='HB01-074','HB01-087: 残り4枚は山札の一番下へ（上から6枚目が一番上になる）');
+  await close();
+  // 青のエナが足りなければ、エナ詠みの効果は発動しない
+  await setup({line:[['HB01-087']], ena:[B()], deck:['HB01-085']});
+  await tap(await top(0,0)); await fxbtn('出たとき');
+  ok((await log()).includes('エナ詠み ③ の条件を満たしていないため発動しない'),'HB01-087: 青のエナが3枚未満 → エナ詠みの条件を満たさず発動しない');
+  await close();
+
+  // HB01-085 魂のまにまに: このワザを使ったとき、各プレイヤーは山札の一番上のカードをエナゾーンに使用済みで置く
+  await setup({hand:['HB01-085'], line:[[B()]], ena:[B(),B()], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle(); await choose('魂のまにまに');
+  s=await S();
+  ok(s.players[0].ena.length===3 && s.players[1].ena.length===1 && s.players[1].ena[0].turned,
+     'HB01-085: 両方のプレイヤーが、山札の一番上を使用済み（横向き）でエナに置く');
+  await close();
+
+  // HB01-076 無知の視: このワザは下にあるカードが1枚以下のホロビトのみ使える
+  await setup({hand:['HB01-076'], line:[[B(),B(),'HB01-079']], ena:[B()], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle(); await choose('無知の視');
+  ok((await log()).includes('使えない'),'HB01-076: 下にカードが2枚あるホロビトは使えない（1枚以下のみ）');
+  await choose('パス'); await close();
+
+  // HB01-079 義彦と正義の九郎坊: エナ詠み③（青）→ ワザを使っていれば +3000 し、ダブルダメージを得る
+  await setup({hand:['HB01-076'], line:[['HB01-079']], ena:[B(),B(),B(),B()], heart:H5},{line:[['HB01-001']], heart:H5});
+  await battle(); await choose('無知の視');
+  ok((await log()).includes('自分 10000'),'HB01-079: ワザを使ったので 4000＋ワザ3000＋効果3000 ＝ 10000');
+  s=await S();
+  ok(s.players[1].heart.filter(c=>c.turned).length===0 && s.players[1].heart.length===4,
+     'HB01-079: 効果で得たダブルダメージで、相手のハートが1枚破壊される（1ダメージ×2）');
+  await close();
+
+  // HB01-077 山姥ヤマヒメ: バトルが終わったとき、このバトルで使われていたコスト1のワザを1枚選ぶ。
+  // 「次のラインに使ってもよい」は未確定のため処理しない
+  await setup({hand:['HB01-076'], line:[['HB01-077']], ena:[B()], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle(); await choose('無知の視');
+  ok((await log()).includes('無知の視 を選んだ')||(await opts()).some(t=>t.includes('無知の視')),'HB01-077: バトルが終わったとき、このバトルで使われたコスト1のワザを選ばせる');
+  if((await opts()).some(t=>t.includes('無知の視'))) await choose('無知の視');
+  ok((await log()).includes('シミュレーターでは処理しません'),'HB01-077: 「次のラインに使ってもよい」は未確定のため処理せず、手で処理するよう案内する');
+  await close();
+
+  // HB01-081 カッパダイバー / HB01-083 三味線鬼灯とMCガシャ: ダブルダメージ
+  for(const k of ['HB01-081','HB01-083']){
+    await setup({line:[[k]]});
+    ok((await badges(0,0)).includes('ダブルダメージ'),k+': ダブルダメージの印が出る');
+  }
+
+  // HB01-075 石の上にも三念: エナ詠み③（青）→ このバトルが終わったとき、自分のエナを1枚選び、未使用にする
+  await setup({hand:['HB01-075'], ena:[{k:B(),turned:true},{k:B(),turned:true},{k:B(),turned:true}]});
+  await tap((await S()).players[0].hand[0].uid); await fxbtn('バトルが終わったとき');
+  pk=await picks();
+  ok(pk.length===3,'HB01-075: 青のエナが3枚 → エナ詠みを満たし、自分のエナを選ばせる');
+  await tap(pk[0]);
+  ok((await S()).players[0].ena.filter(c=>!c.turned).length===1,'HB01-075: 選んだエナが未使用（縦向き）になる');
+  await close();
+  await setup({hand:['HB01-075'], ena:[{k:B(),turned:true}]});
+  await tap((await S()).players[0].hand[0].uid); await fxbtn('バトルが終わったとき');
+  ok((await log()).includes('エナ詠み ③ の条件を満たしていないため発動しない'),'HB01-075: 青のエナが3枚未満 → 発動しない');
+  await close();
 
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));
   await b.close();

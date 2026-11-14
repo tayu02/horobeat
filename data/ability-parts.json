@@ -217,7 +217,7 @@
     "ena_yomi": {
       "role": "キーワード",
       "text": "エナ詠み {n:circled}",
-      "reminder": "自分のエナゾーンに{color}のエナが{n}枚以上あるなら、このホロビトは以下の効果を得る"
+      "reminder": "自分のエナゾーンに{color}のエナが{n}枚以上あるなら、{subject}は以下の効果を得る"
     },
     "kyomei": {
       "role": "キーワード",
@@ -356,11 +356,65 @@
     },
     "waza_used_by_this": {
       "role": "効果条件",
-      "text": "このホロビトがワザを使っている"
+      "text": "[{subject}が]ワザを使っている",
+      "ba": "[{subject}が]ワザを使っていれば"
     },
     "ena_count_ge": {
       "role": "効果条件",
       "text": "自分のエナゾーンにカードが{n}枚以上ある"
+    },
+    "only_cards_under_le_waza": {
+      "role": "制限",
+      "text": "このワザは下にあるカードが{n}枚以下のホロビトのみ使える"
+    },
+    "select_waza_in_this_battle": {
+      "role": "効果",
+      "text": "このバトルで使われていたコスト{n}のワザを{m}枚選ぶ"
+    },
+    "may_use_on_next_line": {
+      "role": "効果",
+      "text": "そのカードを次のラインに使ってもよい"
+    },
+    "note_no_waza_without_holobito": {
+      "role": "補足",
+      "text": "（ホロビトがいないラインではワザは使えない）"
+    },
+    "may_discard_waza_from_hand": {
+      "role": "効果",
+      "text": "手札からコスト{n}以上のワザ{m}枚を選び、捨ててもよい"
+    },
+    "both_select_grave_waza": {
+      "role": "効果",
+      "text": "お互いのプレイヤーは自分の墓地のワザを{n}枚選ぶ",
+      "ren": "お互いのプレイヤーは自分の墓地のワザを{n}枚選び"
+    },
+    "may_put_to_ena_used": {
+      "role": "効果",
+      "text": "エナに使用済みで置いてもよい"
+    },
+    "each_player_top_to_ena_used": {
+      "role": "効果",
+      "text": "各プレイヤーは山札の一番上のカードをエナゾーンに使用済みで置く"
+    },
+    "look_top_n_of_deck": {
+      "role": "効果",
+      "text": "自分の山札の上から{n}枚を見る"
+    },
+    "may_reveal_waza_to_hand": {
+      "role": "効果",
+      "text": "その中からワザを{n}枚見せ、手札に加えてもよい"
+    },
+    "rest_to_bottom_any_order": {
+      "role": "効果",
+      "text": "残りを好きな順で山札の一番下に置く"
+    },
+    "destroyed": {
+      "role": "発火条件2",
+      "text": "破壊された"
+    },
+    "instead_of_grave_to_ena_unused": {
+      "role": "効果",
+      "text": "このカードを墓地に置くかわりに自分のエナに未使用で置く"
     }
   }
 }

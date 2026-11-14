@@ -69,12 +69,17 @@ export function render(ab, parts = loadParts()) {
   }
   let s = "";
   // condFirst: 「…なら、…とき、…」のように、条件が発火条件より前に印字される形（HB01-032）
-  const conds = () => {
-    for (const c of ab.conditions || []) {
-      const { p, args } = P(c);
-      s += `${fill(p.text, args)}なら、`;
+  // 条件は「…なら、」で続くのが基本。「…ば、」で続く印字もある（HB01-079「ワザを使っていれば、」）。
+  // その形は部品の ba に、印字どおりの文面を持たせる
+  const condText = c => {
+    const { p, args } = P(c);
+    if (ref(c).conj === "ば") {
+      if (!p.ba) throw new Error(`部品 ${ref(c).part} に「ば」で続ける形（ba）がない`);
+      return `${fill(p.ba, args)}、`;
     }
+    return `${fill(p.text, args)}なら、`;
   };
+  const conds = () => { for (const c of ab.conditions || []) s += condText(c); };
   if (ab.condFirst) conds();
   if (ab.trigger) {
     const a = P(ab.trigger.subject), b = P(ab.trigger.event);
@@ -88,7 +93,7 @@ export function render(ab, parts = loadParts()) {
     const last = i === effs.length - 1;
     // 文の頭（最初の効果、または直前の効果が「。」で終わった）にだけ if の条件を書く
     if (ref(e).if && (i === 0 || ref(effs[i - 1]).then === "。"))
-      s += ref(e).if.map(c => { const q = P(c); return fill(q.p.text, q.args) + "なら、"; }).join("");
+      s += ref(e).if.map(condText).join("");
     if (last || ref(e).then === "。") s += fill(p.text, args) + "。";
     else {
       if (!p.ren) throw new Error(`部品 ${ref(e).part} に「し」「び」で続ける形（ren）がない`);
@@ -148,7 +153,7 @@ export function sameShape(a, b, parts = loadParts()) {
   if (!pa.ok || !pb.ok) return false;
   // 能力を、文中に現れる順の [骨組みの記号, 引数] の列にする
   const seq = (ab, out = []) => {
-    const r = (tag, x) => { if (x) { const q = ref(x); out.push([`${tag}:${q.part}:${q.then || ""}:${q.sep || ""}`, q.args || {}]);
+    const r = (tag, x) => { if (x) { const q = ref(x); out.push([`${tag}:${q.part}:${q.then || ""}:${q.sep || ""}:${q.conj || ""}`, q.args || {}]);
       (q.if || []).forEach(c => r("if", c)); } };
     r("kw", ab.keyword);
     if (ab.trigger) { r("subj", ab.trigger.subject); out.push(["particle:" + (ab.trigger.particle || "が"), {}]); r("ev", ab.trigger.event); }
@@ -214,16 +219,23 @@ export function parse(text, parts = loadParts()) {
   let best = { pos: -1, slot: "" }; // 失敗時の手がかり
   const note = (pos, slot) => { if (pos > best.pos) best = { pos, slot }; };
 
+  // 効果条件1つ分。「…なら、」が基本で、「…ば、」で続く印字もある（部品の ba）
+  function* condAt(pos) {
+    for (const [id, p] of byRole("効果条件")) {
+      const r = tryAt(text, pos, [{ tpl: p.text }, { lit: "なら、" }]);
+      if (r) yield { end: r.end, ref: mkref(id, r.args[0]), cost: freeLen(r.args[0]) };
+      if (!p.ba) continue;
+      const q = tryAt(text, pos, [{ tpl: p.ba }, { lit: "、" }]);
+      if (q) yield { end: q.end, ref: { part: id, ...argsOrNone(q.args[0]), conj: "ば" }, cost: freeLen(q.args[0]) };
+    }
+  }
+
   // 以下はすべて「ありうる分解」を列挙するジェネレーター。{ab, end, cost} を返す。
   function* sentence(pos) {
     yield* conditions(pos, [], 0, null);
     yield* triggered(pos, [], 0, false);
     // 「…なら、…とき、…」: 条件が発火条件より前に印字される形（HB01-032）
-    for (const [id, p] of byRole("効果条件")) {
-      const r = tryAt(text, pos, [{ tpl: p.text }, { lit: "なら、" }]);
-      if (!r) continue;
-      yield* triggered(r.end, [mkref(id, r.args[0])], freeLen(r.args[0]), true);
-    }
+    for (const c of condAt(pos)) yield* triggered(c.end, [c.ref], c.cost, true);
   }
   function* triggered(pos, pre, preCost, condFirst) {
     for (const [sid, sp] of byRole("発火条件1"))
@@ -240,11 +252,9 @@ export function parse(text, parts = loadParts()) {
     for (const x of effects(pos, [], cost))
       yield { ...x, ab: { ...(trig ? { trigger: trig } : {}), ...(acc.length ? { conditions: acc } : {}),
                           ...(condFirst ? { condFirst: true } : {}), ...x.ab } };
-    for (const [id, p] of byRole("効果条件")) {
-      const r = tryAt(text, pos, [{ tpl: p.text }, { lit: "なら、" }]);
-      if (!r) continue;
-      note(r.end, "効果条件 または 効果");
-      yield* conditions(r.end, [...acc, mkref(id, r.args[0])], cost + freeLen(r.args[0]), trig, condFirst);
+    for (const c of condAt(pos)) {
+      note(c.end, "効果条件 または 効果");
+      yield* conditions(c.end, [...acc, c.ref], cost + c.cost, trig, condFirst);
     }
   }
   // 効果1つ分の記録。if は、その効果が属する文の頭にある条件
@@ -257,11 +267,9 @@ export function parse(text, parts = loadParts()) {
     // 「。」のあとの文の頭には条件を置ける（「そうしたなら、」など）
     const last = acc[acc.length - 1];
     if (last && ref(last).then === "。")
-      for (const [cid, cp] of byRole("効果条件")) {
-        const r = tryAt(text, pos, [{ tpl: cp.text }, { lit: "なら、" }]);
-        if (!r) continue;
-        note(r.end, "効果");
-        yield* effects(r.end, acc, cost + freeLen(r.args[0]), [...ifs, mkref(cid, r.args[0])]);
+      for (const c of condAt(pos)) {
+        note(c.end, "効果");
+        yield* effects(c.end, acc, cost + c.cost, [...ifs, c.ref]);
       }
     for (const [id, p] of [...byRole("効果"), ...byRole("制限")]) {
       const r = tryAt(text, pos, [{ tpl: p.text }, { lit: "。" }]);
@@ -418,7 +426,7 @@ function indexMarkdown(abilities, parts) {
     rows.sort((a, b) => (u.get(b[0])?.size || 0) - (u.get(a[0])?.size || 0));
     for (const [id, p] of rows) {
       const cards = [...(u.get(id) || [])];
-      const t = p.reminder ? `${p.text}（${p.reminder}）` : p.text;
+      const t = (p.reminder ? `${p.text}（${p.reminder}）` : p.text) + (p.ba ? `<br>（「ば」で続く形: ${p.ba}）` : "");
       lines.push(`| \`${id}\` | ${esc(t)} | ${cards.length} | ${cards.join(" / ")} |`);
     }
     lines.push("");
