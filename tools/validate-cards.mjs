@@ -99,6 +99,15 @@ export function validateCards(path = "data/cards.json") {
     }
   }
 
+  // 画像を拡大して確かめ、**本当に違う印字だと確認した**組。
+  // 閾値を緩めるのではなく、確認した組だけを例外にする（確認した日と、確認のしかたを書く）
+  const CHECKED = [
+    ["このホロビトがラインに出ているなら、コストは1大きくなる。",
+     "このホロビトがラインに出ているなら、コストは1小さくなる。",
+     "2026-11-14 に HB01-055 の画像を拡大して確認。「小」と「大」は別の字で、部品も cost_smaller / cost_bigger に分けてある"],
+  ];
+  const checked = (a, b) => CHECKED.some(([x, y]) => (a === x && b === y) || (a === y && b === x));
+
   // 能力文どうしの「惜しい違い」
   const dist = (a, b) => {
     // レーベンシュタイン距離。短い方の長さを超えたら打ち切る。
@@ -135,7 +144,7 @@ export function validateCards(path = "data/cards.json") {
       // 同じ部品に違う値が入っているだけなら正当（例: エナ詠みの「緑」と「赤」）。
       // 文全体でも、部品の組み立てが同じで、違いが数字か省略できる語の有無だけなら正当
       // （例: HB01-033「自分の赤のホロビトが…+5000」と HD01-015「自分のホロビトが…+4000」）
-      if (d > 0 && d <= 3 && !sameTemplate(uniq[i], uniq[j]) && !sameShape(uniq[i], uniq[j]))
+      if (d > 0 && d <= 3 && !sameTemplate(uniq[i], uniq[j]) && !sameShape(uniq[i], uniq[j]) && !checked(uniq[i], uniq[j]))
         errors.push(`能力文が ${d} 文字だけ違う。転記ミスでないか確認すること:\n` +
           `      ${uniq[i]}\n        … ${byLine.get(uniq[i]).join(", ")}\n` +
           `      ${uniq[j]}\n        … ${byLine.get(uniq[j]).join(", ")}`);

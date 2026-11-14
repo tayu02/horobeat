@@ -304,6 +304,47 @@
     "no_power_up_in_battle": {
       "role": "効果",
       "text": "このホロビトはバトル中、ワザやブーストでパワーが上がらない"
+    },
+    "first_this_round": {
+      "role": "効果条件",
+      "text": "自分がこのラウンドで先手"
+    },
+    "cost_smaller": {
+      "role": "効果",
+      "text": "コストは{n}小さくなる"
+    },
+    "overbeaten_by_other": {
+      "role": "発火条件2",
+      "text": "《{name}》以外にオーバービートされた"
+    },
+    "cannot_use_waza": {
+      "role": "効果",
+      "text": "このホロビトはワザを使えない"
+    },
+    "opp_used_waza": {
+      "role": "効果条件",
+      "text": "相手のホロビトがワザを使っている"
+    },
+    "select_opponent": {
+      "role": "効果",
+      "text": "相手のホロビトを{n}体選ぶ",
+      "ren": "相手のホロビトを{n}体選び"
+    },
+    "may_swap_with_front": {
+      "role": "効果",
+      "text": "このホロビトの正面のホロビトと入れ替えてもよい"
+    },
+    "no_power_up_in_battle_both": {
+      "role": "効果",
+      "text": "このホロビトと正面のホロビトはバトル中、ワザやブーストでパワーが上がらない"
+    },
+    "only_cards_under_waza": {
+      "role": "制限",
+      "text": "このワザは、下にあるカードが{n}枚以上のホロビトのみ使える"
+    },
+    "note_no_swap_without_front": {
+      "role": "補足",
+      "text": "（正面にホロビトがいないなら、入れ替えることはできない）"
     }
   }
 }

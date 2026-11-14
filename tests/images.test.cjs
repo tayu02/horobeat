@@ -18,14 +18,16 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   const order=await p.evaluate(()=>{ const s=document.getElementById('sheet'); const a=s.querySelector('.cimgwrap'), d=s.querySelector('.cdetail'); return a && d && (a.compareDocumentPosition(d) & Node.DOCUMENT_POSITION_FOLLOWING) ? 'img-before-text':'other'; });
   ok(order==='img-before-text','画像は印字の文字情報の上に出る');
   await p.evaluate(()=>closeSheet());
-  // 保留のカード（イベント会場の写真しかないもの）。HB01-034 は 2026-11-14 に本物のカード画像を受領したので外れた
-  await open('HB01-049');
+  // 保留のカード（イベント会場の写真しかないもの）。HB01-034 と HB01-049 は 2026-11-14 に本物のカード画像を受領したので外れた
+  await open('UNKNOWN-utsushimi');
   const pend=await p.evaluate(()=>({img:!!document.querySelector('#sheet img.cimg'), txt:document.querySelector('#sheet .cimgnone')?.textContent||''}));
-  ok(!pend.img && pend.txt.includes('イベント会場の写真しかない'),'保留のカード（ふわふわイロハとぶかぶかジャンボ HB01-049）は画像を出さず理由を表示');
+  ok(!pend.img && pend.txt.includes('イベント会場の写真しかない'),'保留のカード（合術 うつし身の撃）は画像を出さず理由を表示');
   await p.evaluate(()=>closeSheet());
-  await open('HB01-034');
-  ok(await p.evaluate(()=>!!document.querySelector('#sheet img.cimg')),'HB01-034 は本物のカード画像を受領したので、画像が出る');
-  await p.evaluate(()=>closeSheet());
+  for(const k of ['HB01-034','HB01-049']){
+    await open(k);
+    ok(await p.evaluate(()=>!!document.querySelector('#sheet img.cimg')),k+' は本物のカード画像を受領したので、画像が出る');
+    await p.evaluate(()=>closeSheet());
+  }
   await open('HD02-001');
   ok(await p.evaluate(()=>!!document.querySelector('#sheet img.cimg')),'同名でも番号が違う HD02-001 には画像が出る');
   await p.evaluate(()=>closeSheet());

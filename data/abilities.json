@@ -1395,5 +1395,256 @@
         "no_power_up_in_battle"
       ]
     }
+  ],
+  "HB01-050": [
+    {
+      "keyword": "double_damage"
+    }
+  ],
+  "HB01-051": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "won_battle"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-052": [
+    {
+      "keyword": {
+        "part": "kyomei",
+        "args": {
+          "tribe": "スザク"
+        }
+      },
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_waza",
+            "particle": "を",
+            "event": "used"
+          },
+          "effects": [
+            {
+              "part": "opponent_discard",
+              "args": {
+                "n": 1
+              }
+            }
+          ]
+        },
+        {
+          "trigger": {
+            "subject": "this_battle",
+            "particle": "に",
+            "event": "won"
+          },
+          "effects": [
+            {
+              "part": "draw",
+              "args": {
+                "who": "自分",
+                "n": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "HB01-053": [
+    {
+      "conditions": [
+        "first_this_round"
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このワザ",
+            "n": 2000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-054": [
+    {
+      "keyword": {
+        "part": "barrier",
+        "args": {
+          "n": 2
+        }
+      }
+    }
+  ],
+  "HB01-055": [
+    {
+      "conditions": [
+        {
+          "part": "on_line",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "cost_smaller",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": {
+          "part": "overbeaten_by_other",
+          "args": {
+            "name": "ビュンドローン"
+          }
+        }
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-056": [
+    {
+      "effects": [
+        "cannot_use_waza"
+      ]
+    },
+    {
+      "conditions": [
+        "opp_used_waza"
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 4000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-057": [
+    {
+      "conditions": [
+        {
+          "part": "on_line",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "cost_bigger",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-058": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "select_opponent",
+          "args": {
+            "n": 1
+          }
+        },
+        "may_swap_with_front"
+      ],
+      "note": {
+        "part": "note_no_swap_without_front",
+        "sep": "\n"
+      }
+    }
+  ],
+  "HB01-059": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "conditions": [
+        {
+          "part": "lines_under_total_ge",
+          "args": {
+            "from": 1,
+            "to": 2,
+            "n": 5
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "n": 5000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-060": [
+    {
+      "effects": [
+        "no_power_up_in_battle_both"
+      ]
+    }
+  ],
+  "HB01-062": [
+    {
+      "effects": [
+        {
+          "part": "only_cards_under_waza",
+          "args": {
+            "n": 2
+          }
+        }
+      ]
+    },
+    {
+      "conditions": [
+        "won_this_battle"
+      ],
+      "effects": [
+        {
+          "part": "damage_to_opponent_plus",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
   ]
 }

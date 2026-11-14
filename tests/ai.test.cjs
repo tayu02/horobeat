@@ -54,11 +54,12 @@ async function run(label, viewport, touch, full){
   await p.click('#sheet button[data-ailv="normal"]'); await wait(80);
   ok((await p.textContent('#btnAi'))==='相手: AI ふつう' && await p.evaluate(()=>ui.ai==='normal'),'「AI ふつう」を選ぶと「相手: AI ふつう」になる');
   ok((await log()).includes('AI の番でもあなたに聞きます'),'記録にも、ルールが未確定のことは AI の番でも人に聞く、と出る');
-  await p.reload(); await wait(150);
+  // 読み込みが終わるのを待つ（決め打ちの待ち時間だと、込み合っているときに間に合わないことがあった）
+  await p.reload(); await until(()=>document.getElementById('btnAi')?.textContent==='相手: AI ふつう',8000);
   ok((await p.textContent('#btnAi'))==='相手: AI ふつう','再読み込みしても AI のまま（この端末の設定）');
   // 以前の保存（相手を AI にするかどうかだけ）は「ふつう」として読む
   await p.evaluate(()=>{ localStorage.setItem('horobeat-sim-ui', JSON.stringify({view:'play',deckPi:0,f:{},ai:true})); });
-  await p.reload(); await wait(150);
+  await p.reload(); await until(()=>document.getElementById('btnAi')?.textContent==='相手: AI ふつう',8000);
   ok((await p.textContent('#btnAi'))==='相手: AI ふつう','以前の保存（ai: true）は「AI ふつう」として読む');
   await pickAi('easy');
   ok((await p.textContent('#btnAi'))==='相手: AI かんたん' && await p.evaluate(()=>ui.ai==='easy'),'「AI かんたん」も選べる（2〜8 は「かんたん」で確かめる）');
