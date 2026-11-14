@@ -171,6 +171,19 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await setup({line:[['HB01-041']], ena:['HD02-001','HD02-001']});
   ok(!(await badges(0,0)).includes('+3000'),'HB01-041: 緑のエナ2枚 → 付かない');
 
+  // HB01-071 自分のエナゾーンにカードが8枚以上あるなら +4000（色は問わない）
+  await setup({line:[['HB01-071']], ena:Array(8).fill('HD01-001')});
+  ok((await badges(0,0)).includes('+4000'),'HB01-071: エナ8枚（赤ばかり）→ +4000（色は問わない）');
+  await setup({line:[['HB01-071']], ena:Array(7).fill('HD02-001')});
+  ok(!(await badges(0,0)).includes('+4000'),'HB01-071: エナ7枚 → 付かない');
+
+  // HB01-067 このホロビトがワザを使っているなら +3000（使っていなければ付かない）
+  await setup({line:[['HB01-067']]});
+  ok(!(await badges(0,0)).includes('+3000'),'HB01-067: ワザを使っていなければ +3000 の印は出ない');
+  await tap(await top(0,0));
+  ok((await sheet()).includes('+3000') && (await sheet()).includes('条件を満たしていない'),'HB01-067: メニューで「条件を満たしていない」と +3000 を示す');
+  await close();
+
   // HB01-055 ラインに出ているなら、コストは1小さくなる
   await setup({line:[['HB01-055']]});
   ok((await badges(0,0)).includes('コスト-1'),'HB01-055: ラインに出ている → コスト-1 の印');
@@ -202,12 +215,14 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await setup({line:[['HB01-030']]});
   ok((await badges(0,0)).includes('オーバービートされない'),'HB01-030: 「オーバービートされない」の印');
 
-  // HB01-054 2バリア（1バリアだけだったところに2が出た）
-  await setup({line:[['HB01-054']]});
-  ok((await badges(0,0)).includes('2バリア'),'HB01-054: 「2バリア」の印');
+  // HB01-054 / HB01-066 2バリア（1バリアだけだったところに2が出た）
+  for(const k of ['HB01-054','HB01-066']){
+    await setup({line:[[k]]});
+    ok((await badges(0,0)).includes('2バリア'),k+': 「2バリア」の印');
+  }
 
   // キーワード・破壊されない（印だけ）
-  for(const [k,t] of [['HB01-039','1バリア'],['HB01-050','ダブルダメージ'],['HB01-051','ダブルダメージ'],['HD02-002','1バリア'],['HD02-005','1バリア'],['HD02-010','1バリア'],['HD02-006','ダブルダメージ'],['HD01-016','ダブルダメージ'],['HD01-017','破壊されない'],['HD01-007','破壊されない'],['HB01-016','ダブルダメージ'],['HB01-018','ダブルダメージ'],['HB01-027','ダブルダメージ'],['HB01-025','ダブルダメージ']]){
+  for(const [k,t] of [['HB01-039','1バリア'],['HB01-064','ダブルダメージ'],['HB01-073','ダブルダメージ'],['HB01-050','ダブルダメージ'],['HB01-051','ダブルダメージ'],['HD02-002','1バリア'],['HD02-005','1バリア'],['HD02-010','1バリア'],['HD02-006','ダブルダメージ'],['HD01-016','ダブルダメージ'],['HD01-017','破壊されない'],['HD01-007','破壊されない'],['HB01-016','ダブルダメージ'],['HB01-018','ダブルダメージ'],['HB01-027','ダブルダメージ'],['HB01-025','ダブルダメージ']]){
     await setup({line:[[k]]});
     ok((await badges(0,0)).includes(t),k+': 「'+t+'」の印');
   }
@@ -429,6 +444,15 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await tap(await top(0,0)); await fxbtn('バトルが終わったとき');
   ok(!(await S()).players[0].line[0][0].turned,'HB01-025: ダウン中 → このホロビトが回復して縦向きになる');
 
+  // HB01-070 このホロビトがダウンしたとき、自分のエナを1枚選び、未使用にする
+  await setup({line:[['HB01-070']], ena:[{k:'HD01-001',turned:true},{k:'HD01-001',turned:true}]});
+  await tap(await top(0,0)); await fxbtn('ダウンしたとき');
+  pk=await picks();
+  ok(pk.length===2,'HB01-070: ダウンしたとき、自分のエナを選ばせる');
+  await tap(pk[0]);
+  ok((await S()).players[0].ena.filter(c=>!c.turned).length===1,'HB01-070: 選んだエナが未使用（縦向き）になる');
+  await close();
+
   // HD01-009 バトルに勝ったとき、第2〜5ラインにいるなら1枚引く
   await setup({line:[[],['HD01-009']]});
   await tap(await top(0,1)); await fxbtn('バトルに勝ったとき');
@@ -531,6 +555,21 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   const bo=await opts();
   ok(bo.some(t=>t.includes('「レオまる」をブーストで使う')) && !bo.some(t=>t.includes('「ヒナタを導く七尾」をブーストで使う')),'HB01-014: 判定できないので、選択肢には出さない（レオまるは出る）');
   await choose('パス');
+
+  // HB01-066 首領デカケゲン: 負けたとき、バリアで減らす分のダメージを相手に与える（トドメは刺せない）
+  await setup({line:[['HB01-066']], heart:H5},{line:[['HB01-061']], heart:H5});
+  await battle();
+  ok((await log()).includes('バリアで減らす分（2）'),'HB01-066: 負けたとき、バリアで減らす分（2）を相手プレイヤーに与える');
+  s=await S();
+  ok(s.players[1].heart.length===4,'HB01-066: 相手のハートが1枚破壊される（1ダメージでダウン、2ダメージ目で破壊）');
+  ok((await q()).includes('チェック処理'),'HB01-066: 破壊されたハートはチェック処理へ（負けたときの効果のダメージが先に処理される）');
+  await choose('使わずに手札に');
+  ok((await log()).includes('受けるダメージ：0') && (await S()).players[0].heart.filter(c=>c.turned).length===0,'HB01-066: 2バリアで、負けても自分のハートにダメージが入らない（1−2＝0）');
+
+  // HB01-064 滅獣 ジャンボ: エナ詠み③（緑）・バトルに勝ったとき、カードを3枚引く
+  await setup({line:[['HB01-064']], ena:['HD02-001','HD02-001','HD02-001'], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle();
+  ok((await S()).players[0].deck.length===7,'HB01-064: 緑のエナ3枚で勝ったので、カードを3枚引く');
 
   // HB01-053 びゅーんといくジャン！: 自分がこのラウンドで先手なら、このワザのパワーを+2000
   await setup({hand:['HB01-053'], line:[['HD02-001']], ena:['HD02-001'], heart:H5},{line:[['HD01-001']], heart:H5});

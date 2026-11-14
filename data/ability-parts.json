@@ -152,8 +152,8 @@
     },
     "make_unused": {
       "role": "効果",
-      "text": "{target}を未使用にする",
-      "ren": "{target}を未使用にし"
+      "text": "[{target}を]未使用にする",
+      "ren": "[{target}を]未使用にし"
     },
     "recover": {
       "role": "効果",
@@ -345,6 +345,22 @@
     "note_no_swap_without_front": {
       "role": "補足",
       "text": "（正面にホロビトがいないなら、入れ替えることはできない）"
+    },
+    "lost_battle": {
+      "role": "発火条件2",
+      "text": "バトルに負けた"
+    },
+    "barrier_damage_back": {
+      "role": "効果",
+      "text": "このホロビトのバリアで減らす分のダメージを相手プレイヤーに与える"
+    },
+    "waza_used_by_this": {
+      "role": "効果条件",
+      "text": "このホロビトがワザを使っている"
+    },
+    "ena_count_ge": {
+      "role": "効果条件",
+      "text": "自分のエナゾーンにカードが{n}枚以上ある"
     }
   }
 }

@@ -1646,5 +1646,115 @@
         }
       ]
     }
+  ],
+  "HB01-064": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "緑"
+        }
+      },
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_holobito",
+            "event": "won_battle"
+          },
+          "effects": [
+            {
+              "part": "draw",
+              "args": {
+                "n": 3
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "HB01-066": [
+    {
+      "keyword": {
+        "part": "barrier",
+        "args": {
+          "n": 2
+        }
+      }
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "lost_battle"
+      },
+      "effects": [
+        "barrier_damage_back"
+      ],
+      "note": "note_no_finish"
+    }
+  ],
+  "HB01-067": [
+    {
+      "conditions": [
+        "waza_used_by_this"
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "n": 3000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-070": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "downed"
+      },
+      "effects": [
+        {
+          "part": "select_own",
+          "args": {
+            "what": "エナ",
+            "n": 1,
+            "unit": "枚"
+          }
+        },
+        "make_unused"
+      ]
+    }
+  ],
+  "HB01-071": [
+    {
+      "conditions": [
+        {
+          "part": "ena_count_ge",
+          "args": {
+            "n": 8
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 4000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-073": [
+    {
+      "keyword": "double_damage"
+    }
   ]
 }
