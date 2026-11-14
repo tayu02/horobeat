@@ -147,6 +147,31 @@ async function run(label, viewport, touch){
   lb=await lineBtns();
   ok(lb[0].dis && (await p.textContent('#sheet')).includes('オーバービートできません'),'シビレ提灯（コスト2）の上には、コスト5のホロビトでも重ねられない（印字の効果）');
   await p.click('#sheet button[data-close="1"]'); await wait(100);
+  // 「このホロビトを手札から出すなら、オーバービートでは出せない」（カオナシライダー）
+  await setup({hand:['HB01-022'], line:[['HD01-001']], ena:['HD01-001','HD01-001','HD01-001','HD01-001']});
+  await open(await hand('HB01-022'));
+  lb=await lineBtns();
+  ok(lb[0].dis && (await p.textContent('#sheet')).includes('手札から出すならオーバービートでは出せません'),'カオナシライダー（コスト4）は、コスト2のホロビトの上にも重ねられない（印字の効果）');
+  ok(!lb[1].dis,'同じカードを、空いている第2ラインには出せる');
+  await p.click('#sheet button[data-close="1"]'); await wait(100);
+
+  // 「隣のラインにパワー4000以上のホロビトがいないなら出せない」（ヨスズメ）
+  await setup({hand:['HB01-021'], line:[['HD01-001']], ena:['HD01-001','HD01-001','HD01-001']});
+  await open(await hand('HB01-021'));
+  lb=await lineBtns();
+  ok(lb[1].dis && (await p.textContent('#sheet')).includes('パワー 4000 以上のホロビトがいないと出せません'),'ヨスズメ: 隣（第1ライン）がレオまる 2000 だけなら、第2ラインに出せない');
+  await p.click('#sheet button[data-close="1"]'); await wait(100);
+  await setup({hand:['HB01-021'], line:[['HB01-001']], ena:['HD01-001','HD01-001','HD01-001']});
+  await open(await hand('HB01-021'));
+  lb=await lineBtns();
+  ok(!lb[1].dis,'ヨスズメ: 隣（第1ライン）が雷獣 レオ 4000 なら、第2ラインに出せる');
+  await p.click('#sheet button[data-close="1"]'); await wait(100);
+  // 隣のパワーが印字だけでは決められないとき（パワーを変える効果を持つホロビトが隣にいる）は、判定できないと伝える
+  await setup({hand:['HB01-021'], line:[['HD01-005']], ena:['HD01-001','HD01-001','HD01-001']});
+  await open(await hand('HB01-021'));
+  ok((await p.textContent('#sheet')).includes('判定できません'),'ヨスズメ: 隣にパワーを変える効果のホロビトがいると、出せるかを判定できないと伝える');
+  await p.click('#sheet button[data-close="1"]'); await wait(100);
+
   // 「コストは1大きくなる」（しなずいさま）: ラインにいる間はコスト3として数える（総合ルール 6.2.5.5.1.1。印字の「コスト」はカードのコスト）
   await setup({hand:['HD02-004','HD02-005'], line:[['HD02-001']], ena:['HD02-001','HD02-001']});
   await open(await hand('HD02-004'));

@@ -230,6 +230,46 @@
     "cannot_be_overbeaten": {
       "role": "効果",
       "text": "このホロビトには、オーバービートできない"
+    },
+    "only_lower_card_waza": {
+      "role": "制限",
+      "text": "このワザは下にカードが{n}枚以上あるホロビトのみ使える"
+    },
+    "only_own_count_waza": {
+      "role": "制限",
+      "text": "このワザは、自分のホロビトが{n}体以上ラインに出ているときのみ使える"
+    },
+    "cannot_play_without_neighbor_power": {
+      "role": "効果",
+      "text": "このホロビトは、隣のラインにパワー{n}以上のホロビトがいないなら出せない"
+    },
+    "no_overbeat_from_hand": {
+      "role": "効果",
+      "text": "このホロビトを手札から出すなら、オーバービートでは出せない"
+    },
+    "may_swap_position": {
+      "role": "効果",
+      "text": "それと位置を入れ替えてもよい"
+    },
+    "to_grave": {
+      "role": "効果",
+      "text": "墓地に置く"
+    },
+    "damage_to_opponent": {
+      "role": "効果",
+      "text": "相手プレイヤーに{n}ダメージを与える"
+    },
+    "may_play_from_hand_to_line": {
+      "role": "効果",
+      "text": "手札からコスト{n}以下の{color}のホロビトを{m}体、ラインに出してもよい"
+    },
+    "note_no_finish": {
+      "role": "補足",
+      "text": "ただし、この効果でトドメは刺せない。"
+    },
+    "note_no_cost": {
+      "role": "補足",
+      "text": "（コストは支払わない）"
     }
   }
 }

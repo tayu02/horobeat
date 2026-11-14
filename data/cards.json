@@ -2164,6 +2164,559 @@
       "notes": [
         "ルビは「奮雷」にのみ印字"
       ]
+    },
+    {
+      "key": "HB01-016",
+      "id": "HB01-016",
+      "type": "ホロビト",
+      "name": "大豆 アズキチ",
+      "name_ruby": "ダイズ",
+      "color_mark": "赤",
+      "cost": 5,
+      "power": 6000,
+      "family": "オウチ・コミューン",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"
+      ],
+      "flavor": null,
+      "trigger": {
+        "icon": "上",
+        "keyword": "オーバーT",
+        "text": "このホロビトをオーバービートで出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "UC",
+          "illustrator": "Mamezawa",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「大豆」にのみ印字。「アズキチ」にルビはない"
+      ]
+    },
+    {
+      "key": "HB01-017",
+      "id": "HB01-017",
+      "type": "ホロビト",
+      "name": "えんらムッシュ",
+      "name_ruby": null,
+      "color_mark": "赤",
+      "cost": 6,
+      "power": 8500,
+      "family": "オウチ・コミューン",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [],
+      "flavor": "小動物、道具、目に見えぬ怪異…。ホロビトたちは世を忍ぶ姿に変幻し、人間たちの生活に潜んだ。彼らは運命に抗うべく、共に戦う契約者を求めていたのだ。",
+      "trigger": {
+        "icon": "上",
+        "keyword": "オーバーT",
+        "text": "このホロビトをオーバービートで出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "UC",
+          "illustrator": "Muna-Ge",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ]
+    },
+    {
+      "key": "HB01-018",
+      "id": "HB01-018",
+      "type": "ホロビト",
+      "name": "獣合 ヒヒヒメ",
+      "name_ruby": "ビーストビート",
+      "color_mark": "赤",
+      "cost": 7,
+      "power": 9000,
+      "family": "コンガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"
+      ],
+      "flavor": "この合戦に勝利するためには、オーバービートの極意をつかむといいらしいよ！！　―獣合 ヒヒヒメ",
+      "trigger": {
+        "icon": "終",
+        "keyword": "ラストオーバーT",
+        "text": "このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "UC",
+          "illustrator": "shishimi",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「獣合」にのみ印字。「ヒヒヒメ」にルビはない"
+      ]
+    },
+    {
+      "key": "HB01-019",
+      "id": "HB01-019",
+      "type": "ワザ",
+      "name": "以心電心",
+      "name_ruby": "イシンデンシン",
+      "color_mark": "赤",
+      "cost": 1,
+      "power": null,
+      "family": null,
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": null
+      },
+      "abilities": [
+        "共鳴：ライガ（このワザを使うホロビトの種族がライガであるなら、このワザは以下の効果を得る）\n・このワザを使ったとき、カードを1枚引く。\n・このワザのパワーを+1000する。"
+      ],
+      "flavor": "雷獣レオは仔猫の姿で先祖代々の寺を守りながら、少年ジンの力を見定めていた。そしてある日、彼の正義と熱意の力に感化され、その正体を現したのだ。",
+      "trigger": {
+        "icon": "札",
+        "keyword": "ドローT",
+        "text": "このワザを捨て、カードを3枚引く。"
+      },
+      "printings": [
+        {
+          "rarity_mark": "UC",
+          "illustrator": "Inuchiyo Meimaru",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "同名の 以心電心(HD01-013) と、能力欄の文面は一字一句同じ。カード番号・左辺の数値・フレーバー・イラストレーターが違う"
+      ]
+    },
+    {
+      "key": "HB01-020",
+      "id": "HB01-020",
+      "type": "ワザ",
+      "name": "和気愛々",
+      "name_ruby": "ワキアイアイ",
+      "color_mark": "赤",
+      "cost": 1,
+      "power": null,
+      "family": null,
+      "left_edge": {
+        "modifier": "+3000",
+        "cost": null
+      },
+      "abilities": [
+        "このワザは下にカードが1枚以上あるホロビトのみ使える。"
+      ],
+      "flavor": "人には見えぬ怪異が見える少年、鳴海ジンは怪異に好かれる幼馴染のヒナタに心を配り、奔走する日々を過ごしていた。",
+      "trigger": {
+        "icon": "札",
+        "keyword": "ドローT",
+        "text": "このワザを捨て、カードを3枚引く。"
+      },
+      "printings": [
+        {
+          "rarity_mark": "UC",
+          "illustrator": "hatapug",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ]
+    },
+    {
+      "key": "HB01-021",
+      "id": "HB01-021",
+      "type": "ホロビト",
+      "name": "ヨスズメ",
+      "name_ruby": null,
+      "color_mark": "赤",
+      "cost": 3,
+      "power": 5500,
+      "family": "フウガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "このホロビトは、隣のラインにパワー4000以上のホロビトがいないなら出せない。"
+      ],
+      "flavor": "暗い夜道、前から背後から「チッチ」と鳴く声が聞こえたら、それはきっと不吉を知らせるホロビト、ヨスズメたちの群れだ。　―『滅徒大全』〜第三巻 鳥の項〜",
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "R",
+          "illustrator": "rikose",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ]
+    },
+    {
+      "key": "HB01-022",
+      "id": "HB01-022",
+      "type": "ホロビト",
+      "name": "カオナシライダー",
+      "name_ruby": null,
+      "color_mark": "赤",
+      "cost": 4,
+      "power": 7000,
+      "family": "フウガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）",
+        "このホロビトを手札から出すなら、オーバービートでは出せない。"
+      ],
+      "flavor": null,
+      "trigger": {
+        "icon": "上",
+        "keyword": "オーバーT",
+        "text": "このホロビトをオーバービートで出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "R",
+          "illustrator": "Takayuki Futami",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ]
+    },
+    {
+      "key": "HB01-023",
+      "id": "HB01-023",
+      "type": "ホロビト",
+      "name": "滅獣 レオ",
+      "name_ruby": "ホロビースト",
+      "color_mark": "赤",
+      "cost": 5,
+      "power": 4000,
+      "family": "ライガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "このホロビトは破壊されない。",
+        "このホロビトがダウンしていないなら、パワーを+3000し、ダブルダメージを得る。（ダブルダメージを持つホロビトがバトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"
+      ],
+      "flavor": "ホロビトはみな元来、危険なほどに強大な力を秘めている。持てる力を解放したホロビトは本来の姿とされる戦闘形態「滅獣」となり、真の力を発揮するのだ。",
+      "trigger": {
+        "icon": "上",
+        "keyword": "オーバーT",
+        "text": "このホロビトをオーバービートで出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "R",
+          "illustrator": "Nasuno",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "「このホロビトは破壊されない。」に、雷合 レオジン(HD01-017) などが持つ注記（ダウンしているこのホロビトが…）は印字されていない",
+        "ルビは「滅獣」にのみ印字。「レオ」にルビはない"
+      ]
+    },
+    {
+      "key": "HB01-024",
+      "id": "HB01-024",
+      "type": "ホロビト",
+      "name": "夫婦円舞のえんら・えんら",
+      "name_ruby": "ふうふえんまん",
+      "color_mark": "赤",
+      "cost": 5,
+      "power": 5000,
+      "family": "オウチ・コミューン",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）",
+        "このホロビトが出たとき、自分のホロビトを1体選び、それと位置を入れ替えてもよい。"
+      ],
+      "flavor": null,
+      "trigger": {
+        "icon": "上",
+        "keyword": "オーバーT",
+        "text": "このホロビトをオーバービートで出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "R",
+          "illustrator": "Muna-Ge",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「夫婦円舞」にのみ印字"
+      ]
+    },
+    {
+      "key": "HB01-025",
+      "id": "HB01-025",
+      "type": "ホロビト",
+      "name": "滅獣 七尾",
+      "name_ruby": "ホロビースト ななお",
+      "color_mark": "赤",
+      "cost": 6,
+      "power": 7000,
+      "family": "マボロシ・コミューン",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）",
+        "このホロビトのバトルが終わったとき、このホロビトを回復する。"
+      ],
+      "flavor": "マボロシ・コミューンのホロビトは幻術を駆使し、他の妖怪や人間たちを惑わす存在とされてきた。しかし中には幻術を癒す力に転化させ、他者を救う者も現れた。",
+      "trigger": {
+        "icon": "上",
+        "keyword": "オーバーT",
+        "text": "このホロビトをオーバービートで出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "R",
+          "illustrator": "YUKI",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「滅獣」に ホロビースト（カタカナ）、「七尾」に ななお（ひらがな）"
+      ]
+    },
+    {
+      "key": "HB01-026",
+      "id": "HB01-026",
+      "type": "ホロビト",
+      "name": "鬼合 ユウ鬼",
+      "name_ruby": "オニビート キ",
+      "color_mark": "赤",
+      "cost": 6,
+      "power": 12000,
+      "family": "ユウキ・コミューン",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "このホロビトが出たとき、自分のエナを1枚選び、墓地に置く。"
+      ],
+      "flavor": "種族の絆が共鳴する時、ワザの力が高まり、ホロビト達はより一層強化された。それは同胞と共に生き抜くために習得した彼らの叫びであった。",
+      "trigger": {
+        "icon": "上",
+        "keyword": "オーバーT",
+        "text": "このホロビトをオーバービートで出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "R",
+          "illustrator": "Takayuki Futami",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "ルビは「鬼合」に オニビート、名前の末尾の「鬼」に キ。「ユウ」にルビはない"
+      ]
+    },
+    {
+      "key": "HB01-027",
+      "id": "HB01-027",
+      "type": "ホロビト",
+      "name": "雷獣おかん",
+      "name_ruby": "ライジュウ",
+      "color_mark": "赤",
+      "cost": 8,
+      "power": 12000,
+      "family": "ライガ・ファミリー",
+      "left_edge": {
+        "modifier": "+2000",
+        "cost": 1
+      },
+      "abilities": [
+        "ダブルダメージ（バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージを与える）"
+      ],
+      "flavor": "強烈な一閃を放つ雷を操るライガ・ファミリーは他種族から恐れられていた。毎日のように雷を落とす雷獣おかんは雷獣おとんとレオから恐れられていた。",
+      "trigger": {
+        "icon": "終",
+        "keyword": "ラストオーバーT",
+        "text": "このホロビトを見せて手札に加え、カードを1枚引く。さらに自分のハートが1枚以下なら、オーバービートで出せる。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "R",
+          "illustrator": "Mamezawa",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "同名の 雷獣おかん(HD01-016) と、能力欄・トリガーの文面は一字一句同じ。カード番号・コスト・パワー・フレーバーが違う",
+        "ルビは「雷獣」にのみ印字。「おかん」にルビはない"
+      ]
+    },
+    {
+      "key": "HB01-028",
+      "id": "HB01-028",
+      "type": "ワザ",
+      "name": "合術 雷桜迅雷",
+      "name_ruby": "ビートバースト ライオウジンライ",
+      "color_mark": "赤",
+      "cost": 2,
+      "power": null,
+      "family": null,
+      "left_edge": {
+        "modifier": "+4000",
+        "cost": null
+      },
+      "abilities": [
+        "このワザは、自分のホロビトが4体以上ラインに出ているときのみ使える。",
+        "このバトルに勝ったなら、このホロビトが相手プレイヤーに与えるダメージを+1する。"
+      ],
+      "flavor": null,
+      "trigger": {
+        "icon": "札",
+        "keyword": "ドローT",
+        "text": "このワザを捨て、カードを3枚引く。"
+      },
+      "printings": [
+        {
+          "rarity_mark": "R",
+          "illustrator": "teo",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ]
+    },
+    {
+      "key": "HB01-029",
+      "id": "HB01-029",
+      "type": "ワザ",
+      "name": "心斬一転",
+      "name_ruby": "シンキイッテン",
+      "color_mark": "赤",
+      "cost": 2,
+      "power": null,
+      "family": null,
+      "left_edge": {
+        "modifier": "+0000",
+        "cost": null
+      },
+      "abilities": [
+        "このワザを使ったとき、相手プレイヤーに1ダメージを与える。ただし、この効果でトドメは刺せない。"
+      ],
+      "flavor": "追い詰められたホロビトたちは、ワザを駆使して窮地を切り抜けた。諦めぬ限り、まだ負けてはいないのだ。",
+      "trigger": {
+        "icon": "札",
+        "keyword": "ドローT",
+        "text": "このワザを捨て、カードを3枚引く。"
+      },
+      "printings": [
+        {
+          "rarity_mark": "R",
+          "illustrator": "OZUNOYUMI",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "左辺の縦書き数値は「+0000」と印字されている（「+0」ではない）"
+      ]
+    },
+    {
+      "key": "HB01-030",
+      "id": "HB01-030",
+      "type": "ホロビト",
+      "name": "同胞よ集え！ レオ&ジン",
+      "name_ruby": "とも つど アンド",
+      "color_mark": "赤",
+      "cost": 3,
+      "power": 5500,
+      "family": "ライガ・ファミリー",
+      "left_edge": null,
+      "abilities": [
+        "このホロビトには、オーバービートできない。",
+        "このホロビトが出たとき、手札からコスト2以下の赤のホロビトを1体、ラインに出してもよい。\n（コストは支払わない）"
+      ],
+      "flavor": null,
+      "trigger": {
+        "icon": "出",
+        "keyword": "エントリーT",
+        "text": "このホロビトをラインに出す。（コストは支払わない）"
+      },
+      "printings": [
+        {
+          "rarity_mark": "SR",
+          "illustrator": "teo",
+          "frame": "通常",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        },
+        {
+          "rarity_mark": "DR",
+          "illustrator": "Inuchiyo Meimaru",
+          "frame": "縦札",
+          "source": "カード画像群（2026-11-14 受領 第2便）",
+          "source_date": "2026-11-14",
+          "legibility": "high"
+        }
+      ],
+      "notes": [
+        "左辺に縦書き数値と丸数字が印字されていない",
+        "2つの刷りで、能力欄・フレーバー（印字なし）・左辺（印字なし）は同じ",
+        "ルビは「同胞」に とも、「集」に つど、「&」に アンド"
+      ]
     }
   ]
 }
