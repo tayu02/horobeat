@@ -181,6 +181,15 @@ async function run(label, viewport, touch){
   await tap(s8.players[1].line[1][0].uid);
   s8=await S();
   ok(s8.players[1].line[1].length===2 && top(s8,1,1).key==='HB01-033','オーバートリガー: 選んだホロビトの上に出る（コストは支払わない）');
+  // よくある質問②（色）: コストを支払わないなら色の制限はない。青のホロビトのオーバートリガーで、赤のホロビトに重ねられる。
+  // コスト未満の条件はそのまま（総合ルール 8.3.3.2 6.2.5.5.1.1）
+  await setup({line:[['HB01-001']]},{line:[['HD01-001'],['HB01-001']], ena:['HD01-001'], heart:['HD01-001',{k:'HB01-097',turned:true}]});
+  await battle(); await choose('トリガーを使う');
+  pk=await picks(); s8=await S();
+  ok(pk.length===2 && pk.includes(s8.players[1].line[1][0].uid),'オーバートリガー（青）: 赤のホロビトも下にできる（コストを支払わないので色の制限はない。よくある質問②）');
+  await tap(s8.players[1].line[1][0].uid);
+  s8=await S();
+  ok(top(s8,1,1).key==='HB01-097' && s8.players[1].ena.every(c=>!c.turned),'オーバートリガー（青）: 赤の雷獣 レオの上に出て、エナは使わない');
   // ラストオーバーT: 手札に加えて1枚引く。その時点のハートが1枚以下なら、オーバービートで出せる
   await setup({line:[['HB01-001']]},{line:[['HD01-001'],['HB01-001']], heart:[{k:'HD02-006',turned:true}]});
   await battle(); await choose('トリガーを使う');
