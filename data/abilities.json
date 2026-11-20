@@ -198,7 +198,7 @@
       "note": "note_double_damage_held"
     }
   ],
-  "UNKNOWN-utsushimi": [
+  "HB01-094": [
     {
       "effects": [
         "only_if_other_waza_used"
@@ -1036,7 +1036,12 @@
             "unit": "体"
           }
         },
-        "may_swap_position"
+        {
+          "part": "may_swap_position",
+          "args": {
+            "with": "それ"
+          }
+        }
       ]
     }
   ],
@@ -2036,6 +2041,719 @@
       },
       "effects": [
         "instead_of_grave_to_ena_unused"
+      ]
+    }
+  ],
+  "HB01-089": [
+    {
+      "conditions": [
+        {
+          "part": "hand_count_ge",
+          "args": {
+            "n": 6
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 6000
+          }
+        }
+      ]
+    }
+  ],
+  "HB01-090": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        "each_player_top_to_ena_used"
+      ]
+    }
+  ],
+  "HB01-091": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "select_own_in_both_neighbors",
+          "args": {
+            "n": 1
+          }
+        },
+        "may_swap_position"
+      ]
+    }
+  ],
+  "HB01-092": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "downed"
+      },
+      "effects": [
+        "this_card_to_hand"
+      ],
+      "note": {
+        "part": "note_under_stays",
+        "sep": "\n"
+      }
+    }
+  ],
+  "HB01-093": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito_battle",
+        "event": "started"
+      },
+      "effects": [
+        {
+          "part": "select_waza_in_ena",
+          "args": {
+            "n": 3,
+            "color": "青",
+            "m": 1
+          }
+        },
+        "may_use_it"
+      ],
+      "note": {
+        "part": "note_no_cost",
+        "sep": "\n"
+      }
+    }
+  ],
+  "HB01-095": [
+    {
+      "trigger": {
+        "subject": "battle",
+        "event": "ended"
+      },
+      "effects": [
+        "this_card_to_hand"
+      ]
+    }
+  ],
+  "HB01-096": [
+    {
+      "trigger": {
+        "subject": "self_player",
+        "event": "ended_summon_phase"
+      },
+      "effects": [
+        {
+          "part": "select_waza_in_grave",
+          "args": {
+            "n": 1,
+            "m": 1
+          }
+        },
+        "may_return_it_to_hand"
+      ]
+    }
+  ],
+  "HB01-098": [
+    {
+      "conditions": [
+        "own_down_heart"
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 4000
+          }
+        }
+      ]
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "won_battle"
+      },
+      "conditions": [
+        "down_heart_exists"
+      ],
+      "effects": [
+        {
+          "part": "recover",
+          "then": "。"
+        },
+        {
+          "part": "deck_top_down_to_heart",
+          "args": {
+            "n": 1
+          },
+          "lead": "otherwise"
+        }
+      ]
+    }
+  ],
+  "HB01-099": [
+    {
+      "trigger": {
+        "subject": "this_holobito_battle",
+        "event": "ended"
+      },
+      "effects": [
+        {
+          "part": "all_own_ena_unused",
+          "then": "。"
+        },
+        {
+          "part": "select_own",
+          "args": {
+            "what": "エナ",
+            "n": 4,
+            "unit": "枚"
+          },
+          "lead": "after_that"
+        },
+        {
+          "part": "make_used",
+          "args": {
+            "target": "それ"
+          }
+        }
+      ]
+    }
+  ],
+  "PR-004": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "destroyed"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "PR-005": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "particle": "に",
+        "event": "boost_used"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ],
+      "note": {
+        "part": "note_not_by_waza",
+        "sep": "\n"
+      }
+    }
+  ],
+  "PR-006": [
+    {
+      "effects": [
+        "no_damage_on_lose"
+      ],
+      "note": {
+        "part": "note_own_heart_takes_damage",
+        "sep": "\n"
+      }
+    }
+  ],
+  "PR-008": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "won_battle"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ],
+      "note": {
+        "part": "note_also_without_front",
+        "sep": "\n"
+      }
+    }
+  ],
+  "PR-009": [
+    {
+      "keyword": "double_damage_no_wo"
+    }
+  ],
+  "PR-010": [
+    {
+      "effects": [
+        "cannot_be_overbeaten_no_comma"
+      ]
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 2
+          }
+        }
+      ]
+    }
+  ],
+  "PR-011": [
+    {
+      "keyword": "double_damage_no_wo"
+    },
+    {
+      "conditions": [
+        {
+          "part": "own_count_exists",
+          "args": {
+            "n": 4
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 3000
+          }
+        }
+      ]
+    }
+  ],
+  "PR-012": [
+    {
+      "trigger": {
+        "subject": "this_waza",
+        "particle": "を",
+        "event": "used"
+      },
+      "effects": [
+        {
+          "part": "recover",
+          "args": {
+            "target": "このホロビト"
+          }
+        }
+      ]
+    }
+  ],
+  "PR-014": [
+    {
+      "conditions": [
+        "won_this_battle"
+      ],
+      "effects": [
+        {
+          "part": "damage_to_opponent_plus",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "PR-015": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "overbeaten"
+      },
+      "conditions": [
+        {
+          "part": "is_down",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "PR-016": [
+    {
+      "conditions": [
+        "boost_used_on_this"
+      ],
+      "effects": [
+        {
+          "part": "power_plus_passive",
+          "args": {
+            "n": 2000
+          }
+        }
+      ],
+      "note": {
+        "part": "note_not_by_waza",
+        "sep": "\n"
+      }
+    }
+  ],
+  "PR-018": [
+    {
+      "keyword": {
+        "part": "barrier",
+        "args": {
+          "n": 1
+        }
+      }
+    }
+  ],
+  "PR-020": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "overbeaten"
+      },
+      "conditions": [
+        {
+          "part": "is_down",
+          "args": {
+            "subject": "このホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "PR-022": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "won_battle"
+      },
+      "effects": [
+        {
+          "part": "draw",
+          "args": {
+            "n": 1
+          }
+        }
+      ],
+      "note": {
+        "part": "note_also_without_front",
+        "sep": "\n"
+      }
+    }
+  ],
+  "PR-023": [
+    {
+      "keyword": "double_damage_no_wo"
+    }
+  ],
+  "PR-027": [
+    {
+      "conditions": [
+        "won_this_battle"
+      ],
+      "effects": [
+        {
+          "part": "damage_to_opponent_plus",
+          "args": {
+            "n": 1
+          }
+        }
+      ]
+    }
+  ],
+  "PR-025": [
+    {
+      "keyword": "double_damage_no_wo"
+    },
+    {
+      "conditions": [
+        {
+          "part": "cards_under_ge",
+          "args": {
+            "n": 2
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 2000
+          }
+        }
+      ]
+    }
+  ],
+  "PR-028": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "赤",
+          "subject": "このホロビト"
+        }
+      },
+      "sub": [
+        {
+          "conditions": [
+            "not_down"
+          ],
+          "effects": [
+            {
+              "part": "power_plus",
+              "args": {
+                "n": 3000
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "PR-029": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "緑",
+          "subject": "このホロビト"
+        }
+      },
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_holobito",
+            "event": "entered"
+          },
+          "effects": [
+            {
+              "part": "may_reveal_from_hand",
+              "args": {
+                "n": 7,
+                "m": 1
+              },
+              "then": "。"
+            },
+            {
+              "part": "draw",
+              "args": {
+                "n": 1
+              },
+              "if": [
+                "did_so"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "PR-030": [
+    {
+      "keyword": {
+        "part": "ena_yomi",
+        "args": {
+          "n": 3,
+          "color": "青",
+          "subject": "このホロビト"
+        }
+      },
+      "sub": [
+        {
+          "conditions": [
+            {
+              "part": "waza_used_by_this",
+              "conj": "ば"
+            }
+          ],
+          "effects": [
+            {
+              "part": "power_plus",
+              "args": {
+                "n": 3000
+              }
+            },
+            {
+              "part": "gain_keyword",
+              "args": {
+                "keyword": "ダブルダメージ"
+              }
+            }
+          ],
+          "note": {
+            "part": "note_double_damage_held_no_wo",
+            "sep": "\n"
+          }
+        }
+      ]
+    }
+  ],
+  "PR-031": [
+    {
+      "effects": [
+        "front_cannot_use_boost"
+      ]
+    }
+  ],
+  "PR-032": [
+    {
+      "keyword": {
+        "part": "barrier",
+        "args": {
+          "n": 1
+        }
+      }
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "select_line_opp_only",
+          "args": {
+            "n": 1
+          }
+        },
+        "may_move_to_that_line"
+      ]
+    }
+  ],
+  "PR-033": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        "each_player_recover_heart"
+      ]
+    }
+  ],
+  "PR-034": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "won_battle"
+      },
+      "effects": [
+        "lose_effect_this_round"
+      ],
+      "note": {
+        "part": "note_not_if_became_other",
+        "sep": "\n"
+      }
+    }
+  ],
+  "PR-035": [
+    {
+      "keyword": "double_damage"
+    },
+    {
+      "effects": [
+        "no_overbeat_from_hand"
+      ]
+    }
+  ],
+  "PR-036": [
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "entered"
+      },
+      "effects": [
+        {
+          "part": "select_opponent",
+          "args": {
+            "n": 1
+          }
+        },
+        "may_swap_with_front"
+      ],
+      "note": {
+        "part": "note_no_swap_without_front",
+        "sep": "\n"
+      }
+    }
+  ],
+  "PR-037": [
+    {
+      "keyword": {
+        "part": "kyomei",
+        "args": {
+          "tribe": "ライガ"
+        }
+      },
+      "sub": [
+        {
+          "trigger": {
+            "subject": "this_waza",
+            "particle": "を",
+            "event": "used"
+          },
+          "effects": [
+            {
+              "part": "draw",
+              "args": {
+                "n": 1
+              }
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "part": "power_plus",
+              "args": {
+                "target": "このワザ",
+                "n": 1000
+              }
+            }
+          ]
+        }
       ]
     }
   ]

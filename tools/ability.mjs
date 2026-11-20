@@ -91,9 +91,12 @@ export function render(ab, parts = loadParts()) {
   effs.forEach((e, i) => {
     const { p, args } = P(e);
     const last = i === effs.length - 1;
-    // 文の頭（最初の効果、または直前の効果が「。」で終わった）にだけ if の条件を書く
-    if (ref(e).if && (i === 0 || ref(effs[i - 1]).then === "。"))
-      s += ref(e).if.map(condText).join("");
+    // 文の頭（最初の効果、または直前の効果が「。」で終わった）にだけ、接続の語と if の条件を書く
+    if (i === 0 || ref(effs[i - 1]).then === "。") {
+      // 接続: 前の文を受けて次の文の頭に置かれる語（HB01-098「そうでなければ、」 HB01-099「その後、」）
+      if (ref(e).lead) s += `${P(ref(e).lead).p.text}、`;
+      if (ref(e).if) s += ref(e).if.map(condText).join("");
+    }
     if (last || ref(e).then === "。") s += fill(p.text, args) + "。";
     else {
       if (!p.ren) throw new Error(`部品 ${ref(e).part} に「し」「び」で続ける形（ren）がない`);
@@ -138,6 +141,7 @@ function compile(tpl) {
 // 転記ゆれの検出で「同じ部品に違う値が入っているだけ」の組を除くのに使う。
 export function sameTemplate(a, b, parts = loadParts()) {
   for (const p of Object.values(parts)) {
+    if (!p.text) continue;
     const src = p.reminder ? compile(p.text).src + "（" + compile(p.reminder).src + "）" : compile(p.text).src;
     const re = new RegExp("^(?:" + src + ")$");
     if (re.test(a) && re.test(b)) return true;
@@ -153,7 +157,7 @@ export function sameShape(a, b, parts = loadParts()) {
   if (!pa.ok || !pb.ok) return false;
   // 能力を、文中に現れる順の [骨組みの記号, 引数] の列にする
   const seq = (ab, out = []) => {
-    const r = (tag, x) => { if (x) { const q = ref(x); out.push([`${tag}:${q.part}:${q.then || ""}:${q.sep || ""}:${q.conj || ""}`, q.args || {}]);
+    const r = (tag, x) => { if (x) { const q = ref(x); out.push([`${tag}:${q.part}:${q.then || ""}:${q.sep || ""}:${q.conj || ""}:${q.lead || ""}`, q.args || {}]);
       (q.if || []).forEach(c => r("if", c)); } };
     r("kw", ab.keyword);
     if (ab.trigger) { r("subj", ab.trigger.subject); out.push(["particle:" + (ab.trigger.particle || "が"), {}]); r("ev", ab.trigger.event); }
@@ -222,7 +226,8 @@ export function parse(text, parts = loadParts()) {
   // 効果条件1つ分。「…なら、」が基本で、「…ば、」で続く印字もある（部品の ba）
   function* condAt(pos) {
     for (const [id, p] of byRole("効果条件")) {
-      const r = tryAt(text, pos, [{ tpl: p.text }, { lit: "なら、" }]);
+      // text を持たない部品は「ば」の形でしか印字されない（HB01-098 そうでなければ）
+      const r = p.text && tryAt(text, pos, [{ tpl: p.text }, { lit: "なら、" }]);
       if (r) yield { end: r.end, ref: mkref(id, r.args[0]), cost: freeLen(r.args[0]) };
       if (!p.ba) continue;
       const q = tryAt(text, pos, [{ tpl: p.ba }, { lit: "、" }]);
@@ -258,37 +263,46 @@ export function parse(text, parts = loadParts()) {
     }
   }
   // 効果1つ分の記録。if は、その効果が属する文の頭にある条件
-  const ent = (id, args, extra, ifs) => {
+  const ent = (id, args, extra, ifs, lead) => {
     const o = { part: id, ...argsOrNone(args), ...(extra || {}) };
+    if (lead) o.lead = lead;
     if (ifs.length) o.if = ifs;
     return Object.keys(o).length === 1 ? id : o;
   };
-  function* effects(pos, acc, cost, ifs = []) {
-    // 「。」のあとの文の頭には条件を置ける（「そうしたなら、」など）
+  function* effects(pos, acc, cost, ifs = [], lead = null) {
+    // 「。」のあとの文の頭には、接続の語（「その後、」）と条件（「そうしたなら、」など）を置ける
     const last = acc[acc.length - 1];
-    if (last && ref(last).then === "。")
+    if (last && ref(last).then === "。") {
+      if (!lead && !ifs.length)
+        for (const [lid, lp] of byRole("接続")) {
+          const r = tryAt(text, pos, [{ tpl: lp.text }, { lit: "、" }]);
+          if (!r) continue;
+          note(r.end, "効果");
+          yield* effects(r.end, acc, cost, ifs, lid);
+        }
       for (const c of condAt(pos)) {
         note(c.end, "効果");
-        yield* effects(c.end, acc, cost + c.cost, [...ifs, c.ref]);
+        yield* effects(c.end, acc, cost + c.cost, [...ifs, c.ref], lead);
       }
+    }
     for (const [id, p] of [...byRole("効果"), ...byRole("制限")]) {
       const r = tryAt(text, pos, [{ tpl: p.text }, { lit: "。" }]);
       if (r) {
         const c = cost + freeLen(r.args[0]);
-        const eff = [...acc, ent(id, r.args[0], null, ifs)];
+        const eff = [...acc, ent(id, r.args[0], null, ifs, lead)];
         if (r.end === text.length || text.startsWith("\n・", r.end)) yield { ab: { effects: eff }, end: r.end, cost: c };
         for (const sep of ["", "\n"])
           for (const [nid, np] of byRole("補足"))
             if (text.slice(r.end) === sep + np.text)
               yield { ab: { effects: eff, note: sep ? { part: nid, sep } : nid }, end: text.length, cost: c };
         note(r.end, "補足 または 次の効果");
-        yield* effects(r.end, [...acc, ent(id, r.args[0], { then: "。" }, ifs)], c);
+        yield* effects(r.end, [...acc, ent(id, r.args[0], { then: "。" }, ifs, lead)], c);
       }
       if (p.ren) {
         const q = tryAt(text, pos, [{ tpl: p.ren }, { lit: "、" }]);
         if (q) {
           note(q.end, "続く効果");
-          yield* effects(q.end, [...acc, ent(id, q.args[0], null, ifs)], cost + freeLen(q.args[0]), ifs);
+          yield* effects(q.end, [...acc, ent(id, q.args[0], null, ifs, lead)], cost + freeLen(q.args[0]), ifs);
         }
       }
     }
@@ -369,7 +383,7 @@ export function buildAll(cards = JSON.parse(readFileSync(CARDS_PATH, "utf8")).ca
     mark(ab.keyword); mark(ab.note);
     if (ab.trigger) { mark(ab.trigger.subject); mark(ab.trigger.event); }
     (ab.conditions || []).forEach(mark);
-    (ab.effects || []).forEach(e => { mark(e); (ref(e).if || []).forEach(mark); });
+    (ab.effects || []).forEach(e => { mark(e); mark(ref(e).lead); (ref(e).if || []).forEach(mark); });
     (ab.sub || []).forEach(walk);
   };
   Object.values(out).flat().forEach(walk);
@@ -399,7 +413,7 @@ function usage(abilities) {
     add(ab.keyword, key); add(ab.note, key);
     if (ab.trigger) { add(ab.trigger.subject, key); add(ab.trigger.event, key); }
     (ab.conditions || []).forEach(r => add(r, key));
-    (ab.effects || []).forEach(r => { add(r, key); (ref(r).if || []).forEach(c => add(c, key)); });
+    (ab.effects || []).forEach(r => { add(r, key); add(ref(r).lead, key); (ref(r).if || []).forEach(c => add(c, key)); });
     (ab.sub || []).forEach(x => walk(x, key));
   };
   for (const [key, list] of Object.entries(abilities)) list.forEach(ab => walk(ab, key));
@@ -408,7 +422,7 @@ function usage(abilities) {
 
 function indexMarkdown(abilities, parts) {
   const u = usage(abilities);
-  const roles = ["発火条件1", "発火条件2", "効果条件", "効果", "制限", "補足", "キーワード"];
+  const roles = ["発火条件1", "発火条件2", "効果条件", "接続", "効果", "制限", "補足", "キーワード"];
   const esc = s => s.replace(/\|/g, "\\|").replace(/\n/g, "<br>");
   const lines = [
     BEGIN, "",
@@ -426,7 +440,7 @@ function indexMarkdown(abilities, parts) {
     rows.sort((a, b) => (u.get(b[0])?.size || 0) - (u.get(a[0])?.size || 0));
     for (const [id, p] of rows) {
       const cards = [...(u.get(id) || [])];
-      const t = (p.reminder ? `${p.text}（${p.reminder}）` : p.text) + (p.ba ? `<br>（「ば」で続く形: ${p.ba}）` : "");
+      const t = (p.reminder ? `${p.text}（${p.reminder}）` : p.text || "") + (p.ba ? `${p.text ? "<br>" : ""}（「ば」で続く形: ${p.ba}）` : "");
       lines.push(`| \`${id}\` | ${esc(t)} | ${cards.length} | ${cards.join(" / ")} |`);
     }
     lines.push("");

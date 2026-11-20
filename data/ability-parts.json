@@ -13,7 +13,8 @@
     "効果": "文の本体",
     "制限": "使える場面を限る文",
     "補足": "文の後ろに付く（ ）書きの注記",
-    "キーワード": "名前（説明）の形で印字されるもの"
+    "キーワード": "名前（説明）の形で印字されるもの",
+    "接続": "前の文を受けて、次の文の頭に置かれる語（「その後、」「そうでなければ、」）"
   },
   "parts": {
     "this_holobito": {
@@ -182,7 +183,7 @@
     },
     "only_if_other_waza_used": {
       "role": "制限",
-      "text": "このワザは自分がこのバトルで他のワザを使っているときのみ使える"
+      "text": "このワザは、自分がこのバトルで他のワザを使っているときのみ使える"
     },
     "note_no_barrier": {
       "role": "補足",
@@ -250,7 +251,7 @@
     },
     "may_swap_position": {
       "role": "効果",
-      "text": "それと位置を入れ替えてもよい"
+      "text": "[{with}と]位置を入れ替えてもよい"
     },
     "to_grave": {
       "role": "効果",
@@ -415,6 +416,139 @@
     "instead_of_grave_to_ena_unused": {
       "role": "効果",
       "text": "このカードを墓地に置くかわりに自分のエナに未使用で置く"
+    },
+    "hand_count_ge": {
+      "role": "効果条件",
+      "text": "手札が{n}枚以上ある"
+    },
+    "own_down_heart": {
+      "role": "効果条件",
+      "text": "自分にダウンしているハートがある"
+    },
+    "down_heart_exists": {
+      "role": "効果条件",
+      "text": "ダウンしているハートがある"
+    },
+    "started": {
+      "role": "発火条件2",
+      "text": "始まった"
+    },
+    "self_player": {
+      "role": "発火条件1",
+      "text": "自分"
+    },
+    "ended_summon_phase": {
+      "role": "発火条件2",
+      "text": "召喚フェイズを終えた"
+    },
+    "otherwise": {
+      "role": "接続",
+      "text": "そうでなければ"
+    },
+    "after_that": {
+      "role": "接続",
+      "text": "その後"
+    },
+    "select_own_in_both_neighbors": {
+      "role": "効果",
+      "text": "両隣のラインにいる自分のホロビト{n}体を選ぶ",
+      "ren": "両隣のラインにいる自分のホロビト{n}体を選び"
+    },
+    "this_card_to_hand": {
+      "role": "効果",
+      "text": "このカードを手札に戻す"
+    },
+    "note_under_stays": {
+      "role": "補足",
+      "text": "（この下にあるカードはラインに残る）"
+    },
+    "select_waza_in_ena": {
+      "role": "効果",
+      "text": "自分のエナにあるコスト{n}以下の{color}のワザ{m}枚を選ぶ",
+      "ren": "自分のエナにあるコスト{n}以下の{color}のワザ{m}枚を選び"
+    },
+    "may_use_it": {
+      "role": "効果",
+      "text": "使用してもよい"
+    },
+    "select_waza_in_grave": {
+      "role": "効果",
+      "text": "墓地にあるコスト{n}のワザを{m}枚選ぶ",
+      "ren": "墓地にあるコスト{n}のワザを{m}枚選び"
+    },
+    "may_return_it_to_hand": {
+      "role": "効果",
+      "text": "それを手札に戻してもよい"
+    },
+    "deck_top_down_to_heart": {
+      "role": "効果",
+      "text": "山札の上から{n}枚をダウンさせてハートに加える"
+    },
+    "all_own_ena_unused": {
+      "role": "効果",
+      "text": "自分のエナを全て未使用にする"
+    },
+    "make_used": {
+      "role": "効果",
+      "text": "[{target}を]使用済みにする"
+    },
+    "double_damage_no_wo": {
+      "role": "キーワード",
+      "text": "ダブルダメージ",
+      "reminder": "バトルに勝ったなら、相手プレイヤーに1ではなく2ダメージ与える"
+    },
+    "note_double_damage_held_no_wo": {
+      "role": "補足",
+      "text": "（ダブルダメージを持つホロビトがバトルに勝ったなら、相手プレイヤーに1ではなく2ダメージ与える）"
+    },
+    "cannot_be_overbeaten_no_comma": {
+      "role": "効果",
+      "text": "このホロビトにはオーバービートできない"
+    },
+    "own_count_exists": {
+      "role": "効果条件",
+      "text": "自分の[{color}の]ホロビトが{n}体以上いる"
+    },
+    "boost_used": {
+      "role": "発火条件2",
+      "text": "ブーストを使った"
+    },
+    "lose_effect_this_round": {
+      "role": "効果",
+      "text": "正面のホロビトの一番上のカードは、このラウンド中効果を失う"
+    },
+    "note_not_if_became_other": {
+      "role": "補足",
+      "text": "（トリガーなどで別のホロビトになったなら、その効果は失わせない）"
+    },
+    "each_player_recover_heart": {
+      "role": "効果",
+      "text": "各プレイヤーはハートを回復する"
+    },
+    "select_line_opp_only": {
+      "role": "効果",
+      "text": "相手のホロビトのみがいるラインを{n}つ選ぶ",
+      "ren": "相手のホロビトのみがいるラインを{n}つ選び"
+    },
+    "may_move_to_that_line": {
+      "role": "効果",
+      "text": "そのラインに移動してもよい"
+    },
+    "front_cannot_use_boost": {
+      "role": "効果",
+      "text": "このホロビトのバトル中、正面のホロビトはブーストを使えない"
+    },
+    "no_damage_on_lose": {
+      "role": "効果",
+      "text": "このホロビトはバトルに負けてもダメージを受けない"
+    },
+    "note_own_heart_takes_damage": {
+      "role": "補足",
+      "text": "（自分のハートはダメージを受ける）"
+    },
+    "note_also_without_front": {
+      "role": "補足",
+      "text": "（正面に相手のホロビトがいない場合も発動する）"
     }
   }
 }

@@ -46,7 +46,7 @@ async function run(label, viewport, touch){
 
   // --- 絞り込み: 文字 ---
   await p.fill('#fQ','しなずいさま'); await wait(30);
-  ok(same(await shownSorted(),['HB01-034','HD02-001']),'名前で絞り込める（しなずいさま → 2種類）');
+  ok(same(await shownSorted(),['HB01-034','HD02-001','PR-016']),'名前で絞り込める（しなずいさま → 3種類）');
   ok(await p.evaluate(()=>document.getElementById('fQ').classList.contains('on')),'使っている絞り込みに印が付く');
   await p.fill('#fQ','ライガ'); await wait(30);
   ok(same(await shownSorted(),where(d=>nameText(d).includes('ライガ'))),'種族の文字でも絞り込める（ライガ → '+where(d=>nameText(d).includes('ライガ')).length+'種類）');
@@ -75,13 +75,23 @@ async function run(label, viewport, touch){
     ['fRar','SR',d=>d.printings.some(x=>x.rarity_mark==='SR')],
   ];
   for(const [id,v,fn] of cases){
-    await pick(id,v);
     const exp=where(fn);
-    ok(exp.length>0&&same(await shownSorted(),exp),id+' = '+v+' で '+exp.length+' 種類に絞れる');
+    // 選択肢は印字から写した値だけ。当てはまるカードが1枚もない値は、そもそも選択肢に出ない
+    // （2026-11-19 に最後の unknown のカードが確定したので、unknown の選択肢は消えた）
+    if(!exp.length){
+      ok(!(await p.evaluate(i=>!!document.querySelector('#'+i+' option[value="unknown"]'),id)),
+         id+' = '+v+' は、当てはまるカードが1枚もないので選択肢に出ない');
+      continue;
+    }
+    await pick(id,v);
+    ok(same(await shownSorted(),exp),id+' = '+v+' で '+exp.length+' 種類に絞れる');
     await clear();
   }
   const opts=await p.evaluate(()=>[...document.querySelectorAll('#fTrig option')].map(o=>o.textContent));
-  ok(opts[0]==='トリガー'&&opts.includes('トリガー: unknown（読めない）')&&opts.includes('トリガー: エントリーT'),'選択肢に「…: unknown（読めない）」がある '+JSON.stringify(opts));
+  ok(opts[0]==='トリガー'&&opts.includes('トリガー: エントリーT')&&opts.slice(1).every(t=>t.startsWith('トリガー: ')),'選択肢は「項目名: 値」の形で出る '+JSON.stringify(opts));
+  // 読めない値の見出しの作り方。いま unknown のトリガーを持つカードは1枚もない（2026-11-19 に最後の1枚が確定した）ので、
+  // 見出しを作る所だけを直に呼んで確かめる（カードデータに架空の値を足さない）
+  ok(await p.evaluate(()=>filterOptLabel(FILTERS.find(F=>F.id==='fTrig'),'unknown'))==='トリガー: unknown（読めない）','読めない値は「…: unknown（読めない）」と出す');
   const costOpts=await p.evaluate(()=>[...document.querySelectorAll('#fCost option')].slice(1).map(o=>o.value));
   ok(same(costOpts,[...new Set(CARDS.map(d=>String(d.cost)))].sort((a,b)=>a-b)),'コストの選択肢はデータにある値だけ（小さい順） '+costOpts.join(','));
   ok(await p.evaluate(()=>[...document.querySelectorAll('#fFam option')].every(o=>o.value!=='null')),'種族がない（null）カードの値は選択肢に出さない');
@@ -102,7 +112,10 @@ async function run(label, viewport, touch){
   ok(nondec(await shown(),d=>num(d.power)),'パワー順に並べ替えられる（読めない値は最後）');
   await pick('fSort','no');
   const ids=(await shown()).map(k=>byKey[k].id==='unknown'?'~':byKey[k].id);
-  ok(ids.every((v,i)=>i===0||ids[i-1]<=v)&&byKey[(await shown()).slice(-1)[0]].id==='unknown','番号順（番号の読めないカードは最後）');
+  ok(ids.every((v,i)=>i===0||ids[i-1]<=v),'番号順に並べ替えられる');
+  // 番号の読めないカードは最後に回す。いまは該当カードが1枚もない（2026-11-19 に最後の1枚が確定した）ので、
+  // 並べ替えの鍵を作る所だけを直に呼んで確かめる
+  ok(await p.evaluate(()=>idRank({id:'unknown'})>idRank({id:'ZZ99-999'})),'番号の読めないカードは番号順の最後に回る');
 
   // --- −／＋ ---
   await p.click('#cgrid button[data-dk="+"][data-key="HB01-001"]');

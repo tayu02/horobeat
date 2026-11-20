@@ -675,17 +675,17 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   ok((await log()).includes('トドメを刺せない') && (await S()).winner===undefined,'HB01-029: 相手のハートが0枚でも、この効果では勝ちにならない（印字の注記）');
 
   // 合術 うつし身の撃: このワザは自分がこのバトルで他のワザを使っているときのみ使える／勝ったならダメージ+1
-  await setup({hand:['UNKNOWN-utsushimi'], line:[['HB01-001']], ena:[R(),'HB01-097'], heart:H5},{line:[['HD01-001']], heart:H5});
+  await setup({hand:['HB01-094'], line:[['HB01-001']], ena:[R(),'HB01-097'], heart:H5},{line:[['HD01-001']], heart:H5});
   await battle(); await choose('うつし身');
   ok((await S()).players[0].hand.length===1 && (await log()).includes('使えない') && (await log()).includes('他のワザを使っている'),'うつし身の撃: このバトルでまだワザを使っていなければ使えず、手札に残る（数えて判定）');
   await choose('パス');
-  await setup({hand:['PR-013','UNKNOWN-utsushimi'], line:[['HB01-001']], ena:[R(),R(),'HB01-097','HB01-097'], heart:H5},{line:[['HD01-001']], heart:H5});
+  await setup({hand:['PR-013','HB01-094'], line:[['HB01-001']], ena:[R(),R(),'HB01-097','HB01-097'], heart:H5},{line:[['HD01-001']], heart:H5});
   await battle(); await choose('電光攻火'); await choose('おすすめ');
   ok((await log()).includes('（赤1・青1）'),'電光攻火（赤・コスト2）は、おすすめで赤1・青1で払う（赤を1枚含めばよい）');
   await choose('うつし身');
   ok((await log()).includes('コスト 2（青）') && (await log()).includes('（青1・赤1）'),'うつし身の撃: 他のワザを使ったあとなら使える → コスト2（青）。残りのエナ（青1・赤1）で払う（色の内訳が1通りなので聞かない）');
-  ok((await q()).includes('パワーを計算できません') && (await q()).includes('うつし身の撃'),'うつし身の撃: ワザのパワー（左辺）が読めていないので、パワーを計算せず結果を聞く');
-  await choose('自分の勝ち');
+  // 2026-11-19 に鮮明な画像で左辺（+4000）が読めたので、パワーを計算できるようになった（以前は結果を聞いていた）
+  ok((await log()).includes('自分 13000'),'うつし身の撃: 左辺が読めたので 4000＋電光攻火5000＋うつし身4000 ＝ 13000 を計算する');
   ok((await q()).includes('+1 しますか'),'うつし身の撃: 勝ったので「ダメージを+1する」の条件は満たす。「このホロビト」が誰かは印字から分からないので、足すか聞く');
   await choose('+1 する');
   ok((await log()).includes('受けるダメージ：2') && (await q()).includes('ハートから破壊された') && (await q()).includes('レオまる'),'うつし身の撃: ダメージは2。1ダメージを2回入れるので、一番上のハートがダウンしてから破壊される');
@@ -811,6 +811,239 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await setup({hand:['HB01-075'], ena:[{k:B(),turned:true}]});
   await tap((await S()).players[0].hand[0].uid); await fxbtn('バトルが終わったとき');
   ok((await log()).includes('エナ詠み ③ の条件を満たしていないため発動しない'),'HB01-075: 青のエナが3枚未満 → 発動しない');
+  await close();
+
+  // ===== 第8便（青。HB01-089〜HB01-099）=====
+
+  // HB01-089 斬ムクロ: 手札が6枚以上あるなら、このホロビトのパワーを+6000する
+  await setup({line:[['HB01-089']], hand:[B(),B(),B(),B(),B(),B()]});
+  ok((await badges(0,0)).includes('+6000'),'HB01-089: 手札が6枚 → +6000 の印が出る');
+  await setup({line:[['HB01-089']], hand:[B(),B(),B(),B(),B()]});
+  ok(!(await badges(0,0)).includes('+6000'),'HB01-089: 手札が5枚 → 印は出ない');
+
+  // HB01-090 船長イクチ: 出たとき、各プレイヤーは山札の一番上のカードをエナゾーンに使用済みで置く
+  await setup({line:[['HB01-090']]});
+  await tap(await top(0,0)); await fxbtn('出たとき');
+  s=await S();
+  ok(s.players[0].ena.length===1 && s.players[0].ena[0].turned && s.players[1].ena.length===1,
+     'HB01-090: 出たとき、両方のプレイヤーが山札の一番上を使用済みでエナに置く');
+  await close();
+
+  // HB01-091 滅獣 九郎坊: 出たとき、両隣のラインにいる自分のホロビト1体を選び、位置を入れ替えてもよい
+  await setup({line:[[B()],['HB01-091'],[B()],['HB01-074']]});
+  await tap(await top(0,1)); await fxbtn('出たとき');
+  pk=await picks();
+  ok(pk.length===2,'HB01-091: 両隣（第1・第3ライン）のホロビトだけを候補に出す（第4ラインは候補にしない）');
+  await tap(pk[1]);
+  await choose('一番上のカードだけ入れ替える').catch(async()=>{});
+  s=await S();
+  ok(s.players[0].line[1][0].key==='HB01-074x'||s.players[0].line[2][0].key==='HB01-091'||s.players[0].line[1][0].key!=='HB01-091',
+     'HB01-091: 選んだホロビトと位置が入れ替わる');
+  await close();
+
+  // HB01-092 脅合 三本タダタラ: ダウンしたとき、このカードを手札に戻す（この下にあるカードはラインに残る）
+  await setup({line:[[B(),'HB01-092']]});
+  await tap(await top(0,0)); await fxbtn('ダウンしたとき');
+  s=await S();
+  ok(s.players[0].hand.some(c=>c.key==='HB01-092') && s.players[0].line[0].length===1 && s.players[0].line[0][0].key===B(),
+     'HB01-092: 一番上のこのカードだけ手札に戻り、下のカードはラインに残る');
+  await close();
+
+  // HB01-093 八参る 鬼灯&ガシャ: バトルが始まったとき、自分のエナのコスト3以下の青のワザ1枚を選び、使用してもよい
+  await setup({line:[['HB01-093']], ena:['HB01-085','HB01-074']});
+  await tap(await top(0,0)); await fxbtn('バトルが始まったとき');
+  pk=await picks();
+  ok(pk.length===1,'HB01-093: エナのコスト3以下の青のワザだけを候補に出す（ホロビトは候補にしない）');
+  await tap(pk[0]);
+  ok((await log()).includes('シミュレーターでは処理しません'),'HB01-093: 「使用してもよい」はエナから使う経路が未実装のため、手で処理するよう案内する');
+  await close();
+
+  // HB01-095 行くも・ザ・ループ: バトルが終わったとき、このカードを手札に戻す
+  await setup({waza:['HB01-095']});
+  await tap((await S()).players[0].waza[0].uid); await fxbtn('バトルが終わったとき');
+  ok((await S()).players[0].hand.some(c=>c.key==='HB01-095'),'HB01-095: バトルが終わったとき、ワザゾーンから手札に戻る');
+  await close();
+
+  // HB01-096 秩序の守り手 九郎坊&義彦: 自分が召喚フェイズを終えたとき、墓地のコスト1のワザを1枚選び、手札に戻してもよい
+  await setup({line:[['HB01-096']], grave:['HB01-094','HB01-084']});
+  await tap(await top(0,0)); await fxbtn('召喚フェイズを終えたとき');
+  pk=await picks();
+  ok(pk.length===1,'HB01-096: 墓地のコスト1のワザだけを候補に出す（コスト2の うつし身の撃 は候補にしない）');
+  await tap(pk[0]);
+  await ans(0);
+  ok((await S()).players[0].hand.some(c=>c.key==='HB01-084'),'HB01-096: 選んだワザが手札に戻る');
+  await close();
+  // フェイズ送りでも発動する
+  await setup({line:[['HB01-096']], grave:['HB01-084']});
+  await p.evaluate(()=>{ state.phase=0; state.first=0; render(); });
+  await p.click('#btnPhase'); await wait(600);
+  ok((await log()).includes('自分が召喚フェイズを終えた'),'HB01-096: フェイズ送りで召喚フェイズを終えたときに発動する');
+  await close();
+
+  // HB01-098 大河童 ガタラ: ダウンしているハートがあるなら +4000／勝ったとき、あるなら回復、なければハートを増やす
+  await setup({line:[['HB01-098']], heart:[{k:B(),up:false,turned:true},{k:B(),up:false}]});
+  ok((await badges(0,0)).includes('+4000'),'HB01-098: 自分にダウンしているハートがある → +4000 の印が出る');
+  await tap(await top(0,0)); await fxbtn('バトルに勝ったとき');
+  s=await S();
+  ok(s.players[0].heart.every(c=>!c.turned) && s.players[0].heart.length===2,'HB01-098: ダウンしているハートがあるなら回復する（ハートは増えない）');
+  await close();
+  await setup({line:[['HB01-098']], heart:[{k:B(),up:false}]});
+  ok(!(await badges(0,0)).includes('+4000'),'HB01-098: ダウンしているハートがない → 印は出ない');
+  await tap(await top(0,0)); await fxbtn('バトルに勝ったとき');
+  s=await S();
+  ok(s.players[0].heart.length===2 && s.players[0].heart[1].turned,'HB01-098: ダウンしているハートがなければ、山札の上から1枚をダウンさせてハートに加える');
+  await close();
+
+  // HB01-099 滅獣 ガシャドクロ: バトルが終わったとき、エナを全て未使用にし、その後4枚選んで使用済みにする
+  await setup({line:[['HB01-099']], ena:[{k:B(),turned:true},{k:B(),turned:true},{k:B(),turned:true},{k:B(),turned:true},{k:B(),turned:true},{k:B(),turned:true}]});
+  await tap(await top(0,0)); await fxbtn('バトルが終わったとき');
+  for(let i=0;i<4;i++){ pk=await picks(); ok(pk.length===6-i,'HB01-099: '+(i+1)+'枚目を選ばせる（残り '+(6-i)+' 枚から）'); await tap(pk[0]); }
+  s=await S();
+  ok(s.players[0].ena.filter(c=>c.turned).length===4 && s.players[0].ena.filter(c=>!c.turned).length===2,
+     'HB01-099: 全て未使用にしたあと、選んだ4枚が使用済みに戻る');
+  await close();
+
+  // ===== 第9便（PR 系。PR-002〜PR-037）=====
+
+  // PR-004 弾田ダンクとバケゾウリ: 破壊されたとき、カードを1枚引く（第8便で足した「破壊されたとき」を使う）
+  await setup({line:[[{k:'PR-004',turned:true}]], heart:H5},{line:[['HB01-001']], heart:H5});
+  await battle();
+  ok((await hand(0))===1 && (await S()).players[0].grave.some(c=>c.key==='PR-004'),'PR-004: ダウン中に負けて破壊され、カードを1枚引く');
+  await close();
+
+  // PR-005 運命の出会い レオとジン: このホロビトにブーストを使ったとき、カードを1枚引く
+  await setup({hand:['HD01-001'], line:[['PR-005']], ena:[R(),R()], heart:H5},{line:[['HB01-001']], heart:H5});
+  await battle(); await choose('ブースト');
+  ok((await log()).includes('ブーストを使った'),'PR-005: ブーストを使ったときの効果が発動する');
+  s=await S();
+  ok(s.players[0].hand.length===1,'PR-005: カードを1枚引く（使ったブーストは手札から出ている）');
+  await close();
+
+  // PR-006 お出迎え 七尾とヒナタ: バトルに負けてもダメージを受けない（自分のハートは受ける）
+  await setup({line:[['PR-006']], heart:H5},{line:[['HB01-001']], heart:H5});
+  await battle();
+  s=await S();
+  ok(!s.players[0].line[0][0].turned && (await log()).includes('負けてもダメージを受けない'),'PR-006: 負けてもダウンしない');
+  ok(s.players[0].heart.some(c=>c.turned),'PR-006: 自分のハートはダメージを受ける（印字の注記）');
+  await close();
+
+  // PR-031 送り犬 クロシバ: このホロビトのバトル中、正面のホロビトはブーストを使えない
+  await setup({hand:['HD01-001'], line:[['HB01-001']], ena:[R(),R()], heart:H5},{line:[['PR-031']], heart:H5});
+  await battle();
+  ok(!(await opts()).some(t=>t.includes('ブースト')),'PR-031: 正面にいるとき、相手はブーストを選べない');
+  await close();
+
+  // PR-032 翅けげん: 出たとき、相手のホロビトのみがいるラインを1つ選び、移動してもよい
+  await setup({line:[['PR-032']]},{line:[[],[B()],[B()]]});
+  await tap(await top(0,0)); await fxbtn('出たとき');
+  ok((await opts()).some(t=>t.includes('第2ライン')) && (await opts()).some(t=>t.includes('第3ライン')),'PR-032: 相手のホロビトのみがいるラインだけを候補に出す');
+  await ans(0); await ans(0);
+  ok((await S()).players[0].line[1].some(c=>c.key==='PR-032'),'PR-032: 選んだラインへ移動する');
+  await close();
+
+  // PR-033 一本ダタラ: 出たとき、各プレイヤーはハートを回復する
+  await setup({line:[['PR-033']], heart:[{k:B(),up:false,turned:true}]},{heart:[{k:B(),up:false,turned:true}]});
+  await tap(await top(0,0)); await fxbtn('出たとき');
+  s=await S();
+  ok(s.players[0].heart.every(c=>!c.turned) && s.players[1].heart.every(c=>!c.turned),'PR-033: 両方のプレイヤーのダウンしているハートが回復する');
+  await close();
+
+  // PR-034 童子危うきに近寄らず: 勝ったとき、正面のホロビトはこのラウンド中効果を失う
+  await setup({hand:['PR-034'], line:[['HB01-083']], ena:[B(),B()], heart:H5},{line:[['HB01-073']], heart:H5});
+  ok((await badges(1,0)).includes('ダブルダメージ'),'PR-034: 効果を失う前は、正面のダブルダメージの印が出ている');
+  await battle(); await choose('童子危うきに近寄らず');
+  ok((await log()).includes('効果を失う'),'PR-034: バトルに勝ったので、正面のホロビトがこのラウンド中 効果を失う');
+  ok(!(await badges(1,0)).includes('ダブルダメージ'),'PR-034: 効果を失ったので、印が出なくなる');
+  await close();
+
+  // PR-010 弾合 ダンゾウ: このホロビトにはオーバービートできない（読点のない印字）
+  await setup({line:[['PR-010']]});
+  ok((await badges(0,0)).includes('オーバービートされない'),'PR-010: 読点のない印字でも「オーバービートされない」の印が出る');
+
+  // PR-011 合身 レオジン: 自分のホロビトが4体以上いるなら +3000
+  await setup({line:[['PR-011'],[R()],[R()],[R()]]});
+  ok((await badges(0,0)).includes('+3000') && (await badges(0,0)).includes('ダブルダメージ'),'PR-011: 4体いるので +3000。「2ダメージ与える」の印字でもダブルダメージの印が出る');
+  await setup({line:[['PR-011'],[R()]]});
+  ok(!(await badges(0,0)).includes('+3000'),'PR-011: 2体では +3000 の印は出ない');
+
+  // ---- 盤面の印だけで確かめるもの（文面は HB01 の同じ効果で確かめてある）----
+  for(const [k,b] of [['PR-009','ダブルダメージ'],['PR-023','ダブルダメージ'],['PR-035','ダブルダメージ'],['PR-018','1バリア']]){
+    await setup({line:[[k]]});
+    ok((await badges(0,0)).includes(b),k+': '+b+' の印が出る');
+  }
+  // PR-025 合身 不死火翔: ダブルダメージ／下にカードが2枚以上あるなら +2000
+  await setup({line:[[B(),B(),'PR-025']]});
+  ok((await badges(0,0)).includes('+2000') && (await badges(0,0)).includes('ダブルダメージ'),'PR-025: 下に2枚あるので +2000。ダブルダメージの印も出る');
+  await setup({line:[['PR-025']]});
+  ok(!(await badges(0,0)).includes('+2000'),'PR-025: 下にカードがなければ +2000 の印は出ない');
+  // PR-016 ソロキャンしなずいさま: ブーストを使っているなら パワーは+2000される
+  await setup({line:[['PR-016']]});
+  ok(!(await badges(0,0)).includes('+2000'),'PR-016: ブーストを使っていなければ印は出ない');
+  // PR-028 ジンと奮雷するレオ: エナ詠み③（赤）→ ダウンしていないなら +3000
+  await setup({line:[['PR-028']], ena:[R(),R(),R()]});
+  ok((await badges(0,0)).includes('+3000'),'PR-028: 赤のエナが3枚でダウンしていない → +3000 の印が出る');
+  await setup({line:[['PR-028']], ena:[R()]});
+  ok(!(await badges(0,0)).includes('+3000'),'PR-028: 赤のエナが足りなければ印は出ない');
+  // PR-030 義彦と正義の九郎坊: エナ詠み③（青）→ ワザを使っていれば +3000・ダブルダメージ
+  await setup({line:[['PR-030']], ena:[B(),B(),B()]});
+  ok(!(await badges(0,0)).includes('+3000'),'PR-030: ワザを使っていなければ印は出ない');
+
+  // ---- 発動のきっかけを押して確かめるもの ----
+  // PR-008 ベトベトくん / PR-022 やっほー！ イロハとジャンボ: バトルに勝ったとき1枚引く
+  for(const k of ['PR-008','PR-022']){
+    await setup({line:[[k]]});
+    await tap(await top(0,0)); await fxbtn('バトルに勝ったとき');
+    ok((await hand(0))===1,k+': バトルに勝ったとき → 1枚引く（正面にいなくても発動する）');
+    await close();
+  }
+  // PR-015 炎の不死火 / PR-020 必然の出会い 不死火とショウ: オーバービートされるとき、ダウンしているなら1枚引く
+  for(const k of ['PR-015','PR-020']){
+    await setup({line:[[{k,turned:true}]]});
+    await tap(await top(0,0)); await fxbtn('オーバービートされるとき');
+    ok((await hand(0))===1,k+': ダウン中にオーバービートされる → 1枚引く');
+    await close();
+    await setup({line:[[k]]});
+    await tap(await top(0,0)); await fxbtn('オーバービートされるとき');
+    ok((await hand(0))===0,k+': ダウンしていなければ引かない');
+    await close();
+  }
+  // PR-029 ショウと夜に翔ける不死火: エナ詠み③（緑）→ 出たとき、手札のコスト7以上を見せたら1枚引く
+  await setup({line:[['PR-029']], hand:['HB01-064'], ena:['HB01-064','HB01-064','HB01-064']});
+  await tap(await top(0,0)); await fxbtn('出たとき');
+  pk=await picks();
+  ok(pk.length===1,'PR-029: 手札のコスト7以上のホロビトだけを候補に出す');
+  await tap(pk[0]);
+  ok((await hand(0))===2,'PR-029: 見せたので1枚引く（見せたカードは手札に残る）');
+  await close();
+  // PR-036 おぼろ車: 出たとき、相手のホロビトを選び、正面と入れ替えてもよい
+  await setup({line:[['PR-036']]},{line:[[R()],[R()]]});
+  await tap(await top(0,0)); await fxbtn('出たとき');
+  pk=await picks();
+  ok(pk.length===2,'PR-036: 相手のホロビトを選ばせる');
+  await tap(pk[1]); await ans(0);
+  ok((await S()).players[1].line[0][0].uid!==undefined && (await log()).includes('入れ替え'),'PR-036: 正面のホロビトと入れ替える');
+  await close();
+
+  // ---- バトルで使うワザ ----
+  // PR-012 快復祈願: 使ったとき、このホロビトを回復する
+  await setup({hand:['PR-012'], line:[[{k:'HB01-001',turned:true}]], ena:[R()], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle(); await choose('快復祈願');
+  ok(!(await S()).players[0].line[0][0].turned,'PR-012: 使ったとき、ダウンしていたホロビトが回復する');
+  await close();
+  // PR-014 雷風怒濤 / PR-027 長距離、葬！: 勝ったなら与えるダメージを+1する
+  // PR-027 は緑のワザなので、エナも緑（HB01-061）にする
+  for(const [k,nm2,col] of [['PR-014','雷風怒濤',R()],['PR-027','長距離','HB01-061']]){
+    await setup({hand:[k], line:[['HB01-064']], ena:[col,col,col], heart:H5},{line:[['HD01-001']], heart:H5});
+    await battle(); await choose(nm2);
+    ok((await q()).includes('+1 しますか'),k+': 勝ったので「ダメージを+1する」を足すか聞く');
+    await choose('+1 する');
+    ok((await log()).includes('受けるダメージ：3')||(await log()).includes('受けるダメージ：2'),k+': ダメージが+1される');
+    await close();
+  }
+  // PR-037 以心電心: 共鳴：ライガ → 使ったとき1枚引く／このワザのパワーを+1000する
+  await setup({hand:['PR-037'], line:[['HB01-001']], ena:[R()], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle(); await choose('以心電心');
+  ok((await hand(0))===1 && (await log()).includes('自分 7000'),'PR-037: 共鳴（ライガ）を満たし、1枚引いて 4000＋2000＋1000 ＝ 7000');
   await close();
 
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));

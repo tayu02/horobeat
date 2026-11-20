@@ -23,14 +23,14 @@ async function run(label, viewport, touch){
   ok((await S()).players[0].decklist['HB01-001']===4,'同名4枚で止まる');
   await p.click('button[data-dk="+"][data-pi="0"][data-key="HB01-097"]');
   await p.click('button[data-dk="+"][data-pi="0"][data-key="HB01-097"]');
-  await p.click('button[data-dk="+"][data-pi="0"][data-key="UNKNOWN-utsushimi"]');
+  await p.click('button[data-dk="+"][data-pi="0"][data-key="HB01-094"]');
   await p.click('.navbtn[data-view="deck"]');
   await p.click('button[data-act="rebuild"][data-pi="0"]');
   await H.confirmYes(p);
   let s=await S();
   const keys=s.players[0].deck.map(c=>c.key);
   ok(s.players[0].deck.length===50,'初期化後も50枚');
-  ok(keys.filter(k=>k==='HB01-001').length===4&&keys.filter(k=>k==='HB01-097').length===2&&keys.filter(k=>k==='UNKNOWN-utsushimi').length===1,'登録枚数どおりに入る');
+  ok(keys.filter(k=>k==='HB01-001').length===4&&keys.filter(k=>k==='HB01-097').length===2&&keys.filter(k=>k==='HB01-094').length===1,'登録枚数どおりに入る');
   ok(keys.filter(k=>k===null).length===43,'残り43枚は未確定(null)');
   ok(s.players[1].deck.every(c=>c.key===null),'相手には影響しない（全て未確定）');
 
@@ -85,13 +85,15 @@ async function run(label, viewport, touch){
   ok(await p.evaluate(()=>state.players[0].hand.find(c=>c.key==='HB01-097').note)==='+3000','メモが保存される');
   ok(await p.evaluate(()=>{const uid=state.players[0].hand.find(c=>c.key==='HB01-097').uid; const e=document.querySelector('#side-0 .z-hand .card[data-cid="'+uid+'"]'); return e&&e.querySelector('.cnote')&&e.querySelector('.cnote').textContent==='+3000';}),'メモがカード上に出る');
   // unknown 表示
-  // シャッフル次第でハート／エナに入ることがある（約12%）。山札だけを探すと別のカードを掴むので、全ゾーンから探す
-  const uUid=await p.evaluate(()=>{ const P=state.players[0]; let c=P.hand.find(c=>c.key==='UNKNOWN-utsushimi');
-    if(!c){ for(const z of ['deck','heart','ena','grave','waza']){ const i=P[z].findIndex(c=>c.key==='UNKNOWN-utsushimi'); if(i>=0){ c=P[z].splice(i,1)[0]; break; } } c.up=true; P.hand.push(c);} render(); return c.uid; });
+  // 2026-11-19: 合術 うつし身の撃 の番号が確定したので、刷りによってフレーバーが違う しなずいさま(HB01-034) で確かめる
+  // （どちらの刷りの印字で遊ぶのかが未確定なので、カード本体のフレーバーは unknown）
+  // このデッキには入っていないカードなので、HD01-017 と同じやり方で手札に1枚足して見る
+  const uUid=await p.evaluate(()=>{ const P=state.players[0]; const c={uid:'A-97',owner:0,key:'HB01-034',up:true,turned:false,note:''}; P.hand.push(c); render(); return c.uid; });
   await openFor(uUid);
   const det2=await p.evaluate(()=>document.querySelector('#sheet .cdetail').innerHTML);
-  ok(det2.includes('class="unk">unknown')&&det2.includes('他のワザを使っているときのみ'),'読めない項目は unknown と明示され、読めた文は出る');
+  ok(det2.includes('class="fl unk">フレーバー unknown')&&det2.includes('コストは1大きくなる'),'読めない項目は unknown と明示され、読めた文は出る');
   await closeS();
+  await p.evaluate(()=>{ const P=state.players[0]; P.hand=P.hand.filter(c=>c.uid!=='A-97'); render(); });
   // 未確定カードの詳細
   const nUid=await p.evaluate(()=>state.players[0].hand.find(c=>c.key===null).uid);
   await openFor(nUid);
@@ -177,7 +179,7 @@ async function run(label, viewport, touch){
     const P=state.players[0]; const pick=k=>{const i=P.deck.findIndex(c=>c.key===k); return i>=0?P.deck.splice(i,1)[0]:null;};
     let c; c=pick('HB01-001'); if(c){c.up=true;P.line[0].push(c);} c=pick('HB01-097'); if(c){c.up=true;P.line[0].push(c);}
     c=pick('HB01-001'); if(c){c.up=true;c.turned=true;P.line[1].push(c);}
-    c=pick('UNKNOWN-utsushimi'); if(c){c.up=true;c.note='+2000';P.hand.push(c);}
+    c=pick('HB01-094'); if(c){c.up=true;c.note='+2000';P.hand.push(c);}
     P.ena[0].turned=true;
     document.querySelectorAll('details.doc').forEach(d=>d.open=false); render();
   });
