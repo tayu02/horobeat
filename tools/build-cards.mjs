@@ -38,7 +38,9 @@ out = out.slice(0, i) + `${AB}\n// 生成物。編集しないこと。正本は
   `var PARTS = ${enc(parts)};\nvar ABILITY_MAP = ${enc(abil)};\n` +
   `var CARD_IMAGES = ${enc(images)};\nvar CARD_IMAGE_PENDING = ${enc(im.pending)};\n` +
   // スタートデッキの中身（正本は data/starter-decks.json）
-  `var STARTERS = ${enc(JSON.parse(readFileSync("data/starter-decks.json", "utf8")).decks.map(d => ({ id: d.id, name: d.name, color: d.color, cards: d.cards })))};\n${AE}` + out.slice(j + AE.length);
+  `var STARTERS = ${enc(JSON.parse(readFileSync("data/starter-decks.json", "utf8")).decks.map(d => ({ id: d.id, name: d.name, color: d.color, cards: d.cards })))};\n` +
+  // 登録済みのデッキ（第一弾。正本は data/preset-decks.json。公式の商品ではない）
+  `var PRESETS = ${enc(JSON.parse(readFileSync("data/preset-decks.json", "utf8")).decks.map(d => ({ id: d.id, name: d.name, color: d.color, cards: d.cards })))};\n${AE}` + out.slice(j + AE.length);
 
 writeFileSync("simulator.html", out);
 console.log(`embedded ${data.cards.length} cards, ${Object.keys(abil).length} ability maps, ${Object.keys(images).length} image paths into simulator.html`);

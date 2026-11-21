@@ -193,6 +193,8 @@ export function validateCards(path = "data/cards.json") {
     // カード画像: どのカードも、画像を載せるか理由を書いて保留するかが決まっていること
     errors.push(...checkImages(data.cards).errors);
     errors.push(...checkStarters(data.cards));
+    // 登録済みのデッキ（第一弾。依頼者のデッキ写真から）も同じ決まりで確かめる
+    errors.push(...checkStarters(data.cards, "data/preset-decks.json"));
   }
 
   return { data, errors };

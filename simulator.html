@@ -304,6 +304,9 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
 .dkold{font-size:11px;color:var(--gold);border:1px dashed #5a4a2a;border-radius:7px;padding:5px 8px;margin:0 0 8px;line-height:1.6}
 .starterrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0}
 .starterrow .who{font-size:12px;font-weight:700;min-width:2.5em}
+/* 登録済みのデッキを選ぶプルダウン（依頼者の指示 2026-11-21） */
+.dkpick{font:inherit;font-size:13px;width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:#120e0e;color:var(--txt);margin:0 0 6px}
+.starterrow .dkpick{flex:1 1 220px;width:auto;margin:0}
 
 /* ---- シート ---- */
 #sheetwrap{position:fixed;inset:0;z-index:100;display:none}
@@ -505,7 +508,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
   <div class="guide" id="guide">
     <h2>はじめかた</h2>
     <ol>
-      <li>（任意）<b>スタートデッキ</b>で遊ぶなら、ここで選びます（公式の収録カード一覧どおりの50枚）。自分で組むなら上部の<b>「🔍 カード」</b>で、カードの画像の一覧から −／＋ で入れます（<b>「📋 デッキ」</b>でいまのデッキを確かめられます）。入れなかった枠は<b>未確定カード</b>（灰色）で埋まります。
+      <li>（任意）<b>スタートデッキ</b>で遊ぶなら、ここで選びます（公式の収録カード一覧どおりの50枚）。自分で組むなら上部の<b>「🔍 カード」</b>で、カードの画像の一覧から −／＋ で入れます（<b>「📋 デッキ」</b>でいまのデッキを確かめられます）。入れなかった枠は<b>未確定カード</b>（灰色）で埋まります。第一弾のデッキ（赤単・青単・緑単）や「💾 保存」したデッキは、<b>プルダウン</b>から選べます。
         <div class="starterrow" id="guideStarters"></div></li>
       <li>（任意）<b>相手をAIにする</b>なら、上部の<b>「相手: 人」</b>を押して「AI ふつう」か「AI かんたん」を選びます。AI は「相手のデッキ」で遊びます。</li>
       <li>じゃんけんで<b>先手</b>を決めて、下のボタン（上部の「準備」の欄と同じ）を押します。山札を混ぜて6枚ずつ配ります（準備①②③）。</li>
@@ -523,7 +526,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
 
   <details class="doc">
     <summary>このシミュレーターについて / 操作方法</summary>
-    <p><b>画面</b>：上部の<b>「🔍 カード」</b>でカードの画像の一覧から −／＋ でデッキに入れ（名前・効果テキスト・色・コストなどで絞り込めます。選べる値は印字にあるものだけで、読めない値は「unknown（読めない）」）、<b>「📋 デッキ」</b>でいまのデッキの枚数・種別・色・コスト別の枚数を確かめ、<b>「🎮 試遊」</b>で盤面に戻ります。同名のカードは番号が違っても合計4枚、デッキは50枚までです。「📋 デッキ」の「💾 保存」でデッキに名前を付けて保存でき、「📂 保存したデッキ」で開くとデッキリストがカードの画像で並びます。「コード」を送ると、相手も「📥 コードから読み込む」で同じデッキを使えます（保存はこの端末のブラウザなので、大事なデッキはコードを控えてください）。デッキを変えても遊んでいる途中の盤面は消えません（試遊で配るか、デッキの画面の「このデッキで盤面を組み直す」で反映）。</p>
+    <p><b>画面</b>：上部の<b>「🔍 カード」</b>でカードの画像の一覧から −／＋ でデッキに入れ（名前・効果テキスト・色・コストなどで絞り込めます。選べる値は印字にあるものだけで、読めない値は「unknown（読めない）」）、<b>「📋 デッキ」</b>でいまのデッキの枚数・種別・色・コスト別の枚数を確かめ、<b>「🎮 試遊」</b>で盤面に戻ります。同名のカードは番号が違っても合計4枚、デッキは50枚までです。「📋 デッキ」の「💾 保存」でデッキに名前を付けて保存でき、「📂 保存したデッキ」で開くとデッキリストがカードの画像で並びます。スタートデッキ・第一弾のデッキ（赤単・青単・緑単。デッキ写真から数えたもので、公式の商品ではありません）・保存したデッキは、「📋 デッキ」の上と「はじめかた」の<b>プルダウン</b>から選べます。「コード」を送ると、相手も「📥 コードから読み込む」で同じデッキを使えます（保存はこの端末のブラウザなので、大事なデッキはコードを控えてください）。デッキを変えても遊んでいる途中の盤面は消えません（試遊で配るか、デッキの画面の「このデッキで盤面を組み直す」で反映）。</p>
     <p><b>操作</b>：カードを<b>タップ</b>＝印字内容とメニュー（移動・向き・表裏・メモ）。<b>上下にドラッグ</b>＝メニューを開かずにゾーンへ移動。横スワイプは各段のスクロールです。PCではクリックとドラッグがそのまま使えます。</p>
     <p><b>進行</b>（公式の手引書のラウンドの進行どおり）：準備 → 召喚フェイズ（先手）→ 召喚フェイズ（後手）→ バトルフェイズ → エンドフェイズ → 次のラウンド。準備は、先手を選んで配り、両者が引き直すかを決めると自動で終わります。上部の欄に、いまのフェイズと誰の番かが出ます。</p>
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートは、出すホロビトのコスト<b>未満</b>のホロビトの上だけで、支払うエナはその分少なくなります。同じコストには重ねられません。「コストは1大きくなる」ホロビトは、ラインにいる間はそのコストで数えます。重ねるラインは、条件を満たしていればどのラインでも選べます）。<b>支払うエナには、カードの色が1枚以上含まれている必要があります</b>（オーバービート元が同じ色なら、エナは何色でもかまいません。総合ルール 7.2.2.1）。色の内訳が何通りかあるときは「おすすめで支払う」か「自分で選ぶ」を選べます。<b>エナが足りない・色がないときは使えません</b>。</p>
@@ -593,6 +596,7 @@ var ABILITY_MAP = {"HB01-033":[{"keyword":"double_damage"},{"conditions":[{"part
 var CARD_IMAGES = {"HB01-001":"images/cards/HB01-001.webp","HB01-002":"images/cards/HB01-002.webp","HB01-003":"images/cards/HB01-003.webp","HB01-004":"images/cards/HB01-004.webp","HB01-005":"images/cards/HB01-005.webp","HB01-007":"images/cards/HB01-007.webp","HB01-008":"images/cards/HB01-008.webp","HB01-009":"images/cards/HB01-009.webp","HB01-010":"images/cards/HB01-010.webp","HB01-011":"images/cards/HB01-011.webp","HB01-012":"images/cards/HB01-012.webp","HB01-013":"images/cards/HB01-013.webp","HB01-014":"images/cards/HB01-014.webp","HB01-015":"images/cards/HB01-015.webp","HB01-016":"images/cards/HB01-016.webp","HB01-017":"images/cards/HB01-017.webp","HB01-018":"images/cards/HB01-018.webp","HB01-019":"images/cards/HB01-019.webp","HB01-020":"images/cards/HB01-020.webp","HB01-021":"images/cards/HB01-021.webp","HB01-022":"images/cards/HB01-022.webp","HB01-023":"images/cards/HB01-023.webp","HB01-024":"images/cards/HB01-024.webp","HB01-025":"images/cards/HB01-025.webp","HB01-026":"images/cards/HB01-026.webp","HB01-027":"images/cards/HB01-027.webp","HB01-028":"images/cards/HB01-028.webp","HB01-029":"images/cards/HB01-029.webp","HB01-030":"images/cards/HB01-030.webp","HB01-031":"images/cards/HB01-031.webp","HB01-032":"images/cards/HB01-032.webp","HB01-033":"images/cards/HB01-033.webp","HB01-034":"images/cards/HB01-034.webp","HB01-035":"images/cards/HB01-035.webp","HB01-036":"images/cards/HB01-036.webp","HB01-037":"images/cards/HB01-037.webp","HB01-038":"images/cards/HB01-038.webp","HB01-039":"images/cards/HB01-039.webp","HB01-040":"images/cards/HB01-040.webp","HB01-041":"images/cards/HB01-041.webp","HB01-042":"images/cards/HB01-042.webp","HB01-043":"images/cards/HB01-043.webp","HB01-044":"images/cards/HB01-044.webp","HB01-045":"images/cards/HB01-045.webp","HB01-046":"images/cards/HB01-046.webp","HB01-047":"images/cards/HB01-047.webp","HB01-048":"images/cards/HB01-048.webp","HB01-049":"images/cards/HB01-049.webp","HB01-050":"images/cards/HB01-050.webp","HB01-051":"images/cards/HB01-051.webp","HB01-052":"images/cards/HB01-052.webp","HB01-053":"images/cards/HB01-053.webp","HB01-054":"images/cards/HB01-054.webp","HB01-055":"images/cards/HB01-055.webp","HB01-056":"images/cards/HB01-056.webp","HB01-057":"images/cards/HB01-057.webp","HB01-058":"images/cards/HB01-058.webp","HB01-059":"images/cards/HB01-059.webp","HB01-060":"images/cards/HB01-060.webp","HB01-061":"images/cards/HB01-061.webp","HB01-062":"images/cards/HB01-062.webp","HB01-063":"images/cards/HB01-063.webp","HB01-064":"images/cards/HB01-064.webp","HB01-065":"images/cards/HB01-065.webp","HB01-066":"images/cards/HB01-066.webp","HB01-067":"images/cards/HB01-067.webp","HB01-068":"images/cards/HB01-068.webp","HB01-069":"images/cards/HB01-069.webp","HB01-070":"images/cards/HB01-070.webp","HB01-071":"images/cards/HB01-071.webp","HB01-072":"images/cards/HB01-072.webp","HB01-073":"images/cards/HB01-073.webp","HB01-097":"images/cards/HB01-097.webp","HD01-001":"images/cards/HD01-001.webp","HD01-003":"images/cards/HD01-003.webp","HD01-004":"images/cards/HD01-004.webp","HD01-005":"images/cards/HD01-005.webp","HD01-006":"images/cards/HD01-006.webp","HD01-007":"images/cards/HD01-007.webp","HD01-009":"images/cards/HD01-009.webp","HD01-010":"images/cards/HD01-010.webp","HD01-011":"images/cards/HD01-011.webp","HD01-012":"images/cards/HD01-012.webp","HD01-013":"images/cards/HD01-013.webp","HD01-014":"images/cards/HD01-014.webp","HD01-015":"images/cards/HD01-015.webp","HD01-016":"images/cards/HD01-016.webp","HD01-017":"images/cards/HD01-017.webp","HD02-001":"images/cards/HD02-001.webp","HD02-002":"images/cards/HD02-002.webp","HD02-003":"images/cards/HD02-003.webp","HD02-004":"images/cards/HD02-004.webp","HD02-005":"images/cards/HD02-005.webp","HD02-006":"images/cards/HD02-006.webp","HD02-007":"images/cards/HD02-007.webp","HD02-008":"images/cards/HD02-008.webp","HD02-009":"images/cards/HD02-009.webp","HD02-010":"images/cards/HD02-010.webp","HD02-011":"images/cards/HD02-011.webp","HD02-012":"images/cards/HD02-012.webp","HD02-013":"images/cards/HD02-013.webp","HD02-014":"images/cards/HD02-014.webp","HD02-015":"images/cards/HD02-015.webp","HD02-016":"images/cards/HD02-016.webp","HD02-017":"images/cards/HD02-017.webp","PR-001":"images/cards/PR-001.webp","PR-013":"images/cards/PR-013.webp","HB01-074":"images/cards/HB01-074.webp","HB01-075":"images/cards/HB01-075.webp","HB01-076":"images/cards/HB01-076.webp","HB01-077":"images/cards/HB01-077.webp","HB01-078":"images/cards/HB01-078.webp","HB01-079":"images/cards/HB01-079.webp","HB01-080":"images/cards/HB01-080.webp","HB01-081":"images/cards/HB01-081.webp","HB01-082":"images/cards/HB01-082.webp","HB01-083":"images/cards/HB01-083.webp","HB01-084":"images/cards/HB01-084.webp","HB01-085":"images/cards/HB01-085.webp","HB01-086":"images/cards/HB01-086.webp","HB01-087":"images/cards/HB01-087.webp","HB01-088":"images/cards/HB01-088.webp","HB01-089":"images/cards/HB01-089.webp","HB01-090":"images/cards/HB01-090.webp","HB01-091":"images/cards/HB01-091.webp","HB01-092":"images/cards/HB01-092.webp","HB01-093":"images/cards/HB01-093.webp","HB01-094":"images/cards/HB01-094.webp","HB01-095":"images/cards/HB01-095.webp","HB01-096":"images/cards/HB01-096.webp","HB01-098":"images/cards/HB01-098.webp","HB01-099":"images/cards/HB01-099.webp","PR-002":"images/cards/PR-002.webp","PR-003":"images/cards/PR-003.webp","PR-004":"images/cards/PR-004.webp","PR-005":"images/cards/PR-005.webp","PR-006":"images/cards/PR-006.webp","PR-007":"images/cards/PR-007.webp","PR-008":"images/cards/PR-008.webp","PR-009":"images/cards/PR-009.webp","PR-010":"images/cards/PR-010.webp","PR-011":"images/cards/PR-011.webp","PR-012":"images/cards/PR-012.webp","PR-014":"images/cards/PR-014.webp","PR-015":"images/cards/PR-015.webp","PR-016":"images/cards/PR-016.webp","PR-017":"images/cards/PR-017.webp","PR-018":"images/cards/PR-018.webp","PR-019":"images/cards/PR-019.webp","PR-020":"images/cards/PR-020.webp","PR-021":"images/cards/PR-021.webp","PR-022":"images/cards/PR-022.webp","PR-023":"images/cards/PR-023.webp","PR-024":"images/cards/PR-024.webp","PR-025":"images/cards/PR-025.webp","PR-026":"images/cards/PR-026.webp","PR-027":"images/cards/PR-027.webp","PR-028":"images/cards/PR-028.webp","PR-029":"images/cards/PR-029.webp","PR-030":"images/cards/PR-030.webp","PR-031":"images/cards/PR-031.webp","PR-032":"images/cards/PR-032.webp","PR-033":"images/cards/PR-033.webp","PR-034":"images/cards/PR-034.webp","PR-035":"images/cards/PR-035.webp","PR-036":"images/cards/PR-036.webp","PR-037":"images/cards/PR-037.webp","PR-038":"images/cards/PR-038.webp"};
 var CARD_IMAGE_PENDING = {};
 var STARTERS = [{"id":"HB-SD01","name":"スタートデッキ レオジン","color":"赤","cards":[{"key":"HD01-017","count":3},{"key":"HD01-001","count":3},{"key":"HD01-003","count":4},{"key":"HB01-001","count":3},{"key":"HD01-009","count":3},{"key":"HD01-004","count":4},{"key":"HD01-006","count":3},{"key":"HD01-005","count":3},{"key":"HD01-007","count":4},{"key":"HD01-010","count":3},{"key":"HD01-011","count":3},{"key":"HD01-014","count":2},{"key":"HD01-015","count":2},{"key":"HD01-012","count":3},{"key":"HD01-016","count":1},{"key":"HD01-013","count":3},{"key":"PR-013","count":3}]},{"id":"HB-SD02","name":"スタートデッキ 不死火翔","color":"緑","cards":[{"key":"HD02-017","count":3},{"key":"HD02-001","count":3},{"key":"HD02-002","count":4},{"key":"HD02-003","count":3},{"key":"HD02-009","count":3},{"key":"HD02-004","count":4},{"key":"HD02-010","count":3},{"key":"HD02-007","count":3},{"key":"HD02-005","count":3},{"key":"HD02-014","count":1},{"key":"HD02-012","count":3},{"key":"HD02-011","count":3},{"key":"HD02-006","count":4},{"key":"HD02-015","count":2},{"key":"HD02-016","count":2},{"key":"HD02-013","count":3},{"key":"HD02-008","count":3}]}];
+var PRESETS = [{"id":"P01-RED","name":"赤単(第一弾)","color":"赤","cards":[{"key":"HD01-013","count":4},{"key":"HB01-001","count":4},{"key":"HB01-002","count":4},{"key":"HB01-003","count":4},{"key":"HB01-012","count":4},{"key":"HB01-028","count":1},{"key":"PR-013","count":4},{"key":"HB01-030","count":4},{"key":"HD01-005","count":4},{"key":"HB01-031","count":4},{"key":"PR-028","count":4},{"key":"HB01-023","count":2},{"key":"HD01-015","count":3},{"key":"HB01-033","count":4}]},{"id":"P01-BLUE","name":"青単(第一弾)","color":"青","cards":[{"key":"HB01-075","count":4},{"key":"HB01-076","count":2},{"key":"HB01-084","count":4},{"key":"HB01-067","count":4},{"key":"HB01-068","count":4},{"key":"HB01-070","count":4},{"key":"HB01-095","count":1},{"key":"HB01-086","count":3},{"key":"HB01-087","count":4},{"key":"HB01-088","count":4},{"key":"PR-030","count":4},{"key":"HB01-096","count":4},{"key":"HB01-091","count":3},{"key":"HB01-097","count":2},{"key":"HB01-093","count":3}]},{"id":"P01-GREEN","name":"緑単(第一弾)","color":"緑","cards":[{"key":"HB01-052","count":4},{"key":"HB01-053","count":3},{"key":"HB01-034","count":4},{"key":"HD02-002","count":4},{"key":"HD02-008","count":2},{"key":"HD02-009","count":4},{"key":"HB01-054","count":4},{"key":"HB01-047","count":4},{"key":"HB01-057","count":4},{"key":"HB01-058","count":2},{"key":"HB01-063","count":1},{"key":"HB01-060","count":3},{"key":"HB01-064","count":3},{"key":"HB01-065","count":4},{"key":"HB01-066","count":3},{"key":"HB01-061","count":1}]}];
 /* @@ABIL_END@@ */
 
 var CARDS = {};
@@ -3435,6 +3439,55 @@ function starterButtonHTML(pi, id, label, on, keep){
   return '<button class="mini' + (on ? " on" : "") + '" data-starter="' + esc(id) + '" data-pi="' + pi + '"' +
          (keep ? ' data-keep="1"' : sideIsEmpty(pi) ? "" : ' data-confirm="' + SIDE_NAME[pi] + 'の盤面を消して、' + what + 'で組み直します。よろしいですか？"') + '>' + label + '</button>';
 }
+// ---- 登録済みのデッキをプルダウンで選ぶ（依頼者の指示 2026-11-21「前登録したデッキから、プルダウンとかで選べるようにしてほしい」）----
+// スタートデッキ（公式の商品）・第一弾のデッキ（正本は data/preset-decks.json。依頼者のデッキ写真から数えたもので、公式の商品ではない）・
+// この端末に保存したデッキ（「📂 保存したデッキ」）を、1つのプルダウンに並べる
+function presetById(id){ for (var i = 0; i < PRESETS.length; i++) if (PRESETS[i].id === id) return PRESETS[i]; return null; }
+// いまのデッキが、どの第一弾のデッキとそのまま同じか（違えば null）
+function presetOf(dl){
+  var keys = Object.keys(dl).filter(function(k){ return (dl[k] | 0) > 0; });
+  for (var i = 0; i < PRESETS.length; i++){
+    var D = PRESETS[i];
+    if (D.cards.length === keys.length && D.cards.every(function(c){ return (dl[c.key] | 0) === c.count; })) return D;
+  }
+  return null;
+}
+// keep: 「📋 デッキ」の画面。デッキ（登録）だけを変え、盤面にカードがあっても消さない（タブと同じ）
+function deckPickHTML(pi, keep){
+  var dl = state.players[pi].decklist, st = starterOf(dl), pr = st ? null : presetOf(dl);
+  var cur = st ? "s:" + st.id : pr ? "p:" + pr.id : "";
+  var opt = function(v, label){ return '<option value="' + esc(v) + '"' + (v === cur ? " selected" : "") + '>' + esc(label) + '</option>'; };
+  return '<select class="dkpick" data-pi="' + pi + '"' + (keep ? ' data-keep="1"' : "") + ' aria-label="' + SIDE_NAME[pi] + 'のデッキを選ぶ">' +
+    opt("", "登録済みのデッキから選ぶ…") +
+    '<optgroup label="スタートデッキ（公式）">' + STARTERS.map(function(S){ return opt("s:" + S.id, "スタートデッキ " + starterLabel(S)); }).join("") + '</optgroup>' +
+    '<optgroup label="第一弾のデッキ">' + PRESETS.map(function(D){ return opt("p:" + D.id, D.name); }).join("") + '</optgroup>' +
+    (lib.length ? '<optgroup label="保存したデッキ（この端末）">' + lib.map(function(d){ return opt("l:" + d.id, d.name + "（" + libTotal(d.cards) + "枚）"); }).join("") + '</optgroup>' : "") +
+    '</select>';
+}
+function deckPickApply(pi, v, keep){
+  var kind = v.slice(0, 2), id = v.slice(2), name = "", cards = {}, src = null;
+  if (kind === "s:"){ src = starterById(id); if (src) name = "スタートデッキ " + starterLabel(src); }
+  else if (kind === "p:"){ src = presetById(id); if (src) name = src.name; }
+  else if (kind === "l:"){ var L = libById(id); if (L){ name = L.name; for (var k in L.cards) cards[k] = L.cards[k]; } src = L; }
+  if (!src){ render(); return; }
+  if (src.cards && Array.isArray(src.cards)) src.cards.forEach(function(c){ cards[c.key] = c.count; });
+  var go = function(){
+    snap();
+    var empty = sideIsEmpty(pi);
+    state.players[pi].decklist = cards;
+    if (!keep || empty) rebuildPlayer(pi);
+    fxClear(); fxLog("「" + name + "」を" + SIDE_NAME[pi] + "のデッキにした（" + libTotal(cards) + " 枚）" + (!keep || empty ? "" : "。盤面には、配るか組み直すと反映されます"));
+    closeSheet(); render();
+  };
+  if (keep || sideIsEmpty(pi)) return go();
+  render();   // やめたときにプルダウンが元の表示に戻るように、先に描き直す
+  askConfirm(SIDE_NAME[pi] + "の盤面を消して、「" + name + "」で組み直します。よろしいですか？", "組み直す", go);
+}
+document.addEventListener("change", function(e){
+  var sel = e.target.closest && e.target.closest("select.dkpick");
+  if (!sel || !sel.value) return;
+  deckPickApply(+sel.dataset.pi, sel.value, sel.dataset.keep === "1");
+});
 // 盤面にあるその陣地のカード（すべてのゾーン）が、いまのデッキの登録どおりか
 function boardMatchesDeck(pi){
   var m = {}, dl = state.players[pi].decklist, add = function(c){ if (c.owner === pi && c.key) m[c.key] = (m[c.key] || 0) + 1; };
@@ -3448,11 +3501,12 @@ function boardMatchesDeck(pi){
 function starterTabsHTML(pi){
   var dl = state.players[pi].decklist, cur = starterOf(dl), n = 0;
   Object.keys(dl).forEach(function(k){ n += dl[k] | 0; });
-  return '<div class="dktabs">' +
+  var pr = cur ? null : presetOf(dl);
+  return deckPickHTML(pi, true) + '<div class="dktabs">' +
     STARTERS.map(function(S){ return starterButtonHTML(pi, S.id, starterLabel(S), cur === S, true); }).join("") +
     starterButtonHTML(pi, "", "空から組む", !cur && !n, true) + '</div>' +
     '<div class="dknow">いまのデッキ: ' + (cur ? "スタートデッキ " + esc(starterLabel(cur)) + "（" + esc(cur.id) + "）そのまま"
-      : (n ? "自分で組んだデッキ（登録 " + n + " 枚）" : "空（すべて未確定カード）")) + '</div>' +
+      : pr ? "「" + esc(pr.name) + "」そのまま" : (n ? "自分で組んだデッキ（登録 " + n + " 枚）" : "空（すべて未確定カード）")) + '</div>' +
     (boardMatchesDeck(pi) ? "" : '<div class="dkold">' + SIDE_NAME[pi] + 'の盤面は、まだ前のデッキのままです。「🎮 試遊」で先手を選んで配るか、下の「このデッキで' + SIDE_NAME[pi] + 'の盤面を組み直す」で反映されます。</div>');
 }
 // ---- デッキを作る（依頼者の指示 2026-10-16「こういうデッキを作るのが欲しい」）----
@@ -3871,7 +3925,7 @@ function render(){
   document.getElementById("guideStarters").innerHTML = [0, 1].map(function(pi){
     var cur = starterOf(state.players[pi].decklist);
     return '<span class="who ' + (pi === 0 ? "me" : "opp") + '">' + SIDE_NAME[pi] + '</span>' +
-      STARTERS.map(function(S){ return starterButtonHTML(pi, S.id, starterLabel(S), cur === S); }).join("");
+      STARTERS.map(function(S){ return starterButtonHTML(pi, S.id, starterLabel(S), cur === S); }).join("") + deckPickHTML(pi, false);
   }).join('<span style="flex-basis:100%;height:0"></span>');
   motionAfter();
   save();
