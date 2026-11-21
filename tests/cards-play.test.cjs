@@ -150,7 +150,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await setup({line:[['HB01-032']]});
   ok(!(await badges(0,0)).includes('ダブルダメージ'),'HB01-032: 第1ライン → 付かない');
 
-  // HB01-047 エナ詠み③（緑3枚以上）。HD02-011 と同じ文面で、コスト・パワーが違う
+  // HB01-047 エナ詠み③（緑3枚以上）。HD02-011 と同じ文面・同じコスト・同じパワーで、番号とフレーバーが違う
   await setup({hand:['HB01-047','HB01-061'], ena:['HD02-001','HD02-001','HD02-001']});
   await moveTo(await inZone(0,'hand','HB01-047'),'line',0);
   await tap((await picks())[0]);
@@ -542,6 +542,12 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   await settle();
   s=await S();
   ok(s.players[0].grave.some(c=>c.key==='HD02-010') && !s.players[0].waza.length,'ブースト: バトルが終わると墓地へ（手引書「バトルで使い終わったワザ・ブースト」）');
+  // 左辺に何も印字されていないホロビトは、ブーストとして使えない（2026-11-21 に左辺の誤記を直した3枚）
+  await setup({hand:['HB01-015','HB01-041','HB01-047'], line:[['HD02-012']], ena:[R(),'HD02-001','HD02-001'], heart:H5},{line:[['HB01-033']], heart:H5});
+  await battle();
+  ok(!(await opts()).some(t=>t.includes('ブーストで使う')) && (await log()).includes('両者とも使えるものがない'),
+     'HB01-015・HB01-041・HB01-047: 左辺に印字がないので、エナがあってもブーストとして使えない');
+  await settle();
   // HD01-012 このホロビトがブーストを使っているなら、このホロビトのパワーは+3000される
   await setup({hand:['HD01-001'], line:[['HD01-012']], ena:[R()], heart:H5},{line:[['HB01-033']], heart:H5});
   await battle(); await choose('ブーストで使う');
