@@ -793,6 +793,15 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   if((await opts()).some(t=>t.includes('無知の視'))) await choose('無知の視');
   ok((await log()).includes('シミュレーターでは処理しません'),'HB01-077: 「次のラインに使ってもよい」は未確定のため処理せず、手で処理するよう案内する');
   await close();
+  // バトルで破壊されたら発動しない: 「バトルが終わったとき」の効果を発動するのは、そのときラインにいるホロビトだけ（総合ルール 6.3.2.12）。
+  // 破壊（ホロビトへのダメージ 6.3.2.10）はその前に済んでいる
+  await setup({hand:['HB01-076'], line:[[{k:'HB01-077',turned:true}]], ena:[B()], heart:H5},{line:[['HB01-061']], heart:H5});   // 4500+3000 は 巨ダマ 18000 に負ける
+  await battle(); await choose('無知の視');
+  s=await S();
+  ok(s.players[0].grave.some(c=>c.key==='HB01-077') && (await log()).includes('「山姥ヤマヒメ」はもうラインの一番上にいないので') &&
+     !(await log()).includes('無知の視 を選んだ') && !(await opts()).some(t=>t.includes('無知の視')),
+     'HB01-077: ダウン中に負けて破壊されたら、「バトルが終わったとき」は発動しない（総合ルール 6.3.2.12）');
+  await close();
 
   // HB01-081 カッパダイバー / HB01-083 三味線鬼灯とMCガシャ: ダブルダメージ
   for(const k of ['HB01-081','HB01-083']){
