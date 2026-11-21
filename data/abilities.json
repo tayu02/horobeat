@@ -1147,7 +1147,7 @@
           "part": "may_play_from_hand_to_line",
           "args": {
             "n": 2,
-            "color": "赤",
+            "kind": "赤",
             "m": 1
           }
         }
@@ -2755,6 +2755,47 @@
           ]
         }
       ]
+    }
+  ],
+  "PR-038": [
+    {
+      "conditions": [
+        {
+          "part": "on_line",
+          "args": {
+            "subject": "自分の他のファミリーのホロビト"
+          }
+        }
+      ],
+      "effects": [
+        {
+          "part": "power_plus",
+          "args": {
+            "target": "このホロビト",
+            "n": 2000
+          }
+        }
+      ]
+    },
+    {
+      "trigger": {
+        "subject": "this_holobito",
+        "event": "won_battle"
+      },
+      "effects": [
+        {
+          "part": "may_play_from_hand_to_line",
+          "args": {
+            "n": 2,
+            "kind": "ファミリー",
+            "m": 1
+          }
+        }
+      ],
+      "note": {
+        "part": "note_no_cost",
+        "sep": "\n"
+      }
     }
   ]
 }

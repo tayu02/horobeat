@@ -263,7 +263,7 @@
     },
     "may_play_from_hand_to_line": {
       "role": "効果",
-      "text": "手札からコスト{n}以下の{color}のホロビトを{m}体、ラインに出してもよい"
+      "text": "手札からコスト{n}以下の{kind}のホロビトを{m}体、ラインに出してもよい"
     },
     "note_no_finish": {
       "role": "補足",

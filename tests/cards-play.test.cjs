@@ -1046,6 +1046,31 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
   ok((await hand(0))===1 && (await log()).includes('自分 7000'),'PR-037: 共鳴（ライガ）を満たし、1枚引いて 4000＋2000＋1000 ＝ 7000');
   await close();
 
+  // ---- PR-038 紅合身 レオジン ----
+  // 「ファミリー」が何を指すかは印字から決まらない（rules_guess.md B-8）。決めつけずに聞く／人に選ばせる
+  // 自分のラインに他のホロビトがいなければ、どう読んでも条件を満たさない → 聞かずに 5000 のまま
+  await setup({line:[['PR-038']], hand:['HB01-001','HD02-001','HB01-061'], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle();
+  ok((await log()).includes('自分 5000'),'PR-038: 自分のラインに他のホロビトがいないので +2000 しない（聞かない）');
+  // 勝ったとき: 手札のコスト2以下のホロビトを、種族で絞らずに光らせ、何を指すかが未確定だと示す
+  pk=await picks();
+  const msg038=await p.textContent('#pickmsg');
+  ok(pk.length===2 && msg038.includes('印字からは決まっていない') && msg038.includes('スザク・ブラッド') && msg038.includes('ライガ・ファミリー'),
+     'PR-038: 勝ったとき、コスト2以下のホロビト（雷獣 レオ・しなずいさま）を光らせ、「ファミリー」が未確定であることと候補の種族を示す');
+  await tap((await S()).players[0].hand.find(c=>c.key==='HB01-001').uid);
+  s=await S();
+  ok(s.players[0].line[1].length===1 && s.players[0].line[1][0].key==='HB01-001' && !s.players[0].ena.length,'PR-038: 選んだホロビトが第2ラインに出る（コストは支払わない）');
+  await close();
+  // 自分のラインに他のホロビトがいれば聞く。「満たしている」なら 5000＋2000＝7000
+  await setup({line:[['PR-038'],['HB01-001']], hand:['HD02-001'], heart:H5},{line:[['HD01-001']], heart:H5});
+  await battle();
+  ok((await q()).includes('ファミリー') && (await q()).includes('雷獣 レオ（種族: ライガ・ファミリー）'),'PR-038: 自分のラインに他のホロビトがいるときは、他のホロビトと種族を示して聞く');
+  await choose('満たしている');
+  ok((await log()).includes('自分 7000'),'PR-038: 「満たしている」→ 5000＋2000＝7000');
+  await p.click('#pickCancel'); await wait(460);
+  ok((await log()).includes('出さなかった'),'PR-038: 手札から出すのはやめられる（任意）');
+  await close();
+
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));
   await b.close();
   await H.finish();
