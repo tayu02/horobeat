@@ -389,6 +389,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
 }
 /* ---- カード画像（メニューに大きく出す） ---- */
 .cimgwrap{display:flex;justify-content:center;margin:2px 0 8px}
+.cimgwrap{cursor:pointer}
 .cimg{width:100%;max-width:340px;aspect-ratio:596/833;border-radius:10px;background:#241c1c;box-shadow:0 4px 14px rgba(0,0,0,.55);object-fit:contain}
 .cimgnone{font-size:11px;color:var(--sub);text-align:center;margin:0 0 6px}
 /* ---- 効果の自動処理 ---- */
@@ -436,7 +437,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
 #pickbar{position:fixed;left:8px;right:8px;top:8px;z-index:95;display:none;background:#2a2020;border:2px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:13px;gap:8px;align-items:center;box-shadow:0 4px 18px rgba(0,0,0,.6)}
 #pickbar.on{display:flex}
 #pickbar span{flex:1}
-#fxlog{position:fixed;left:8px;right:8px;bottom:8px;z-index:90;display:none;background:#1b1414;border:1px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:0 4px 18px rgba(0,0,0,.6)}
+#fxlog{cursor:pointer;position:fixed;left:8px;right:8px;bottom:8px;z-index:90;display:none;background:#1b1414;border:1px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:0 4px 18px rgba(0,0,0,.6)}
 #fxlog .fxlines{max-height:30vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 #fxlog.on{display:block}
 #fxlog .fxlines div{padding:1px 0;border-bottom:1px dashed #3a2b2b}
@@ -5380,7 +5381,7 @@ function detailHTML(c){
 function imageHTML(c){
   if (!c.key || !c.up) return "";
   var src = CARD_IMAGES[c.key];
-  if (src) return '<div class="cimgwrap"><img class="cimg" src="' + esc(src) + '" alt="' + esc(nm(c)) + '" decoding="async" onerror="this.parentNode.remove()"></div>';
+  if (src) return '<div class="cimgwrap" title="タップすると閉じます"><img class="cimg" src="' + esc(src) + '" alt="' + esc(nm(c)) + '" decoding="async" onerror="this.parentNode.remove()"></div>';
   var why = CARD_IMAGE_PENDING[c.key];
   return why ? '<div class="cimgnone">画像なし：' + esc(why) + '</div>' : "";
 }
@@ -5502,6 +5503,9 @@ function openEnaSheet(pi){
 
 sheetEl.addEventListener("click", function(e){
   if (guarded()) return;
+  // カードの画像をタップしても閉じる（依頼者の指示 2026-11-23「スマホだと下までスクロールしないとこの画面が消せないので、
+  // カード画面をタップしたら閉じられるようにもして欲しい」）。「閉じる」と同じ
+  if (e.target.closest(".cimgwrap")){ closeSheet(); if (fxAsk){ var a9 = fxAsk; fxAsk = null; a9.cancel(); } return; }
   var t = e.target.closest("button"); if (!t) return;
   var ds = t.dataset;
   if (ds.close){ closeSheet(); if (fxAsk){ var a0 = fxAsk; fxAsk = null; a0.cancel(); } return; }
@@ -5676,9 +5680,11 @@ function setAi(lv){
 }
 document.getElementById("btnFx").addEventListener("click", function(){ snap(); state.fxAuto = !fxOn(); picking = null; fxClear(); render(); });
 document.getElementById("pickCancel").addEventListener("click", function(){ var p = picking; picking = null; render(); if (p) p.cancel(); });
+// ログは、「戻す」以外のどこをタップしても閉じる（依頼者の指示 2026-11-23「ログもどこをタップしても消えるようにして欲しい」）
 document.getElementById("fxlog").addEventListener("click", function(e){
-  var b = e.target.closest("button[data-fxlog]"); if (!b) return;
-  if (b.dataset.fxlog === "undo"){ picking = null; focusReset(); fxClear(); undo(); } else fxClear();
+  var b = e.target.closest("button[data-fxlog]");
+  if (b && b.dataset.fxlog === "undo"){ picking = null; focusReset(); fxClear(); undo(); return; }
+  fxClear();
 });
 document.querySelector("header").addEventListener("click", function(e){
   var t = e.target.closest("button[data-jump]"); if (!t) return;

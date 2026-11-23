@@ -1,6 +1,7 @@
 // 画面の見やすさ（依頼者の指示 2026-11-23）
 // 1. 「🌐 対戦」は「🎮 試遊」の横のタブ
 // 2. スマホで、下に出るログが自分の手札を隠さない（ログの高さの分だけページの下に余白を足す）
+// 2b. ログはどこをタップしても消える／2c. カードの詳細は画像をタップすると閉じる
 // 3. バトル中は、パワーの内訳（印字・効果・ワザ・ブースト）と合計、印字からの増減をいつも出す
 const H = require('./harness.cjs');
 const { devices, ok } = H;
@@ -51,6 +52,43 @@ async function run(label, viewport, touch){
   ok(r2.hand<=r2.log+1,'一番下まで動かしても、手札はログに隠れない');
   await p.click('#fxlog button[data-fxlog="close"]'); await wait(80);
   ok(await p.evaluate(()=>document.body.style.paddingBottom==='' && document.documentElement.style.scrollPaddingBottom===''),'ログを閉じると、足した余白はなくなる');
+
+  // ---- 2b. ログは、どこをタップしても消える。「戻す」は戻す（依頼者の指示 2026-11-23）----
+  await p.evaluate(()=>{ fxLines=['試しの行1','試しの行2']; fxShowLog(); });
+  ok(await p.evaluate(()=>document.getElementById('fxlog').classList.contains('on')),'ログが出ている');
+  await p.locator('#fxlog .fxlines div',{hasText:'試しの行2'}).click(); await wait(80);
+  ok(await p.evaluate(()=>!document.getElementById('fxlog').classList.contains('on')),'ログの行をタップするとログが消える');
+  ok(await p.evaluate(()=>document.body.style.paddingBottom===''),'タップで消したときも、足した余白はなくなる');
+  const hand1=(await S()).players[0].hand.length;
+  await p.evaluate(()=>{ snap(); runAction('draw1',0); render(); });
+  ok((await S()).players[0].hand.length===hand1+1,'（準備）1枚引く');
+  await p.evaluate(()=>{ fxLines=['引いた']; fxShowLog(); });
+  const undoBtn=await p.$('#fxlog button[data-fxlog="undo"]');
+  if (undoBtn){
+    await undoBtn.click(); await wait(120);
+    ok((await S()).players[0].hand.length===hand1 && await p.evaluate(()=>!document.getElementById('fxlog').classList.contains('on')),'ログの「戻す」は、これまでどおり1手戻してログを消す');
+  } else ok(false,'ログに「戻す」がない');
+
+  // ---- 2c. カードの詳細は、カードの画像をタップすると閉じる（依頼者の指示 2026-11-23）----
+  await setup({line:[['HB01-001']], heart:H5},{heart:H5});
+  const cu=(await S()).players[0].line[0][0].uid;
+  await p.evaluate(u=>openCardSheet(u,0),cu); await wait(500);
+  ok(await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on') && !!document.querySelector('#sheet .cimgwrap')),'盤面のカードの詳細に画像が出る');
+  await p.click('#sheet .cimgwrap'); await wait(120);
+  ok(await p.evaluate(()=>!document.getElementById('sheetwrap').classList.contains('on')),'画像をタップすると、カードの詳細が閉じる');
+  ok(await p.evaluate(u=>state.players[0].line[0][0].uid===u,cu),'閉じるだけで、カードは動かない');
+  // 開いた直後の誤タップでは閉じない（他のボタンと同じ 400ms の守り）
+  await p.evaluate(u=>openCardSheet(u,0),cu); await wait(30);
+  await p.evaluate(()=>document.querySelector('#sheet .cimgwrap').click()); await wait(50);
+  ok(await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on')),'開いた直後（0.4秒以内）のタップでは閉じない');
+  await wait(450); await p.click('#sheet .cimgwrap'); await wait(120);
+  // カードの一覧の詳細も同じ
+  await p.click('.navbtn[data-view="cards"]'); await wait(80);
+  await p.evaluate(()=>openCatalogSheet('HB01-002')); await wait(500);
+  ok(await p.evaluate(()=>!!document.querySelector('#sheet .cimgwrap')),'カードの一覧の詳細にも画像が出る');
+  await p.click('#sheet .cimgwrap'); await wait(120);
+  ok(await p.evaluate(()=>!document.getElementById('sheetwrap').classList.contains('on')),'カードの一覧の詳細も、画像をタップすると閉じる');
+  await p.click('.navbtn[data-view="play"]'); await wait(80);
 
   // ---- 3. バトル中のパワーの内訳 ----
   // 学合 フラリンテ(HD02-012): このホロビトにブーストを使っているなら +2000。ケサランパサラン(HD02-010) をブーストで使う
