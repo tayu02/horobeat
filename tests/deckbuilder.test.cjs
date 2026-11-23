@@ -196,7 +196,7 @@ async function run(label, viewport, touch){
   // --- 表示の設定は再読み込みしても残る（盤面の状態とは別） ---
   await p.click('.navbtn[data-view="cards"]');
   await pick('fColor','赤');
-  await p.reload(); await wait(150);
+  await H.reloadSaved(p); await wait(150);
   ok(await vis('#viewCards')&&await p.evaluate(()=>document.getElementById('fColor').value)==='赤'&&await p.evaluate(()=>ui.deckPi)===1,'再読み込みしても、開いていた画面・絞り込み・組んでいるデッキが残る');
   ok(same(await shownSorted(),where(d=>d.color_mark==='赤')),'残った絞り込みで一覧が出る');
   await clear();

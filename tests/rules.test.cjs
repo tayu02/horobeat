@@ -130,7 +130,7 @@ async function run(label, viewport, touch){
 
   // ---- 以前の保存（フェイズが3つ）を読み込むと、フェイズの番号を合わせる ----
   await p.evaluate(()=>{ const s=JSON.parse(JSON.stringify(state)); delete s.v; s.phase=1; localStorage.setItem(STORE_KEY, JSON.stringify(s)); });
-  await p.reload(); await wait(100);
+  await H.reloadSaved(p); await wait(100);
   ok(await phase()==='バトルフェイズ' && (await S()).v===3,'以前の保存の「バトルフェイズ」（番号1）は、バトルフェイズ（番号2）として読み込む');
 
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));

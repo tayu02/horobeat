@@ -55,13 +55,15 @@ async function run(label, viewport, touch, full){
   ok((await p.textContent('#btnAi'))==='相手: AI ふつう' && await p.evaluate(()=>ui.ai==='normal'),'「AI ふつう」を選ぶと「相手: AI ふつう」になる');
   ok((await log()).includes('AI の番でもあなたに聞きます'),'記録にも、ルールが未確定のことは AI の番でも人に聞く、と出る');
   // 読み込みが終わるのを待つ（決め打ちの待ち時間だと、込み合っているときに間に合わないことがあった）
-  // 待ち時間は 8 秒では足りなかった（2026-11-14 と 2026-11-20 に、試験を20本並列で回しているときに1回ずつ落ちた。
-  // test-results/history.log に記録あり）。ほかの試験と同じ 30 秒にする
-  await p.reload(); await until(()=>document.getElementById('btnAi')?.textContent==='相手: AI ふつう',30000);
+  // 2026-11-14 と 2026-11-20 に、試験を20本並列で回しているときに1回ずつ落ちた（test-results/history.log）。
+  // 2026-11-20 には「待ち時間が 8 秒では足りない」と見て 30 秒に広げたが、その見立ては誤りだった可能性が高い:
+  // 2026-11-23 に deckbuilder で同じ形の失敗（再読み込みのあと、保存が丸ごと無い）が出た。待ち時間では直らないので、
+  // 保存が別のページからも読めることを確かめてから再読み込みする（harness.cjs の reloadSaved）
+  await H.reloadSaved(p); await until(()=>document.getElementById('btnAi')?.textContent==='相手: AI ふつう',30000);
   ok((await p.textContent('#btnAi'))==='相手: AI ふつう','再読み込みしても AI のまま（この端末の設定）');
   // 以前の保存（相手を AI にするかどうかだけ）は「ふつう」として読む
   await p.evaluate(()=>{ localStorage.setItem('horobeat-sim-ui', JSON.stringify({view:'play',deckPi:0,f:{},ai:true})); });
-  await p.reload(); await until(()=>document.getElementById('btnAi')?.textContent==='相手: AI ふつう',30000);
+  await H.reloadSaved(p); await until(()=>document.getElementById('btnAi')?.textContent==='相手: AI ふつう',30000);
   ok((await p.textContent('#btnAi'))==='相手: AI ふつう','以前の保存（ai: true）は「AI ふつう」として読む');
   await pickAi('easy');
   ok((await p.textContent('#btnAi'))==='相手: AI かんたん' && await p.evaluate(()=>ui.ai==='easy'),'「AI かんたん」も選べる（2〜8 は「かんたん」で確かめる）');

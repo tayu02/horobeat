@@ -46,7 +46,7 @@ async function run(label, viewport, touch){
   ok((await p.textContent('#viewDeck .libbar')).includes('保存したデッキ（2）'),'数が増える');
 
   // ---- 一覧（各デッキの画像を少し並べる）→ 再読み込みしても残る ----
-  await p.reload(); await wait(150);
+  await H.reloadSaved(p); await wait(150);
   await p.click('#viewDeck button[data-lib="list"]'); await wait(450);
   const rows=await p.evaluate(()=>[...document.querySelectorAll('#sheet .librow')].map(r=>({name:r.querySelector('b').textContent, th:r.querySelectorAll('.libth').length})));
   ok(rows.length===2 && rows[0].name==='テスト／赤' && rows.every(r=>r.th===8),'一覧: 再読み込みしても残る。新しいものが上。各デッキの画像を8枚まで並べる '+JSON.stringify(rows));

@@ -68,7 +68,7 @@ async function run(label, viewport, touch){
 
   // ---- 再読み込みしても残る ----
   const n1=await p.evaluate(()=>rec.d.length);
-  await p.reload(); await wait(150);
+  await H.reloadSaved(p); await wait(150);
   ok(await p.evaluate(()=>rec && rec.d.length)===n1,'再読み込みしても記録は残る（この端末のブラウザ）');
   await openRec('cur'); r=await R();
   ok(r && r.n>=3,'再読み込みのあとも見返せる');

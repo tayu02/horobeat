@@ -153,7 +153,7 @@ async function run(label, viewport, touch){
 
   // --- 保存と復元 ---
   const before=JSON.stringify(await S());
-  await p.reload();
+  await H.reloadSaved(p);
   await wait(100);
   const after=JSON.stringify(await S());
   ok(before===after,'再読み込みしても盤面が復元される');
@@ -165,7 +165,7 @@ async function run(label, viewport, touch){
   s=await S();
   ok(s.players[0].deck.length===50&&s.players[0].hand.length===0,'リセットで盤面が空に');
   ok(s.players[0].decklist['HB01-001']===4,'リセットしてもデッキ構成は残る');
-  await p.reload(); await wait(100);
+  await H.reloadSaved(p); await wait(100);
   ok((await S()).players[0].hand.length===0&&await p.isVisible('#guide'),'リセット後に再読み込みしても空のまま・ガイドが出る');
 
   // --- レイアウト ---

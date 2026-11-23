@@ -5,7 +5,7 @@
 //
 // やっていること:
 //   1. 速い検査（データ・文書の表・画像の台帳・生成物が最新か）
-//   2. ブラウザの試験（tests/*.test.cjs）を並列に実行
+//   2. ブラウザの試験（tests/*.test.cjs）を、CPU の数ずつ並列に実行（HB_TEST_JOBS で変えられる）
 //   3. それぞれの全出力を test-results/<名前>.log に保存
 //      （あとから「何が落ちたか」を必ず確かめられるように。以前、出力を捨てていて分からなくなった）
 //   4. FAIL の行をすべて、試験名つきで最後にまとめて表示。失敗時の画面の保存先も出す
@@ -13,7 +13,8 @@
 //
 // 1つでも失敗すれば終了コード 1。コミット前のフック（.githooks/pre-commit）がこれを使う。
 import { spawn, execFileSync } from "node:child_process";
-import { readdirSync, mkdirSync, writeFileSync, appendFileSync, rmSync } from "node:fs";
+import { readdirSync, mkdirSync, writeFileSync, appendFileSync, rmSync, statSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -45,12 +46,24 @@ const results = [];
 for (const [label, cmd, args] of quick) results.push(await run(label, cmd, args));
 
 // ---- 2. ブラウザの試験 ----
+// 同時に回す本数は CPU の数まで（HB_TEST_JOBS で変えられる）。2026-11-23 まではすべてを一度に回していたが、
+// CPU 4つに20本ほど（それぞれブラウザを起動）を重ねると、ブラウザの保存（localStorage）が10秒以上届かないことがあり、
+// 「再読み込みしても残る」の確認がまれに落ちた（tests/harness.cjs の reloadSaved が検出）。大きい試験から先に始める
 const suites = readdirSync(path.join(ROOT, "tests")).filter(f => f.endsWith(".test.cjs")).sort();
+const JOBS = Math.max(1, parseInt(process.env.HB_TEST_JOBS, 10) || os.cpus().length || 4);
+const bySize = suites.slice().sort((a, b) => statSync(path.join(ROOT, "tests", b)).size - statSync(path.join(ROOT, "tests", a)).size);
+async function pool(items, n, fn) {
+  const out = new Array(items.length); let next = 0;
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
+    while (next < items.length) { const i = next++; out[i] = await fn(items[i]); }
+  }));
+  return out;
+}
 const browser = [];
 for (let r = 1; r <= REPEAT; r++) {
-  const batch = await Promise.all(suites.map(f =>
-    run(f.replace(".test.cjs", "") + (REPEAT > 1 ? `#${r}` : ""), "node", [path.join("tests", f)])));
-  browser.push(...batch);
+  const done = await pool(bySize, JOBS, f => run(f.replace(".test.cjs", "") + (REPEAT > 1 ? `#${r}` : ""), "node", [path.join("tests", f)]));
+  // 一覧は名前の順で出す（これまでどおり）
+  browser.push(...suites.map(f => done[bySize.indexOf(f)]));
 }
 results.push(...browser);
 

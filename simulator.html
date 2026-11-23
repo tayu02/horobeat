@@ -227,6 +227,7 @@ details.doc code{background:#241c1c;padding:0 3px;border-radius:3px}
 .navrow{gap:6px}
 .navbtn{font-size:13px;padding:6px 10px;font-weight:700}
 .navbtn.on{background:var(--red2);border-color:var(--red)}
+.navbtn.olon{border-color:var(--gold);color:var(--gold)}   /* オンライン対戦中 */
 .deckcount{font-weight:800;color:var(--gold);font-size:13px;white-space:nowrap}
 .view{display:none}
 body.view-play #viewPlay, body.view-cards #viewCards, body.view-deck #viewDeck{display:block}
@@ -425,6 +426,15 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
 .fxvs{align-self:center;font-weight:800;color:var(--gold);font-size:15px;flex:0 0 auto}
 .fxcard .res{display:inline-block;margin-top:2px;padding:0 7px;border-radius:4px;background:var(--gold);color:#1a1212;font-weight:800}
 .fxcard .res.lose{background:#6b6058;color:#fff}
+/* バトル中のパワーの内訳（＋は緑、−は赤、条件しだいは灰色） */
+.pwb{display:table;margin:3px auto 0;text-align:left;font-size:10.5px;line-height:1.35;color:var(--sub)}
+.pwr.up,.pwb .up{color:#7fd67f;font-weight:700}
+.pwr.dn,.pwb .dn{color:#ff8a8a;font-weight:700}
+.pwr.q{color:#a89e96}
+.pwr.off{color:#6b6058;text-decoration:line-through}
+.pwr.tot{color:var(--txt);font-weight:800;font-size:12px;border-top:1px solid var(--line);margin-top:2px;padding-top:2px}
+/* 盤面: バトル中のホロビトのパワー（いまの合計）。上がっていれば緑、下がっていれば赤 */
+.cpow.up{color:#1f8a2a} .cpow.dn{color:#c0272d}
 #pickbar{position:fixed;left:8px;right:8px;top:8px;z-index:95;display:none;background:#2a2020;border:2px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:13px;gap:8px;align-items:center;box-shadow:0 4px 18px rgba(0,0,0,.6)}
 #pickbar.on{display:flex}
 #pickbar span{flex:1}
@@ -449,6 +459,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
     <button class="navbtn" data-view="cards">🔍 カード</button>
     <button class="navbtn" data-view="deck">📋 デッキ</button>
     <button class="navbtn" data-view="play">🎮 試遊</button>
+    <button id="btnOnline" class="navbtn">🌐 対戦</button>
     <span class="spacer"></span>
     <button id="btnUndo2" class="mini buildonly" disabled>戻す</button>
     <span class="deckcount" id="deckCount"></span>
@@ -461,7 +472,6 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
     <button id="btnFx" class="mini">効果: 自動</button>
     <button id="btnAi" class="mini">相手: 人</button>
     <button id="btnRec" class="mini">📼 記録</button>
-    <button id="btnOnline" class="mini">🌐 対戦</button>
     <span class="spacer"></span>
     <span class="jumpbar">
       <button class="mini" data-jump="1">相手へ</button>
@@ -532,7 +542,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
     <p><b>召喚フェイズ</b>：番のプレイヤーだけが操作できます（相手の側は見るだけ）。初めにドローステップで1枚引きます（最初のラウンドはお互いドローなし。山札が0枚で引けなければ負け＝勝利条件②）。エナチャージは手札のカードをエナゾーンへ動かす操作で、<b>1枚だけ・ホロビトを出す前だけ</b>です。ホロビトは手札からラインへ動かすと、エナを使用済みにして支払って出します（新しいラインは、空いているラインのうち第1ラインに最も近いラインだけ。オーバービートは、出すホロビトのコスト<b>未満</b>のホロビトの上だけで、支払うエナはその分少なくなります。同じコストには重ねられません。「コストは1大きくなる」ホロビトは、ラインにいる間はそのコストで数えます。重ねるラインは、条件を満たしていればどのラインでも選べます）。<b>支払うエナには、カードの色が1枚以上含まれている必要があります</b>（オーバービート元が同じ色なら、エナは何色でもかまいません。総合ルール 7.2.2.1）。色の内訳が何通りかあるときは「おすすめで支払う」か「自分で選ぶ」を選べます。<b>エナが足りない・色がないときは使えません</b>。</p>
     <p><b>バトルフェイズ</b>：第1ラインから順に自動で進めます。片方だけにホロビトがいれば不戦勝（勝ち）。ワザとブーストは先手から交互に1枚ずつ、使うかを聞きます。使わないときは「パス」。<b>両者が続けてパスしたら、パワーを比べます</b>（総合ルール 6.3.2.4。使えるカードがない・ホロビトがいないときは自動でパス）。ブーストは、左辺に「+2000」と丸数字のあるホロビトを手札から使い、丸数字の数のエナを払って、横向きでワザゾーンに置きます。ダウンしているホロビトも通常どおりバトルし、勝てば通常どおりダメージを与えます。パワー（印字＋効果の+N＋使ったワザ・ブースト）を比べ、勝ったときの効果 → 負けたときの効果 → ダメージの計算 → 負けたホロビトへのダメージ → ハート（重なりの一番上＝持ち主にいちばん近い1枚から順に）へのダメージ、の順に進めます（総合ルール 6.3.2.7〜6.3.2.11）。ダウンしていれば破壊（ホロビトは重なっているカードごと墓地へ。ハートはチェックゾーンへ）。ダブルダメージの2ダメージは、そのときの一番上のハートに1ダメージを2回入れます（縦向きなら1回目でダウン、2回目で破壊）。破壊されたハートは、ダメージを入れ終えてから「チェック処理」で1枚ずつ、トリガーを使う（相手にも見せる）か手札に加える（見せない）かを選びます。引き分けは、お互いのホロビトにそれぞれ1ダメージ（ダウンしていなければダウン、すでにダウンしていれば破壊）で、ハートはダメージを受けません。ハートが0枚のときのダメージでトドメ（勝利条件①）。第1ラインのバトルに勝ったプレイヤーが次の先手。引き分けか、第1ラインにバトルがなかったら、先手と後手が入れ替わります。途中でやめても、上部の「バトルを続ける」で再開できます。バトルのたびに両者のカードの画像を並べて出し、パワーを比べたら結果（勝ち・負け）を見せます（「続ける」で次へ）。チェック処理では、そのカードの画像を出します。</p>
     <p><b>相手をAIにする</b>：上部の「相手: 人」を押して「AI ふつう」か「AI かんたん」を選ぶと、相手の番に AI が自動で動きます（引き直すか、エナチャージ、どのホロビトをどのラインに出すか、ワザ・ブーストを使うか、ハートのトリガー、効果で選ぶカード）。<b>ルールが未確定でシミュレーターが聞くことは、AI の番でもあなたに聞きます</b>（AI にルールを決めさせないため）。AI が何をしたかは下の記録に残ります。「戻す」で AI の番に戻ったときは AI が止まるので、「AIを進める」で続けます。「かんたん」は、その場でいちばん強くなる出し方をします。「ふつう」は、第1ラインから順にバトルの結果（どのラインで勝ち負けし、ハートに何回ダメージが入るか、トドメになるか）を見通し、エナを使うと次のエナドローで引ける枚数が減ることやカードの効果も数えて、出し方・ワザ・ブースト（5つのラインへの配り方）・トリガーを選びます（AI どうしで800回対戦させると、「ふつう」が「かんたん」に約86%勝ちます）。AI はあなたの手札の中身を見ません（盤面と枚数だけを見ます）。AI の手札も裏向きで表示します（相手を選ぶシートで「見せる」にもできます。勝敗が決まったら見せます）。</p>
-    <p><b>オンライン対戦</b>：上部の「🌐 対戦」で部屋を作り、出た6文字のコードを相手に伝えます。相手は同じシミュレーターを開いて「部屋に入る」にコードを入れます。作った人が先手を選んで始めます。デッキは、それぞれのいまの「自分のデッキ」です。あなたの手札・山札・ハートの中身は相手の端末には送りません（場に出たカード・表になったカードだけが届きます）。相手が決めること（引き直す・ワザ・ブースト・ハートのトリガー・効果で選ぶカードなど）は、相手の画面に出ます。自分の番でないときは、自分の側も操作できません。「戻す」と AI は使えません。読み込み直すと、同じ部屋の続きに戻ります。使えるのは、claude.ai で公開したシミュレーターを、ログインして開いたときだけです。相手は、このシミュレーターに「編集者」としてメールで招待されている必要があります（リンクで共有していないとき）。1人で試すときは、同じアカウントのまま別の端末（またはパソコンの別のブラウザ）で開けば、招待なしで試せます（同じブラウザの2つのタブでは試せません）。</p>
+    <p><b>オンライン対戦</b>：上部の「🎮 試遊」の右の「🌐 対戦」タブで部屋を作り、出た6文字のコードを相手に伝えます。相手は同じシミュレーターを開いて「部屋に入る」にコードを入れます。作った人が先手を選んで始めます。デッキは、それぞれのいまの「自分のデッキ」です。あなたの手札・山札・ハートの中身は相手の端末には送りません（場に出たカード・表になったカードだけが届きます）。相手が決めること（引き直す・ワザ・ブースト・ハートのトリガー・効果で選ぶカードなど）は、相手の画面に出ます。自分の番でないときは、自分の側も操作できません。「戻す」と AI は使えません。読み込み直すと、同じ部屋の続きに戻ります。使えるのは、claude.ai で公開したシミュレーターを、ログインして開いたときだけです。相手は、このシミュレーターに「編集者」としてメールで招待されている必要があります（リンクで共有していないとき）。1人で試すときは、同じアカウントのまま別の端末（またはパソコンの別のブラウザ）で開けば、招待なしで試せます（同じブラウザの2つのタブでは試せません）。</p>
     <p><b>カードの動き</b>：カードを動かすと、前の場所から新しい場所へ飛んで見えます（山札から引くと裏から表に返りながら手札へ、手札から出すときは持ち上げてから、墓地へは傾きながら落ちる）。バトルの結果が出ると、勝ったホロビトが相手に飛び込み（攻撃）、ダメージを受けたホロビトとハートは揺れて赤く光ります。動いている間に出る質問は、動き終わってから出ます。端末の設定で動きを減らしている（iPhone の「視差効果を減らす」など）ときは動かしません。見せ方だけで、盤面の中身は変わりません。</p>
     <p><b>対戦の記録</b>：上部の「📼 記録」で、配った直後からの盤面を1手ずつ見返せます（⏮ ◀ ▶ ⏭・つまみ・PC は矢印キー）。見返している間は盤面を触れず、「閉じる」でいまの盤面に戻ります。記録はこの端末のブラウザに、いまのゲームと1つ前のゲームの2つまで残ります。</p>
     <p><b>盤面の印</b>：効果を出しているカードは金の太い枠と「効果」、効果の対象は赤の太い枠と「対象」、バトル中のカードは白の太い枠と「バトル」、選ぶ候補は金の太い枠と「選ぶ」の札が付きます。</p>
@@ -3172,11 +3182,20 @@ function fxLog(s, pub){ fxLines.push(s); if (fxLines.length > 80) fxLines.shift(
 function fxClear(){ if (aiActing) return; fxLines = []; fxShowLog(); }
 function fxShowLog(){
   var el = document.getElementById("fxlog");
-  if (!fxLines.length){ el.classList.remove("on"); el.innerHTML = ""; return; }
+  if (!fxLines.length){ el.classList.remove("on"); el.innerHTML = ""; logSpace(); return; }
   el.innerHTML = '<div class="fxlines">' + fxLines.map(function(s){ return "<div>" + esc(s) + "</div>"; }).join("") + '</div>' +
     '<div class="fxbtns"><button class="mini" data-fxlog="undo">戻す</button><button class="mini" data-fxlog="close">閉じる</button></div>';
   el.classList.add("on");
   var ls = el.querySelector(".fxlines"); if (ls) ls.scrollTop = ls.scrollHeight;
+  logSpace();
+}
+// 画面の下に重ねて出すログ（#fxlog）が、盤面の一番下（自分の手札）を隠さないように、ログの高さの分だけページの下に余白を足す。
+// 画面の中の移動（「自分へ」など）も、ログの裏に止まらないようにする（依頼者の報告 2026-11-23「スマホだと何が起きたかのログが出てくると初手の手札が見えなかった」）
+function logSpace(){
+  var el = document.getElementById("fxlog"), h = el ? el.getBoundingClientRect().height : 0;
+  var pad = h ? Math.ceil(h) + 16 : 0;
+  document.body.style.paddingBottom = pad ? "calc(env(safe-area-inset-bottom) + " + pad + "px)" : "";
+  document.documentElement.style.scrollPaddingBottom = pad ? pad + "px" : "";
 }
 // ---- 効果を出しているカードと、その対象（盤面の印と、質問の上の画像に使う）----
 var fxFocus = { src:null, tgt:[] };
@@ -3205,6 +3224,34 @@ function powerHint(c){
   boostUsesOf(c).forEach(function(u){ s += "＋ブースト" + u.mod; });
   return s;
 }
+// ---- バトル中のパワーの内訳（依頼者の指示 2026-11-23「バトル時には能力、ワザによるパワー上昇も加算値として常に出して欲しい。
+// パワーが上がってるのか下がってるのか分かりにくかった」）----
+// 印字のパワーに、効果・ワザ・ブーストで足す分を1つずつ並べ、合計と、印字からの増減を出す。計算はパワーを比べるときと同じ powerParts。
+// 条件を判定できない効果は「？」にして合計に入れない（聞いて答えたあとは、足す・足さないを出す）
+function livePower(p){
+  var b = state.battle, c = battler(p);
+  if (!b || !c || c.uid !== b.users[p]) return null;
+  var r = powerParts(p); if (r.err) return { err:r.err };
+  var base = r.parts[0].n, tot = 0, pend = 0, rows = [];
+  r.parts.forEach(function(q, i){ tot += q.n; if (i) rows.push({ t:q.t, n:q.n }); });
+  r.asks.forEach(function(a){
+    var v = b.ask ? b.ask[r.c.uid + "|" + a.q] : undefined;
+    if (v === true){ tot += a.n; rows.push({ t:a.t, n:a.n }); }
+    else if (v === false) rows.push({ t:a.t + "（満たしていない）", n:0, cls:"off" });
+    else { pend++; rows.push({ t:a.t + "？（条件しだい）", n:0, cls:"q" }); }
+  });
+  return { base:base, tot:tot, pend:pend, rows:rows };
+}
+function signCls(n){ return n > 0 ? "up" : n < 0 ? "dn" : ""; }
+function powerBreakHTML(p){
+  var L = livePower(p); if (!L) return "";
+  if (L.err) return '<div class="pwb"><div class="pwr q">' + esc(L.err) + '</div></div>';
+  var d = L.tot - L.base;
+  return '<div class="pwb"><div class="pwr">印字 ' + L.base + '</div>' +
+    L.rows.map(function(q){ return '<div class="pwr ' + (q.cls || signCls(q.n)) + '">' + esc(q.t) + '</div>'; }).join("") +
+    '<div class="pwr tot">パワー ' + L.tot + (L.pend ? "＋？" : "") +
+    (d ? ' <span class="' + signCls(d) + '">（' + (d > 0 ? "+" : "") + d + '）</span>' : "") + '</div></div>';
+}
 // バトルしている両者のカード（自分・相手の順）。result: 勝ち負けを出す
 function battleHeadHTML(result){
   var b = state.battle; if (!b || b.line >= LINE_COUNT || (!b.users[0] && !b.users[1])) return "";
@@ -3215,8 +3262,10 @@ function battleHeadHTML(result){
       else if (b.winner === p){ cls = "win"; tag = '<span class="res">勝ち</span>'; }
       else { cls = "lose"; tag = '<span class="res lose">負け</span>'; }
     }
-    var pw = b.pw && typeof b.pw[p] === "number" ? "パワー " + b.pw[p] : powerHint(c);
-    return picHTML(c, '<b>' + SIDE_NAME[p] + '</b>' + (c ? esc(nm(c)) + (pw ? '<br>' + pw : "") : "ホロビトなし") + (tag ? '<br>' + tag : ""), cls);
+    // 内訳はバトルの間ずっと出す。ホロビトがもうラインにいない（破壊された など）ときは、比べたときのパワーか印字の内訳だけ
+    var br = powerBreakHTML(p);
+    var pw = br ? "" : b.pw && typeof b.pw[p] === "number" ? "パワー " + b.pw[p] : powerHint(c);
+    return picHTML(c, '<b>' + SIDE_NAME[p] + '</b>' + (c ? esc(nm(c)) + (pw ? '<br>' + pw : "") + br : "ホロビトなし") + (tag ? '<br>' + tag : ""), cls);
   };
   return '<div class="fxcards">' + one(0) + '<div class="fxvs">VS</div>' + one(1) + '</div>';
 }
@@ -3316,11 +3365,16 @@ function cardHTML(c, tag){
     var right = d.type === "ワザ"
       ? (d.left_edge && d.left_edge !== "unknown" ? esc(d.left_edge.modifier) : "")
       : (d.power === "unknown" ? "?" : (d.power === null ? "" : d.power));
+    var powCls = "";
+    if (mk && mk.cls === "fx-bat"){
+      var bp = state.battle.users[0] === c.uid ? 0 : 1, L = livePower(bp);
+      if (L && !L.err){ right = L.tot + (L.pend ? "?" : ""); powCls = " " + (signCls(L.tot - L.base) || "same"); }
+    }
     var mod = (d.type !== "ワザ" && d.left_edge && d.left_edge !== "unknown")
       ? '<div class="cmod">' + esc(d.left_edge.modifier) + (d.left_edge.cost !== null && d.left_edge.cost !== "unknown" ? " (" + d.left_edge.cost + ")" : "") + '</div>'
       : (d.type === "ワザ" ? '<div class="ctype">ワザ</div>' : "");
     inner = '<div class="ci up">' +
-              '<div class="ctop"><span class="ccost">' + esc(costTxt) + '</span><span class="cpow">' + right + '</span></div>' +
+              '<div class="ctop"><span class="ccost">' + esc(costTxt) + '</span><span class="cpow' + powCls + '">' + right + '</span></div>' +
               '<div class="cname">' + esc(d.name) + '</div>' + mod +
               (c.note ? '<div class="cnote">' + esc(c.note) + '</div>' : "") +
             '</div>';
@@ -3804,7 +3858,8 @@ function libSheetClick(ds){
 }
 function renderBuilder(){
   document.body.className = "view-" + ui.view + (replay ? " replaying" : "");
-  document.querySelectorAll(".navbtn").forEach(function(b){ b.classList.toggle("on", b.dataset.view === ui.view); });
+  logSpace();
+  document.querySelectorAll(".navbtn[data-view]").forEach(function(b){ b.classList.toggle("on", b.dataset.view === ui.view); });
   document.getElementById("deckCount").textContent = SIDE_NAME[ui.deckPi] + " " + deckTotal(ui.deckPi) + "枚";
   document.getElementById("btnUndo2").disabled = !undoStack.length;
   document.querySelectorAll(".deckseg").forEach(function(e){ e.innerHTML = deckSegHTML(); });
@@ -3917,7 +3972,7 @@ function render(){
   document.getElementById("btnAi").className = "mini" + (isAI(AI_SIDE) || ol.on ? " on" : "");
   document.getElementById("btnAi").disabled = ol.on;
   document.getElementById("btnOnline").textContent = ol.on ? "🌐 部屋 " + ol.gid : "🌐 対戦";
-  document.getElementById("btnOnline").className = "mini" + (ol.on ? " on" : "");
+  document.getElementById("btnOnline").className = "navbtn" + (ol.on ? " olon" : "");
   document.getElementById("flow").innerHTML = flowHTML();
   document.getElementById("side-1").innerHTML = sideHTML(1);
   document.getElementById("side-0").innerHTML = sideHTML(0);
@@ -5597,7 +5652,10 @@ document.getElementById("fClear").addEventListener("click", function(){ ui.f = {
 // 対戦の記録を見返す
 document.getElementById("btnRec").addEventListener("click", function(){ recSheet(); });
 // オンライン対戦（部屋を作る・入る・始める・やめる）
-document.getElementById("btnOnline").addEventListener("click", function(){ if (!ol.net && !ol.on) return olNoNet(); olLobbySheet(); });
+// 「🌐 対戦」は「🎮 試遊」の横のタブ（依頼者の指示 2026-11-23）。押すと試遊の画面に切り替えてから、対戦の画面を開く
+document.getElementById("btnOnline").addEventListener("click", function(){
+  if (ui.view !== "play"){ if (replay) replayClose(); ui.view = "play"; saveUI(); render(); window.scrollTo(0, 0); }
+  if (!ol.net && !ol.on) return olNoNet(); olLobbySheet(); });
 document.getElementById("replaybar").addEventListener("click", function(e){
   var b = e.target.closest("button[data-rb]"); if (!b || !replay) return;
   var a = b.dataset.rb;

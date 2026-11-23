@@ -75,4 +75,29 @@ async function confirmNo(p) {
   await p.click('#sheet button[data-close="1"]');
 }
 
-module.exports = { chromium, devices, launch, ok, watch, finish, out, prep, confirmYes, confirmNo, ROOT, URL };
+// 再読み込みする前に、いまのページが保存した内容（localStorage）が、別のページからも読めることを確かめてから再読み込みする。
+// 経緯（2026-11-23）: 試験を20本ほど同時に回して重いときに、「保存してすぐ再読み込み」すると、保存した内容が新しいページに
+// 届いていないことがあった（ai の「再読み込みしても AI のまま」2回、deckbuilder の「再読み込みしても…残る」1回。どれも保存が丸ごと無い状態）。
+// 保存の量（約8KB）や読み込みの処理には原因が見つからず、ブラウザが保存を受け取り終える前に再読み込みが始まったと見ている
+// （負荷をかけた単純な再現 180 回では起きなかったので、断定はしていない）。別のページから読めれば、ブラウザが保存を受け取っている。
+// 10 秒たっても読めなければ、そのことを失敗として出す（黙って再読み込みしない）
+const PROBE_URL = "file://" + path.join(ROOT, "tests", "probe.html");
+// 比べるたびに、元のページの保存も読み直す（確かめている間にページが保存を書き換えることがあるため。2026-11-23 に、最初に1回だけ
+// 写し取った内容と比べ続けて、書き換えのあとの正しい保存を「読めない」と取り違えたことがあった）
+const allStore = () => { const o = {}; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; };
+async function reloadSaved(p, ms = 10000) {
+  const probe = await p.context().newPage();
+  await probe.goto(PROBE_URL);
+  const t0 = Date.now(); let diff = null;
+  while (Date.now() - t0 < ms) {
+    const a = await p.evaluate(allStore), b = await probe.evaluate(allStore);
+    diff = [...new Set(Object.keys(a).concat(Object.keys(b)))].filter(k => a[k] !== b[k]);
+    if (!diff.length) break;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  await probe.close();
+  if (diff.length) ok(false, "再読み込みの前に保存した内容が、" + (ms / 1000) + " 秒たっても別のページから同じに読めない（食い違う項目: " + diff.join("・") + "）");
+  await p.reload();
+}
+
+module.exports = { chromium, devices, launch, ok, watch, finish, out, prep, confirmYes, confirmNo, reloadSaved, ROOT, URL };

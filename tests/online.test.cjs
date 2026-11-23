@@ -170,7 +170,7 @@ async function run(label, viewport, touch){
   ok(await ev(B, () => state.first === 1) && (await ev(A, () => state.first === 0)), '先手は作った側（入った側の画面では「相手が先手」。左右を入れ替えて自分を下に描く）');
   ok(await ev(A, () => document.querySelectorAll('#side-1 .z-hand .card.hid').length === 6 && !document.querySelector('#side-1 .z-hand .card:not(.hid)')), '相手の手札は伏せて描く（6枚）');
   // 読み込み直しても、質問がまた出る
-  await B.reload();
+  await H.reloadSaved(B);
   ok(await until(async () => (await sheet(B)).includes('引き直しますか')), '入った側が読み込み直しても、部屋に戻り、引き直しの質問がまた出る');
   ok(await ev(B, () => ol.on && !ol.host && state.players[0].hand.every(c => c.key)), '読み込み直したあとも、自分の手札の中身が分かる（自分の端末の控えから）');
   await tapSheet(B, 'button[data-fxa="1"]');   // このまま
@@ -179,6 +179,9 @@ async function run(label, viewport, touch){
   await A.click('#flow button[data-prep="mull"][data-pi="0"][data-redraw="1"]');
   ok(await until(() => ev(A, () => state.phase === 0 && state.players[1].ena.length === 1 && !!state.players[1].ena[0].key && !ol.wait)),
      '⑤⑥のあと、相手の⑥のエナ（表向き）の中身は相手の端末から届く');
+  // 届き方: 番の端末（作った側）が、表向きなのに中身が分からない相手のカードを、相手の端末に見せてもらう（olRevealMissing の "reveal"）。
+  // この場面は毎回同じ流れで起きる（作った側が先手で⑤⑥を置く）ので、ここで必ず確かめる
+  ok(R.msgs.some(m => /\/rpc\/req/.test(m.path) && m.data.kind === 'reveal'), '⑥のエナの中身は、相手の端末に「見せて」と頼んで届いた（reveal の問い合わせが送られた）');
   ok(await until(() => ev(B, () => state.phase === 0 && state.players[1].ena.length === 1 && !!state.players[1].ena[0].key && state.players[0].heart.length === 5)), '入った側にも準備完了の盤面が届く');
   ok(await ev(A, () => state.players[1].heart.every(c => !c.key) && state.players[1].deck.every(c => !c.key)), '相手のハート・山札の中身は届かない');
   ok(await until(async () => (await B.textContent('#fxlog')).includes('相手：④引き直した') && (await B.textContent('#fxlog')).includes('自分：④引き直さない')),
@@ -200,12 +203,12 @@ async function run(label, viewport, touch){
   ok((await flow(A)).includes('相手の番です') && await ev(A, () => document.getElementById('btnPhase').disabled), '渡した側は「相手の番です」');
   // 番の側が読み込み直しても、続きから
   const handB = await ev(B, () => JSON.stringify(state.players[0].hand.map(c => c.uid + c.key)));
-  await B.reload();
+  await H.reloadSaved(B);
   ok(await until(() => ev(B, h => ol.on && state.phase === 1 && olHolder() && JSON.stringify(state.players[0].hand.map(c => c.uid + c.key)) === h, handB)),
      '番の側が読み込み直しても、同じ盤面（自分の手札の中身も）で続けられる');
   // 部屋を作った側（いまは番でない）が読み込み直しても、盤面が戻る。部屋の画面（先手を選ぶ）は出ない
   const handA = await ev(A, () => JSON.stringify(state.players[0].hand.map(c => c.uid + c.key)));
-  await A.reload();
+  await H.reloadSaved(A);
   ok(await until(() => ev(A, h => ol.on && ol.host && !ol.loading && state.phase === 1 && !olHolder() && JSON.stringify(state.players[0].hand.map(c => c.uid + c.key)) === h, handA)),
      '部屋を作った側が読み込み直しても、同じ盤面（自分の手札の中身も）に戻る');
   ok(!(await sheet(A)) && (await flow(A)).includes('相手の番です') && await ev(A, () => !!ol.peer), '読み込み直したときは、部屋の画面も「相手が入りました」も出さない');
@@ -237,7 +240,7 @@ async function run(label, viewport, touch){
   await ev(A, () => { clearInterval(window.__drv); window.__drv = null; aiForce = null; });
   await ev(B, () => { clearInterval(window.__drv); window.__drv = null; aiForce = null; });
   // 終わったあとに読み込み直しても、勝敗の出た盤面に戻る
-  await A.reload();
+  await H.reloadSaved(A);
   ok(await until(() => ev(A, w => ol.on && !ol.loading && state.winner === w, fin[0].w)) && !(await sheet(A)), '終わったあとに読み込み直しても、勝敗の出た盤面に戻る');
   const big = Math.max(...R.msgs.filter(m => /^games\/[^/]+$/.test(m.path)).map(m => JSON.stringify(m.data).length));
   ok(big < 128 * 1024, '共有の盤面の大きさは、いちばん大きいときでも ' + Math.round(big / 1024) + ' KB（データの保存の1文書の上限 256 KB より十分小さい）');
@@ -245,7 +248,7 @@ async function run(label, viewport, touch){
   ok((await sheet(A)).includes('やめますか'), '「対戦をやめる」は、やめてよいかを確かめる');
   await H.confirmYes(A);
   ok(await ev(A, () => !ol.on && JSON.stringify(state)) === offA && (await A.textContent('#btnOnline')).includes('対戦'), '「対戦をやめる」で、1人で遊んでいた盤面に戻る');
-  await A.reload(); await wait(200);
+  await H.reloadSaved(A); await wait(200);
   ok(await ev(A, () => !ol.on && localStorage.getItem('horobeat-online') === 'null'), 'やめたあとは、読み込み直しても部屋に戻らない');
   ok(await ev(B, () => document.documentElement.scrollWidth <= window.innerWidth + 1), '横にはみ出さない');
 
@@ -270,8 +273,10 @@ async function run(label, viewport, touch){
     ok(L2.bad.length === 0 && bad2.length === 0 && sneak2.length === 0, '6局とも、相手の手札・山札・ハートの中身は送られず、画面の中にもない（' + s2.length + ' 回調べた）' + L2.bad.concat(bad2, sneak2).slice(0, 3).join(' / '));
     console.log('  （相手に聞いたこと: ' + JSON.stringify(kinds) + '）');
     // ⑥のエナのように、表向きに置かれたのに中身が分からない相手のカードは、番の端末が相手に見せてもらう。
-    // 番が先に相手に移れば、相手が自分のエナを盤面と一緒に送るので、聞く回数は局の進み方で変わる（どちらでも、終わったときの盤面は一致する。上の確認）
-    ok((kinds.reveal || 0) >= 1, '表向きに置かれたのに中身が分からないカードは、相手の端末に見せてもらう（6局で ' + (kinds.reveal || 0) + ' 回）');
+    // 番が先に相手に移れば、相手が自分のエナを盤面と一緒に送るので、聞く回数は局の進み方で変わる（どちらでも、終わったときの盤面は一致する。上の確認）。
+    // 以前はここで「6局で1回以上」を確かめていたが、AI どうしの局の進み方しだいで0回になり、まれに落ちた（2026-11-23。5回のうち1回）。
+    // 見せてもらう仕組みは、前半の決まった手順の局で必ず確かめている（⑥のエナ）ので、ここでは回数を記録に出すだけにする
+    console.log('  （6局で相手に見せてもらった回数: ' + (kinds.reveal || 0) + '）');
     ok(await ev(A, () => !ol.on && localStorage.getItem('horobeat-online') === 'null'), '6局のあと、やめた状態に戻っている');
   }
   ok(A.__errs.length === 0 && B.__errs.length === 0 && R.errs.length === 0, 'JSエラーなし（受け取ったときのものも） ' + A.__errs.concat(B.__errs, R.errs).slice(0, 3).join(' | '));
