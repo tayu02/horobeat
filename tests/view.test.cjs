@@ -2,6 +2,7 @@
 // 1. 「🌐 対戦」は「🎮 試遊」の横のタブ
 // 2. スマホで、下に出るログが自分の手札を隠さない（ログの高さの分だけページの下に余白を足す）
 // 2b. ログはどこをタップしても消える／2c. カードの詳細は画像をタップすると閉じる
+// 2d. 勝敗が出たら「もう一度」「デッキを選び直す」を出す
 // 3. バトル中は、パワーの内訳（印字・効果・ワザ・ブースト）と合計、印字からの増減をいつも出す
 const H = require('./harness.cjs');
 const { devices, ok } = H;
@@ -89,6 +90,29 @@ async function run(label, viewport, touch){
   await p.click('#sheet .cimgwrap'); await wait(120);
   ok(await p.evaluate(()=>!document.getElementById('sheetwrap').classList.contains('on')),'カードの一覧の詳細も、画像をタップすると閉じる');
   await p.click('.navbtn[data-view="play"]'); await wait(80);
+
+  // ---- 2d. 勝敗が出たら、次の試合を始めるボタンを出す（依頼者の報告 2026-11-23）----
+  await p.evaluate(()=>{ runAction('reset',2); loadStarter(0,'HB-SD01'); loadStarter(1,'HB-SD02'); render(); });
+  await H.prep(p);
+  const dl0=JSON.stringify((await S()).players.map(P=>P.decklist));
+  await p.evaluate(()=>{ setWinner(1,'試しの勝利'); render(); });
+  const fl=await p.textContent('#flow');
+  ok(fl.includes('相手の勝利') && fl.includes('もう一度') && fl.includes('デッキを選び直す'),'勝敗が出たら、案内の段に「もう一度」と「デッキを選び直す」が出る '+JSON.stringify(fl));
+  ok(await p.isVisible('#flow button[data-prep="deal"][data-first="0"]'),'「もう一度」のボタンは画面に見えている');
+  await p.click('#flow button[data-prep="deal"][data-first="0"]'); await wait(150);
+  let sw=await S();
+  ok(!await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on')),'終わった試合なので、確かめずにすぐ配る');
+  ok(sw.winner===undefined && sw.prep==='mull' && sw.first===0 && sw.round===1 && sw.players.every(P=>P.hand.length===6),'「自分が先手」で、同じ盤面の続きではなく、自分が先手の新しい試合を配る（6枚ずつ）');
+  ok(JSON.stringify(sw.players.map(P=>P.decklist))===dl0,'デッキは同じまま');
+  await p.click('#btnUndo'); await wait(100);
+  ok((await S()).winner===1,'「戻す」で、勝敗の出た盤面に戻せる');
+  await p.click('#flow button[data-prep="fresh"]'); await wait(200);
+  sw=await S();
+  ok(sw.winner===undefined && sw.phase<0 && sw.players.every(P=>P.hand.length===0 && P.line.every(l=>!l.length)) && JSON.stringify(sw.players.map(P=>P.decklist))===dl0,'「デッキを選び直す」で盤面を片付ける（デッキの登録はそのまま）');
+  ok(await p.isVisible('#guideStarters select.dkpick[data-pi="0"]') && await p.isVisible('#guide button[data-prep="deal"]'),'「はじめかた」が出て、デッキのプルダウンと「先手で始める」が使える');
+  await p.click('#btnUndo'); await wait(100);
+  ok((await S()).winner===1,'これも「戻す」で戻せる');
+  await p.evaluate(()=>{ fxClear(); });
 
   // ---- 3. バトル中のパワーの内訳 ----
   // 学合 フラリンテ(HD02-012): このホロビトにブーストを使っているなら +2000。ケサランパサラン(HD02-010) をブーストで使う

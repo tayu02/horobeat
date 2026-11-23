@@ -3905,7 +3905,7 @@ function flowHTML(){
     if (state.winner === undefined && !olHolder()) return code + '<span>相手の番です（相手の端末で操作しています）</span>';
   }
   if (replay) return '<span>📼 記録を見ています（' + (replay.i + 1) + ' / ' + replay.steps.length + '）。盤面は触れません。下の「閉じる」でいまの盤面に戻ります</span>';
-  if (state.winner !== undefined) return '<span class="win">★ ' + SIDE_NAME[state.winner] + 'の勝利</span><span>' + esc(state.winWhy || "") + '</span>';
+  if (state.winner !== undefined) return '<span class="win">★ ' + SIDE_NAME[state.winner] + 'の勝利</span><span>' + esc(state.winWhy || "") + '</span>' + againHTML();
   if (state.phase < 0){
     if (state.prep !== "mull")
       return '<span>準備：じゃんけんで先手を決めて配る（①②③）</span>' +
@@ -3938,6 +3938,16 @@ function flowHTML(){
     return '<span>バトルフェイズ終了。' + (state.nextFirst !== undefined ? "次のラウンドの先手は" + SIDE_NAME[state.nextFirst] + "。" : "") + '「フェイズ送り」でエンドフェイズへ</span>';
   }
   return '<span>エンドフェイズ（スライド・エナドロー・エナリフレッシュを済ませた）。「フェイズ送り」で次のラウンドへ</span>';
+}
+// 勝敗が出たあとに次の試合を始めるボタン（依頼者の報告 2026-11-23「対戦をスタートさせるボタンがなくて、先ほどのと続き状態で停止してる」）。
+// 1人のとき: 同じデッキで配り直す（先手を選ぶ）か、盤面を片付けて「はじめかた」でデッキを選び直す。
+// オンライン対戦: 部屋を作った側が、同じ部屋のまま次の試合を始める（相手は待つ）
+function againHTML(){
+  if (ol.on) return ol.host ? '<button class="mini primary" data-ol-lobby="1">もう一度対戦する</button>'
+                            : '<span>部屋を作った人が「もう一度対戦する」を押すと、次の試合が始まります</span>';
+  return '<span class="grp"><span>もう一度：</span><button class="mini primary" data-prep="deal" data-first="0">自分が先手</button>' +
+    '<button class="mini primary" data-prep="deal" data-first="1">相手が先手</button></span>' +
+    '<button class="mini" data-prep="fresh">デッキを選び直す</button>';
 }
 function aiFlowHTML(){
   return aiPaused ? '<span>止めています</span><button class="mini primary" data-flow="ai">AIを進める</button>' : '<span>考えています…</span>';
@@ -5202,7 +5212,10 @@ function olLobbySheet(){
   } else {
     h += '<div class="fxq">部屋のコード：<b class="olcode">' + esc(ol.gid) + '</b>（' + (ol.host ? "あなたが作った部屋" : "あなたは部屋に入った側") + '）</div>';
     if (ol.host && !ol.peer) h += '<div class="cres">相手が入るのを待っています。相手に、このコードを伝えてください。</div>';
-    if (ol.host && ol.peer && !ol.loading && state.phase < 0 && state.prep !== "mull")
+    if (ol.host && ol.peer && !ol.loading && state.winner !== undefined)
+      h += '<div class="sect">同じ相手・同じ部屋で、次の試合を始めます</div><div class="sgrid c1"><button class="primary" data-ol="start" data-first="0">自分が先手で始める</button>' +
+           '<button class="primary" data-ol="start" data-first="1">相手が先手で始める</button><button data-ol="start" data-first="r">ランダムに決める</button></div>';
+    else if (ol.host && ol.peer && !ol.loading && state.phase < 0 && state.prep !== "mull")
       h += '<div class="sect">相手が入りました。先手を選んで始めます</div><div class="sgrid c1"><button class="primary" data-ol="start" data-first="0">自分が先手で始める</button>' +
            '<button class="primary" data-ol="start" data-first="1">相手が先手で始める</button><button data-ol="start" data-first="r">ランダムに決める</button></div>';
     h += '<div class="sgrid c2" style="margin-top:8px"><button data-ol="leave">対戦をやめる</button><button data-close="1">閉じる</button></div>';
@@ -5617,7 +5630,15 @@ document.addEventListener("click", function(e){
   if (t.dataset.prep === "deal"){
     if (ol.on) return olLobbySheet();   // オンライン対戦は「部屋」から始める
     var first = +t.dataset.first;
-    askConfirm(boardIsEmpty() ? "" : "盤面を消して、準備からやり直します。よろしいですか？", "やり直す", function(){ snap(); prepDeal(first); render(); }); return;
+    // 勝敗が出たあとは確かめない（終わった試合なので。「戻す」でも戻せる）
+    askConfirm(boardIsEmpty() || state.winner !== undefined ? "" : "盤面を消して、準備からやり直します。よろしいですか？", "やり直す", function(){ snap(); prepDeal(first); render(); }); return;
+  }
+  // 盤面を片付けて「はじめかた」（デッキのプルダウン・先手を選んで始める）を出す
+  if (t.dataset.prep === "fresh"){
+    if (ol.on) return;
+    snap(); picking = null; fxClear(); runAction("reset", 2); render();
+    var g = document.getElementById("guide"); if (g && g.scrollIntoView) g.scrollIntoView({ block:"start" });
+    return;
   }
   if (t.dataset.prep === "mull"){ if (ol.on && (+t.dataset.pi !== 0 || !olHolder())) return; snap(); prepMull(+t.dataset.pi, t.dataset.redraw === "1"); render(); return; }
   if (t.dataset.flow === "resume"){ if (fxAsk || picking || aiBusy) return; fxClear(); battleRun(); return; }

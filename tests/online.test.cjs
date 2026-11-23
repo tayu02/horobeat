@@ -242,6 +242,16 @@ async function run(label, viewport, touch){
   // 終わったあとに読み込み直しても、勝敗の出た盤面に戻る
   await H.reloadSaved(A);
   ok(await until(() => ev(A, w => ol.on && !ol.loading && state.winner === w, fin[0].w)) && !(await sheet(A)), '終わったあとに読み込み直しても、勝敗の出た盤面に戻る');
+  // ---- 同じ部屋のまま、次の試合を始める（依頼者の報告 2026-11-23「対戦をスタートさせるボタンがなくて」）----
+  ok((await flow(A)).includes('もう一度対戦する') && (await flow(B)).includes('部屋を作った人が「もう一度対戦する」を押すと'),
+     '勝敗が出たら、部屋を作った側に「もう一度対戦する」、入った側に待つ案内が出る');
+  await A.click('#flow button[data-ol-lobby]');
+  await tapSheet(A, 'button[data-ol="start"][data-first="1"]');
+  ok(await until(() => ev(B, () => ol.on && !ol.loading && state.winner === undefined && state.prep === 'mull' && state.players[0].hand.length === 6)),
+     '「相手が先手で始める」で、入った側の画面にも次の試合が配られる');
+  ok(await ev(A, () => state.winner === undefined && state.first === 1 && state.round === 1 && state.players[0].hand.length === 6 && state.players[1].hand.length === 6),
+     '部屋を作った側も、前の試合の盤面は消えて新しい試合になる');
+  ok(await ev(B, () => state.first === 0 && state.players.every(P => P.hand.length === 6)), '入った側の画面では、先手は「自分」（部屋を作った側が「相手が先手」を選んだので）');
   const big = Math.max(...R.msgs.filter(m => /^games\/[^/]+$/.test(m.path)).map(m => JSON.stringify(m.data).length));
   ok(big < 128 * 1024, '共有の盤面の大きさは、いちばん大きいときでも ' + Math.round(big / 1024) + ' KB（データの保存の1文書の上限 256 KB より十分小さい）');
   await A.click('#btnOnline'); await tapSheet(A, 'button[data-ol="leave"]');
