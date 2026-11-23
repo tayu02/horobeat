@@ -299,8 +299,6 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
 .ctile.ro{border-color:var(--line)}
 .dkshare{background:#3a2f1a;color:var(--gold);border:1px solid #5a4a2a;border-radius:3px;font-size:9px;padding:0 3px;white-space:nowrap}
 /* スタートデッキを選ぶタブ */
-.dktabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 4px}
-.dktabs button{flex:1 1 auto}
 .dknow{font-size:11px;color:var(--sub);margin:0 0 6px}
 .dkold{font-size:11px;color:var(--gold);border:1px dashed #5a4a2a;border-radius:7px;padding:5px 8px;margin:0 0 8px;line-height:1.6}
 .starterrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0}
@@ -518,7 +516,7 @@ body.replaying #btnPhase, body.replaying #btnUndo, body.replaying #btnFx, body.r
   <div class="guide" id="guide">
     <h2>はじめかた</h2>
     <ol>
-      <li>（任意）<b>スタートデッキ</b>で遊ぶなら、ここで選びます（公式の収録カード一覧どおりの50枚）。自分で組むなら上部の<b>「🔍 カード」</b>で、カードの画像の一覧から −／＋ で入れます（<b>「📋 デッキ」</b>でいまのデッキを確かめられます）。入れなかった枠は<b>未確定カード</b>（灰色）で埋まります。第一弾のデッキ（赤単・青単・緑単）や「💾 保存」したデッキは、<b>プルダウン</b>から選べます。
+      <li>（任意）<b>スタートデッキ</b>（公式の収録カード一覧どおりの50枚）や<b>第一弾のデッキ</b>（赤単・青単・緑単）で遊ぶなら、ここの<b>プルダウン</b>で選びます。自分で組むなら上部の<b>「🔍 カード」</b>で、カードの画像の一覧から −／＋ で入れます（<b>「📋 デッキ」</b>でいまのデッキを確かめられます）。入れなかった枠は<b>未確定カード</b>（灰色）で埋まります。「💾 保存」したデッキもプルダウンから選べます。
         <div class="starterrow" id="guideStarters"></div></li>
       <li>（任意）<b>相手をAIにする</b>なら、上部の<b>「相手: 人」</b>を押して「AI ふつう」か「AI かんたん」を選びます。AI は「相手のデッキ」で遊びます。</li>
       <li>じゃんけんで<b>先手</b>を決めて、下のボタン（上部の「準備」の欄と同じ）を押します。山札を混ぜて6枚ずつ配ります（準備①②③）。</li>
@@ -3487,12 +3485,6 @@ function loadStarter(pi, id, keep){
   state.players[pi].decklist = dl;
   if (!keep || sideIsEmpty(pi)) rebuildPlayer(pi);
 }
-// keep: 「📋 デッキ」の画面のタブ。デッキ（登録）だけを変え、盤面にカードがあっても消さない（−／＋ と同じ）
-function starterButtonHTML(pi, id, label, on, keep){
-  var what = id ? starterLabel(starterById(id)) + "・50枚" : "空のデッキ";
-  return '<button class="mini' + (on ? " on" : "") + '" data-starter="' + esc(id) + '" data-pi="' + pi + '"' +
-         (keep ? ' data-keep="1"' : sideIsEmpty(pi) ? "" : ' data-confirm="' + SIDE_NAME[pi] + 'の盤面を消して、' + what + 'で組み直します。よろしいですか？"') + '>' + label + '</button>';
-}
 // ---- 登録済みのデッキをプルダウンで選ぶ（依頼者の指示 2026-11-21「前登録したデッキから、プルダウンとかで選べるようにしてほしい」）----
 // スタートデッキ（公式の商品）・第一弾のデッキ（正本は data/preset-decks.json。依頼者のデッキ写真から数えたもので、公式の商品ではない）・
 // この端末に保存したデッキ（「📂 保存したデッキ」）を、1つのプルダウンに並べる
@@ -3509,13 +3501,14 @@ function presetOf(dl){
 // keep: 「📋 デッキ」の画面。デッキ（登録）だけを変え、盤面にカードがあっても消さない（タブと同じ）
 function deckPickHTML(pi, keep){
   var dl = state.players[pi].decklist, st = starterOf(dl), pr = st ? null : presetOf(dl);
-  var cur = st ? "s:" + st.id : pr ? "p:" + pr.id : "";
+  var cur = st ? "s:" + st.id : pr ? "p:" + pr.id : deckTotal(pi) ? "" : "e:";
   var opt = function(v, label){ return '<option value="' + esc(v) + '"' + (v === cur ? " selected" : "") + '>' + esc(label) + '</option>'; };
   return '<select class="dkpick" data-pi="' + pi + '"' + (keep ? ' data-keep="1"' : "") + ' aria-label="' + SIDE_NAME[pi] + 'のデッキを選ぶ">' +
     opt("", "登録済みのデッキから選ぶ…") +
     '<optgroup label="スタートデッキ（公式）">' + STARTERS.map(function(S){ return opt("s:" + S.id, "スタートデッキ " + starterLabel(S)); }).join("") + '</optgroup>' +
     '<optgroup label="第一弾のデッキ">' + PRESETS.map(function(D){ return opt("p:" + D.id, D.name); }).join("") + '</optgroup>' +
     (lib.length ? '<optgroup label="保存したデッキ（この端末）">' + lib.map(function(d){ return opt("l:" + d.id, d.name + "（" + libTotal(d.cards) + "枚）"); }).join("") + '</optgroup>' : "") +
+    opt("e:", "空から組む（登録なし）") +
     '</select>';
 }
 function deckPickApply(pi, v, keep){
@@ -3523,6 +3516,7 @@ function deckPickApply(pi, v, keep){
   if (kind === "s:"){ src = starterById(id); if (src) name = "スタートデッキ " + starterLabel(src); }
   else if (kind === "p:"){ src = presetById(id); if (src) name = src.name; }
   else if (kind === "l:"){ var L = libById(id); if (L){ name = L.name; for (var k in L.cards) cards[k] = L.cards[k]; } src = L; }
+  else if (kind === "e:"){ src = {}; name = "空のデッキ"; }
   if (!src){ render(); return; }
   if (src.cards && Array.isArray(src.cards)) src.cards.forEach(function(c){ cards[c.key] = c.count; });
   var go = function(){
@@ -3556,9 +3550,7 @@ function starterTabsHTML(pi){
   var dl = state.players[pi].decklist, cur = starterOf(dl), n = 0;
   Object.keys(dl).forEach(function(k){ n += dl[k] | 0; });
   var pr = cur ? null : presetOf(dl);
-  return deckPickHTML(pi, true) + '<div class="dktabs">' +
-    STARTERS.map(function(S){ return starterButtonHTML(pi, S.id, starterLabel(S), cur === S, true); }).join("") +
-    starterButtonHTML(pi, "", "空から組む", !cur && !n, true) + '</div>' +
+  return deckPickHTML(pi, true) +
     '<div class="dknow">いまのデッキ: ' + (cur ? "スタートデッキ " + esc(starterLabel(cur)) + "（" + esc(cur.id) + "）そのまま"
       : pr ? "「" + esc(pr.name) + "」そのまま" : (n ? "自分で組んだデッキ（登録 " + n + " 枚）" : "空（すべて未確定カード）")) + '</div>' +
     (boardMatchesDeck(pi) ? "" : '<div class="dkold">' + SIDE_NAME[pi] + 'の盤面は、まだ前のデッキのままです。「🎮 試遊」で先手を選んで配るか、下の「このデッキで' + SIDE_NAME[pi] + 'の盤面を組み直す」で反映されます。</div>');
@@ -3978,9 +3970,7 @@ function render(){
   document.getElementById("side-0").innerHTML = sideHTML(0);
   renderBuilder();
   document.getElementById("guideStarters").innerHTML = [0, 1].map(function(pi){
-    var cur = starterOf(state.players[pi].decklist);
-    return '<span class="who ' + (pi === 0 ? "me" : "opp") + '">' + SIDE_NAME[pi] + '</span>' +
-      STARTERS.map(function(S){ return starterButtonHTML(pi, S.id, starterLabel(S), cur === S); }).join("") + deckPickHTML(pi, false);
+    return '<span class="who ' + (pi === 0 ? "me" : "opp") + '">' + SIDE_NAME[pi] + '</span>' + deckPickHTML(pi, false);
   }).join('<span style="flex-basis:100%;height:0"></span>');
   motionAfter();
   save();
@@ -5589,17 +5579,13 @@ sheetEl.addEventListener("keydown", function(e){
 
 /* ---------------- 準備手順・デッキ編集・ヘッダー ---------------- */
 document.querySelector("main").addEventListener("click", function(e){
-  var t = e.target.closest("button[data-act], button[data-dk], button[data-starter], button[data-deckpi], button[data-lib], [data-detail], .zlabel[data-zsheet]");
+  var t = e.target.closest("button[data-act], button[data-dk], button[data-deckpi], button[data-lib], [data-detail], .zlabel[data-zsheet]");
   if (!t) return;
   if (t.dataset.lib){
     if (t.dataset.lib === "save") libSaveSheet(); else if (t.dataset.lib === "list") libListSheet(); else if (t.dataset.lib === "import") libImportSheet("", null);
     return;
   }
   var tpi = +t.dataset.pi;
-  if (t.dataset.starter !== undefined){
-    var sid = t.dataset.starter, keep = t.dataset.keep === "1";
-    askConfirm(t.dataset.confirm, "組み直す", function(){ snap(); loadStarter(tpi, sid, keep); render(); }); return;
-  }
   if (t.dataset.zsheet){
     var zl = lockOf(+t.dataset.pi);
     if (zl){ fxClear(); fxLog(zl); return; }

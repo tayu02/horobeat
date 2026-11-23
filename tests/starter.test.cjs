@@ -14,31 +14,33 @@ async function run(label, viewport, touch){
   const same=(m,sd)=>sd.cards.every(c=>m[c.key]===c.count) && Object.keys(m).length===sd.cards.length;
 
   ok(await p.evaluate(()=>STARTERS.length)===2,'スタートデッキ2種が埋め込まれている');
-  // はじめかたのボタン（盤面が空なので確かめずに読み込む）
-  await p.click('#guideStarters button[data-starter="HB-SD01"][data-pi="0"]'); await wait(80);
-  await p.click('#guideStarters button[data-starter="HB-SD02"][data-pi="1"]'); await wait(80);
+  // はじめかたのプルダウン（盤面が空なので確かめずに読み込む）。2026-11-23 からボタンは出さず、プルダウンだけ（依頼者の指示）
+  ok(!(await p.$('#guideStarters button')) && !(await p.$('#viewDeck .dktabs')),'スタートデッキはボタンとして外に出さない（プルダウンの中だけ）');
+  await p.selectOption('#guideStarters select.dkpick[data-pi="0"]','s:HB-SD01'); await wait(80);
+  await p.selectOption('#guideStarters select.dkpick[data-pi="1"]','s:HB-SD02'); await wait(80);
   let s=await S();
   ok(s.players[0].deck.length===50 && same(count(s.players[0].deck),SD[0]),'自分の山札がレオジン（赤）の50枚になる（未確定カードなし）');
   ok(s.players[1].deck.length===50 && same(count(s.players[1].deck),SD[1]),'相手の山札が不死火翔（緑）の50枚になる');
-  ok(await p.evaluate(()=>document.querySelector('#guideStarters button.on[data-pi="0"]').dataset.starter)==='HB-SD01','選んだスタートデッキのボタンが選択中になる');
-  // 「📋 デッキ」の画面のタブ（自分のデッキを開いている）
+  ok(await p.evaluate(()=>document.querySelector('#guideStarters select.dkpick[data-pi="0"]').value)==='s:HB-SD01','選んだスタートデッキがプルダウンに出たままになる');
+  // 「📋 デッキ」の画面のプルダウン（自分のデッキを開いている）
   await p.click('.navbtn[data-view="deck"]');
-  const tabs=await p.evaluate(()=>[...document.querySelectorAll('#viewDeck .dktabs button')].map(b=>b.textContent));
-  ok(tabs.join()==='レオジン（赤）,不死火翔（緑）,空から組む','デッキ編集にタブ「レオジン（赤）／不死火翔（緑）／空から組む」 '+JSON.stringify(tabs));
+  const opts=await p.evaluate(()=>[...document.querySelectorAll('#viewDeck select.dkpick[data-pi="0"] option')].map(o=>o.textContent));
+  ok(opts.includes('スタートデッキ レオジン（赤）') && opts.includes('スタートデッキ 不死火翔（緑）') && opts[opts.length-1]==='空から組む（登録なし）',
+     'デッキの画面のプルダウンに「スタートデッキ レオジン（赤）／不死火翔（緑）」と、最後に「空から組む（登録なし）」がある '+JSON.stringify(opts));
   ok((await p.evaluate(()=>document.querySelector('#viewDeck .dknow').textContent)).includes('HB-SD01'),'「いまのデッキ: スタートデッキ レオジン（赤）（HB-SD01）そのまま」と出る');
   // ＋で変えると「自分で組んだデッキ」になる
   await p.evaluate(()=>{ const dl=state.players[0].decklist; dl['HD01-016']=2; render(); });
   ok((await p.evaluate(()=>document.querySelector('#viewDeck .dknow').textContent)).includes('自分で組んだ'),'枚数を変えると「自分で組んだデッキ」になる');
-  // 盤面にカードがあるとき: タブはデッキ（登録）だけを変え、盤面は消さない（−／＋ と同じ）。
+  // 盤面にカードがあるとき: デッキの画面のプルダウンはデッキ（登録）だけを変え、盤面は消さない（−／＋ と同じ）。
   // 以前はブラウザの確認窓で聞いていたが、公開先では確認窓が出ずに「いいえ」になり、押しても何も起きなかった（2026-10-19 依頼者の報告）
   await p.evaluate(()=>{ runAction('setupAll',2); render(); });
   const pile0=JSON.stringify((await S()).players[0].deck.map(c=>c.key));
-  await p.click('#viewDeck button[data-starter="HB-SD02"][data-pi="0"]'); await wait(80);
+  await p.selectOption('#viewDeck select.dkpick[data-pi="0"]','s:HB-SD02'); await wait(80);
   s=await S();
-  ok(!await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on')),'盤面にカードがあっても、タブを押すと確かめずにすぐ切り替わる');
+  ok(!await p.evaluate(()=>document.getElementById('sheetwrap').classList.contains('on')),'盤面にカードがあっても、デッキの画面のプルダウンで選ぶと確かめずにすぐ切り替わる');
   ok(same(s.players[0].decklist,SD[1]),'デッキ（登録）が不死火翔（緑）の構成になる');
   ok(s.players[0].hand.length===6&&JSON.stringify(s.players[0].deck.map(c=>c.key))===pile0,'盤面（手札・山札）はそのまま');
-  ok(await p.evaluate(()=>document.querySelector('#viewDeck .dktabs button.on').dataset.starter)==='HB-SD02'&&(await p.textContent('#viewDeck .dknow')).includes('HB-SD02'),'選んだタブが選択中になり、「いまのデッキ」に出る');
+  ok(await p.evaluate(()=>document.querySelector('#viewDeck select.dkpick[data-pi="0"]').value)==='s:HB-SD02'&&(await p.textContent('#viewDeck .dknow')).includes('HB-SD02'),'選んだデッキがプルダウンに出たままになり、「いまのデッキ」に出る');
   ok(await p.evaluate(()=>{ const c=document.querySelectorAll('#viewDeck .ctile'); return c.length>0&&[...c].every(e=>e.dataset.color==='緑'); }),'デッキの画面に不死火翔（緑）のカードが並ぶ');
   ok((await p.textContent('#viewDeck .dkold')).includes('まだ前のデッキのまま'),'盤面がまだ前のデッキだと知らせる');
   // 組み直す: 画面の中で確かめる（やめる → 変えない／組み直す → 盤面を消して組み直す）
@@ -56,14 +58,14 @@ async function run(label, viewport, touch){
   s=await S();
   ok(s.players[0].hand.length===6,'「戻す」で取り消せる');
   // 空から組む（盤面はそのまま）
-  await p.click('#viewDeck button[data-starter=""][data-pi="0"]'); await wait(80);
+  await p.selectOption('#viewDeck select.dkpick[data-pi="0"]','e:'); await wait(80);
   s=await S();
   ok(Object.keys(s.players[0].decklist).length===0 && s.players[0].hand.length===6,'「空から組む」で登録なしになる（盤面はそのまま）');
-  // 盤面が空なら、タブを押すとそのまま山札も組み直す
+  // 盤面が空なら、プルダウンで選ぶとそのまま山札も組み直す
   await p.evaluate(()=>{ runAction('reset',2); render(); });
-  await p.click('#viewDeck button[data-starter="HB-SD01"][data-pi="0"]'); await wait(80);
+  await p.selectOption('#viewDeck select.dkpick[data-pi="0"]','s:HB-SD01'); await wait(80);
   s=await S();
-  ok(same(count(s.players[0].deck),SD[0])&&!await p.$('#viewDeck .dkold'),'盤面が空なら、タブで山札もレオジン（赤）の50枚になる');
+  ok(same(count(s.players[0].deck),SD[0])&&!await p.$('#viewDeck .dkold'),'盤面が空なら、プルダウンで選ぶと山札もレオジン（赤）の50枚になる');
   ok(errs.length===0,'JSエラーなし '+errs.join(' | '));
   await b.close();
 }
